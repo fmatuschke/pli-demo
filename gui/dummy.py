@@ -11,9 +11,6 @@ class ImageWidget(QWidget):
         self.create_image()
 
     def create_image(self):
-        '''
-        Creates frame for the zoomed region
-        '''
         self.layout = QVBoxLayout(self)
         self.qimage = QImage(
             os.path.join(os.path.dirname(os.path.abspath(__file__)),

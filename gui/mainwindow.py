@@ -1,12 +1,16 @@
 import sys
 import os
 from PyQt5.QtCore import Qt, pyqtSignal, QSize
-from PyQt5.QtGui import QColor, QPixmap, QImage
+from PyQt5.QtGui import QColor, QPixmap, QImage, QIcon
 from PyQt5.QtWidgets import QApplication, QWidget, QMainWindow, QMessageBox
 from PyQt5.QtWidgets import QGridLayout, QLabel
 from PyQt5.QtWidgets import QMenuBar, QAction, qApp
 
 from gui.dummy import ImageWidget
+from gui.camerawidget import CameraWidget
+
+pli_logo_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                             "pli-logo.png")
 
 
 class MainWindow(QMainWindow):
@@ -21,6 +25,8 @@ class MainWindow(QMainWindow):
     def __initUI__(self):
         self.setAttribute(Qt.WA_DeleteOnClose)
         self.setWindowTitle("3D-PLI Demo")
+        self.setWindowIcon(QIcon(pli_logo_path))
+        self.createMenue()
         self.createCentralWidget()
         self.connect_widgets()
         self.setBackground()
@@ -50,9 +56,7 @@ class MainWindow(QMainWindow):
         self.tiltwidget.setMinimumSize(QSize(100, 300))
         self.tiltwidget.setMaximumSize(QSize(300, 500))
 
-        self.image = QImage(
-            os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                         "pli-logo.png"))
+        self.image = QImage(pli_logo_path)
         self.logolabel = QLabel()
         self.logolabel.setMaximumSize(QSize(100, 100))
         self.logolabel.setMinimumSize(QSize(100, 100))
@@ -68,6 +72,11 @@ class MainWindow(QMainWindow):
         self.layout.addWidget(self.logolabel, 3, 2)
         self.centralWidget().setLayout(self.layout)
 
+    def createMenue(self):
+        self.statusBar()
+        mainMenu = self.menuBar()
+        cameraMenu = mainMenu.addMenu('&Camera')
+
     def connect_widgets(self):
         '''Connect Signal and Slots of the Widgets for inter Widget communication'''
         pass
@@ -81,7 +90,6 @@ class MainWindow(QMainWindow):
         self.setPalette(p)
 
     def closeWidgets(self):
-        self.buttons.close()
         self.camwidget.close()
 
     def closeEvent(self, event):
