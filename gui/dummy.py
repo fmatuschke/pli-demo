@@ -1,7 +1,7 @@
 import os
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel
-from PyQt5.QtGui import QImage, QPixmap
-from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import *
+from PyQt5.QtGui import *
+from PyQt5.QtCore import *
 
 
 class ImageWidget(QWidget):
@@ -24,6 +24,12 @@ class ImageWidget(QWidget):
     def resizeEvent(self, event):
         super(ImageWidget, self).resizeEvent(event)
         self.update_qimage()
+
+    def contextMenuEvent(self, event):
+        menu = QMenu(self)
+        templateAction = menu.addAction("action")
+        action = menu.exec_(self.mapToGlobal(event.pos()))
+        print("action")
 
     def update_qimage(self, qimage=None):
         if qimage is None:
