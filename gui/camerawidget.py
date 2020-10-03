@@ -2,6 +2,7 @@ import os
 
 from PyQt5.QtCore import QByteArray, qFuzzyCompare, Qt, QTimer
 from PyQt5.QtGui import QImage, QPalette, QPixmap
+from PyQt5.QtMultimediaWidgets import QCameraViewfinder
 from PyQt5.QtMultimedia import (QAudioEncoderSettings, QCamera,
                                 QCameraImageCapture, QImageEncoderSettings,
                                 QMediaMetaData, QMediaRecorder, QMultimedia,
@@ -15,11 +16,16 @@ class CameraWidget(QWidget):
 
     def __init__(self, parent=None, *args, **kwargs):
         super(CameraWidget, self).__init__(parent, *args, **kwargs)
+        self.ui = parent
         self.init_camera()
 
     def init_camera(self):
+        self.checkCameraDevices()
+        self.setCamera(self.cameraDevice)
 
-        cameraDevice = QByteArray()
+    def checkCameraDevices(self):
+        self.cameraDevice = QByteArray()
+
         videoDevicesGroup = QActionGroup(self)
         videoDevicesGroup.setExclusive(True)
 
@@ -29,13 +35,9 @@ class CameraWidget(QWidget):
             videoDeviceAction.setCheckable(True)
             videoDeviceAction.setData(deviceName)
 
-            if cameraDevice.isEmpty():
-                cameraDevice = deviceName
+            if self.cameraDevice.isEmpty():
+                self.cameraDevice = deviceName
                 videoDeviceAction.setChecked(True)
-
-        videoDevicesGroup.triggered.connect(self.updateCameraDevice)
-
-        self.setCamera(cameraDevice)
 
     def setCamera(self, cameraDevice):
         if cameraDevice.isEmpty():
@@ -43,9 +45,9 @@ class CameraWidget(QWidget):
         else:
             self.camera = QCamera(cameraDevice)
 
-    def updateCameraDevice(self, action):
-        self.setCamera(action.data())
+        self.viewfinder = QCameraViewfinder(self)
+        self.camera.setViewfinder(self.viewfinder)
+        self.camera.start()
 
     def resizeEvent(self, event):
         super(CameraWidget, self).resizeEvent(event)
-        pass

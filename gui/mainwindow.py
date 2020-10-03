@@ -40,7 +40,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setCentralWidget(QtWidgets.QWidget(self))
 
         self.cam_resolution_target = (1280, 1024)
-        self.camwidget = ImageWidget(self)
+        self.camwidget = CameraWidget(self)
         self.camwidget.setMinimumSize(QtCore.QSize(600, 600))
 
         self.plotwidget = ImageWidget(self)
