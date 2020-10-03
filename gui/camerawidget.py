@@ -22,6 +22,7 @@ class CameraWidget(QWidget):
     def init_camera(self):
         self.checkCameraDevices()
         self.setCamera(self.cameraDevice)
+        self.checkResolution()
 
     def checkCameraDevices(self):
         self.cameraDevice = QByteArray()
@@ -29,7 +30,7 @@ class CameraWidget(QWidget):
         videoDevicesGroup = QActionGroup(self)
         videoDevicesGroup.setExclusive(True)
 
-        for deviceName in QCamera.availableDevices():
+        for deviceName in QCamera.availableDevices()[::-1]:
             description = QCamera.deviceDescription(deviceName)
             videoDeviceAction = QAction(description, videoDevicesGroup)
             videoDeviceAction.setCheckable(True)
@@ -39,12 +40,19 @@ class CameraWidget(QWidget):
                 self.cameraDevice = deviceName
                 videoDeviceAction.setChecked(True)
 
+    def checkResolution(self):
+        supportedResolutions, _ = self.imageCapture.supportedResolutions()
+        for resolution in supportedResolutions:
+            self.ui.cameraMenu.addAction(
+                f"{resolution.width()}x{resolution.height()}")
+
     def setCamera(self, cameraDevice):
         if cameraDevice.isEmpty():
             self.camera = QCamera()
         else:
             self.camera = QCamera(cameraDevice)
 
+        self.imageCapture = QCameraImageCapture(self.camera)
         self.viewfinder = QCameraViewfinder(self)
         self.camera.setViewfinder(self.viewfinder)
         self.camera.start()
