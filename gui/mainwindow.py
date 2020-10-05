@@ -25,7 +25,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         self.setWindowTitle("3D-PLI Demo")
         self.setWindowIcon(QtGui.QIcon(pli_logo_path))
-        self.createMenue()
+        self.createMenu()
         self.createCentralWidget()
         self.connect_widgets()
         self.setBackground()
@@ -71,7 +71,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.layout.addWidget(self.logolabel, 3, 2)
         self.centralWidget().setLayout(self.layout)
 
-    def createMenue(self):
+    def createMenu(self):
 
         self.statusBar()
         self.mainMenu = self.menuBar()
@@ -124,14 +124,6 @@ class MainWindow(QtWidgets.QMainWindow):
         '''
         Show a user dialog when window is closed
         '''
-        reply = QtWidgets.QMessageBox.question(
-            self, 'Window Close', 'Are you sure you want to close the window?',
-            QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
-            QtWidgets.QMessageBox.No)
 
-        if reply == QtWidgets.QMessageBox.Yes:
-            self.closeWidgets()
-            event.accept()
-            print('Window closed')
-        else:
-            event.ignore()
+        self.closeWidgets()
+        event.accept()

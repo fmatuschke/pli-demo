@@ -11,6 +11,9 @@ from PyQt5.QtWidgets import (QAction, QActionGroup, QApplication, QDialog,
                              QLabel, QMainWindow, QMessageBox, QVBoxLayout,
                              QWidget)
 
+# TODO: change to
+from PyQt5 import QtCore, QtGui, QtWidgets
+
 
 class CameraWidget(QWidget):
 
@@ -52,8 +55,14 @@ class CameraWidget(QWidget):
         else:
             self.camera = QCamera(cameraDevice)
 
+        if self.camera.isCaptureModeSupported(QCamera.CaptureStillImage):
+            self.camera.setCaptureMode(QCamera.CaptureStillImage)
+
         self.imageCapture = QCameraImageCapture(self.camera)
         self.viewfinder = QCameraViewfinder(self)
+        self.gridLayout = QtWidgets.QGridLayout(self)
+        self.gridLayout.addWidget(self.viewfinder, 0, 0, 1, 1)
+
         self.camera.setViewfinder(self.viewfinder)
         self.camera.start()
 
