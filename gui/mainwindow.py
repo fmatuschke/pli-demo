@@ -95,15 +95,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pliMenu.addAction(extractAction)
 
         # CAMERA
-        self.cameraMenu = self.mainMenu.addMenu('&Camera')
-        #
-        extractAction = QtWidgets.QAction("&port", self)
-        # extractAction.setShortcut("Ctrl+C")
-        # extractAction.setStatusTip('Change camera device')
-        self.cameraMenu.addAction(extractAction)
-        #
-        extractAction = QtWidgets.QAction("&resolution", self)
-        self.cameraMenu.addAction(extractAction)
+        self.cameraMenu = self.mainMenu.addMenu('&camera')
+        self.cameraPortMenu = self.cameraMenu.addMenu('port')
+        # self.cameraResolutionMenu = self.cameraMenu.addMenu('resolution')
 
     def connect_widgets(self):
         '''Connect Signal and Slots of the Widgets for inter Widget communication'''
