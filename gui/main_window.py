@@ -39,7 +39,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.setCentralWidget(QtWidgets.QWidget(self))
 
-        self.cam_resolution_target = (1280, 1024)
         self.camwidget = CameraWidget(self)
         self.camwidget.setMinimumSize(QtCore.QSize(600, 600))
 
@@ -97,7 +96,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # CAMERA
         self.cameraMenu = self.mainMenu.addMenu('&camera')
         self.cameraPortMenu = self.cameraMenu.addMenu('port')
-        # self.cameraResolutionMenu = self.cameraMenu.addMenu('resolution')
+        self.cameraResolutionMenu = self.cameraMenu.addMenu('resolution')
 
     def connect_widgets(self):
         '''Connect Signal and Slots of the Widgets for inter Widget communication'''
