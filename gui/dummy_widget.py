@@ -3,6 +3,9 @@ from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 
+pli_logo_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..",
+                             "data", "pli-logo.png")
+
 
 class ImageWidget(QtWidgets.QWidget):
 
@@ -12,9 +15,7 @@ class ImageWidget(QtWidgets.QWidget):
 
     def create_image(self):
         self.layout = QtWidgets.QVBoxLayout(self)
-        self.qimage = QtGui.QImage(
-            os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                         "pli-logo.png"))
+        self.qimage = QtGui.QImage(pli_logo_path)
 
         self.image_frame = QtWidgets.QLabel()
         self.layout.addWidget(self.image_frame)

@@ -5,11 +5,11 @@ from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 
-from gui.dummy import ImageWidget
-from gui.camerawidget import CameraWidget
+from gui.dummy_widget import ImageWidget
+from gui.camera_widget import CameraWidget
 
-pli_logo_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                             "pli-logo.png")
+pli_logo_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..",
+                             "data", "pli-logo.png")
 
 
 class MainWindow(QtWidgets.QMainWindow):
