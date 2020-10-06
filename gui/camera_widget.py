@@ -5,18 +5,20 @@ from functools import partial
 from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
-from PyQt5 import QtMultimedia
-from PyQt5 import QtMultimediaWidgets
 
 from src.camera import Camera
 
 
 class CameraWidget(QtWidgets.QWidget):
 
+    click_update = QtCore.pyqtSignal(int, int)
+
     def __init__(self, parent=None, *args, **kwargs):
         super(CameraWidget, self).__init__(parent, *args, **kwargs)
         self.ui = parent
         self.init_camera()
+        self.click_x = int(self.camera.width() / 2 + 0.5)
+        self.click_y = int(self.camera.height() / 2 + 0.5)
 
     def init_camera(self):
         self.camera = Camera(fps=25, port_id=1)
@@ -56,6 +58,36 @@ class CameraWidget(QtWidgets.QWidget):
         self.label_offset_y = (self.size().height() -
                                image.size().height()) * 0.5
         return image
+
+    def widget2framecoordinates(self, click_x, click_y):
+        '''
+        Umrechnung der Click- Koordinaten im Widget in QtWidgets.QLabel Koordinaten und dann in Frame-Koordinaten
+        '''
+        label_x = click_x
+        label_y = click_y - self.label_offset_y
+
+        frame_x = int(label_x * self.camera.height() / self.size().width() +
+                      0.5)
+        frame_y = int(label_y * self.camera.height() / self.size().width() +
+                      0.5)
+
+        #print("widget ", click_x, click_y)
+        #print("label  ", label_x, label_y)
+        print("frame  ", frame_x, frame_y)
+
+        return frame_x, frame_y
+
+    def mousePressEvent(self, event):
+        '''
+        Sets Tracking coordinate to the clicked coordinate
+        '''
+        # if y coordinate is in QtWidgets.QLabel
+        if (event.y() > self.label_offset_y and
+                event.y() < self.size().height() - self.label_offset_y):
+            self.click_x, self.click_y = self.widget2framecoordinates(
+                event.x(), event.y())
+            self.click_update.emit(self.click_x, self.click_y)
+            # self.update_zoomImage()
 
     def update_camera_frame(self):
         if self.is_live:
