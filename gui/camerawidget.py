@@ -2,22 +2,14 @@ import os
 
 from functools import partial
 
-from PyQt5.QtCore import QByteArray, qFuzzyCompare, Qt, QTimer
-from PyQt5.QtGui import QImage, QPalette, QPixmap
-from PyQt5.QtMultimediaWidgets import QCameraViewfinder
-from PyQt5.QtMultimedia import (QAudioEncoderSettings, QCamera,
-                                QCameraImageCapture, QImageEncoderSettings,
-                                QMediaMetaData, QMediaRecorder, QMultimedia,
-                                QVideoEncoderSettings)
-from PyQt5.QtWidgets import (QAction, QActionGroup, QApplication, QDialog,
-                             QLabel, QMainWindow, QMessageBox, QVBoxLayout,
-                             QWidget)
-
-# TODO: change to
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore
+from PyQt5 import QtGui
+from PyQt5 import QtWidgets
+from PyQt5 import QtMultimedia
+from PyQt5 import QtMultimediaWidgets
 
 
-class CameraWidget(QWidget):
+class CameraWidget(QtWidgets.QWidget):
 
     def __init__(self, parent=None, *args, **kwargs):
         super(CameraWidget, self).__init__(parent, *args, **kwargs)
@@ -30,14 +22,15 @@ class CameraWidget(QWidget):
         self.checkResolution()
 
     def checkCameraDevices(self):
-        self.cameraDevice = QByteArray()
+        self.cameraDevice = QtCore.QByteArray()
 
-        videoDevicesGroup = QActionGroup(self)
+        videoDevicesGroup = QtWidgets.QActionGroup(self)
         videoDevicesGroup.setExclusive(True)
 
-        for deviceName in QCamera.availableDevices()[::-1]:
-            description = QCamera.deviceDescription(deviceName)
-            videoDeviceAction = QAction(description, videoDevicesGroup)
+        for deviceName in QtMultimedia.QCamera.availableDevices()[::-1]:
+            description = QtMultimedia.QCamera.deviceDescription(deviceName)
+            videoDeviceAction = QtWidgets.QAction(description,
+                                                  videoDevicesGroup)
             videoDeviceAction.setCheckable(True)
             videoDeviceAction.setData(deviceName)
 
@@ -70,15 +63,16 @@ class CameraWidget(QWidget):
         # TODO: clean befor set
 
         if cameraDevice.isEmpty():
-            self.camera = QCamera()
+            self.camera = QtMultimedia.QCamera()
         else:
-            self.camera = QCamera(cameraDevice)
+            self.camera = QtMultimedia.QCamera(cameraDevice)
 
-        if self.camera.isCaptureModeSupported(QCamera.CaptureStillImage):
-            self.camera.setCaptureMode(QCamera.CaptureStillImage)
+        if self.camera.isCaptureModeSupported(
+                QtMultimedia.QCamera.CaptureStillImage):
+            self.camera.setCaptureMode(QtMultimedia.QCamera.CaptureStillImage)
 
-        self.imageCapture = QCameraImageCapture(self.camera)
-        self.viewfinder = QCameraViewfinder(self)
+        self.imageCapture = QtMultimedia.QCameraImageCapture(self.camera)
+        self.viewfinder = QtMultimediaWidgets.QCameraViewfinder(self)
         self.gridLayout = QtWidgets.QGridLayout(self)
         self.gridLayout.addWidget(self.viewfinder, 0, 0, 1, 1)
 

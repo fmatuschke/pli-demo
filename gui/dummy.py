@@ -1,22 +1,22 @@
 import os
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
+from PyQt5 import QtCore
+from PyQt5 import QtGui
+from PyQt5 import QtWidgets
 
 
-class ImageWidget(QWidget):
+class ImageWidget(QtWidgets.QWidget):
 
     def __init__(self, parent=None, *args, **kwargs):
         super(ImageWidget, self).__init__(parent, *args, **kwargs)
         self.create_image()
 
     def create_image(self):
-        self.layout = QVBoxLayout(self)
-        self.qimage = QImage(
+        self.layout = QtWidgets.QVBoxLayout(self)
+        self.qimage = QtGui.QImage(
             os.path.join(os.path.dirname(os.path.abspath(__file__)),
                          "pli-logo.png"))
 
-        self.image_frame = QLabel()
+        self.image_frame = QtWidgets.QLabel()
         self.layout.addWidget(self.image_frame)
         self.setLayout(self.layout)
         self.update_qimage()
@@ -26,17 +26,16 @@ class ImageWidget(QWidget):
         self.update_qimage()
 
     def contextMenuEvent(self, event):
-        menu = QMenu(self)
-        templateAction = menu.addAction("action")
-        action = menu.exec_(self.mapToGlobal(event.pos()))
-        print("action")
+        menu = QtGui.QMenu(self)
+        menu.addAction("action")
+        menu.exec_(self.mapToGlobal(event.pos()))
 
     def update_qimage(self, qimage=None):
         if qimage is None:
             qimage = self.qimage
 
-        pixmap = QPixmap.fromImage(qimage)
+        pixmap = QtGui.QPixmap.fromImage(qimage)
         pixmap = pixmap.scaled(self.size().width(),
-                               self.size().height(), Qt.KeepAspectRatio)
+                               self.size().height(), QtCore.Qt.KeepAspectRatio)
 
         self.image_frame.setPixmap(pixmap)
