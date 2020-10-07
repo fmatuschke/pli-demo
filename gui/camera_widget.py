@@ -14,7 +14,7 @@ from src.pli import Stack as PliStack
 from src import helper
 
 
-class CameraWidget(QtWidgets.QWidget):
+class CameraWidget(QtWidgets.QLabel):
 
     plot_update = QtCore.pyqtSignal(np.ndarray, np.ndarray, float)
     click_update = QtCore.pyqtSignal(int, int)
@@ -43,10 +43,10 @@ class CameraWidget(QtWidgets.QWidget):
         self.click_y = int(self.camera.height() / 2 + 0.5)
 
         # setup image label
-        self.image_label = QtWidgets.QLabel()
+        # self.image_label = QtWidgets.QLabel()
         self.layout = QtWidgets.QVBoxLayout(self)
         self.layout.setContentsMargins(0, 0, 0, 0)
-        self.layout.addWidget(self.image_label)
+        # self.layout.addWidget(self.image_label)
         self.setLayout(self.layout)
 
         # QTimer to access camera frames
@@ -74,26 +74,29 @@ class CameraWidget(QtWidgets.QWidget):
         image = QtGui.QImage(frame.data, frame.shape[1], frame.shape[0],
                              img_format)
         image = image.rgbSwapped()
-        self.label_height = image.size().height()
-        self.label_width = image.size().width()
         image = image.scaled(self.size().width(),
                              self.size().height(), QtCore.Qt.KeepAspectRatio)
-        self.label_offset_y = (self.size().height() -
-                               image.size().height()) * 0.5
+
+        # save parameter for coordinate transformation
+        self.frame_height = frame.shape[1]
+        self.frame_width = frame.shape[0]
+
+        # print("frame: ", frame.shape)
+
         return image
 
     def widget2framecoordinates(self, click_x, click_y):
         '''
         Umrechnung der Click- Koordinaten im Widget in QtWidgets.QLabel Koordinaten und dann in Frame-Koordinaten
         '''
-        label_x = click_x
-        label_y = click_y - self.label_offset_y
+        # label_x = click_x
+        # label_y = click_y - self.label_offset_y
 
-        frame_x = int(label_x * self.label_height / self.size().width() + 0.5)
-        frame_y = int(label_y * self.label_height / self.size().width() + 0.5)
+        frame_x = int(click_x / self.size().width() * self.frame_width + 0.5)
+        frame_y = int(click_y / self.size().height() * self.frame_height + 0.5)
 
-        print("widget ", click_x, click_y)
-        print("label  ", label_x, label_y)
+        print("click ", click_x, click_y)
+        print("self.size() ", self.size())
         print("frame  ", frame_x, frame_y)
 
         return frame_x, frame_y
@@ -103,15 +106,16 @@ class CameraWidget(QtWidgets.QWidget):
         Sets Tracking coordinate to the clicked coordinate
         '''
         # if y coordinate is in QtWidgets.QLabel
-        if (event.y() > self.label_offset_y and
-                event.y() < self.size().height() - self.label_offset_y):
-            self.click_x, self.click_y = self.widget2framecoordinates(
-                event.x(), event.y())
-            self.click_update.emit(self.click_x, self.click_y)
-            self.set_mode(self.mode)
+        # if (event.y() > self.label_offset_y and
+        #         event.y() < self.size().height() - self.label_offset_y):
 
-            x, y = self.pli_stack.get(self.click_x, self.click_y)
-            self.plot_update.emit(x, y, self.rho)
+        self.click_x, self.click_y = self.widget2framecoordinates(
+            event.x(), event.y())
+        self.click_update.emit(self.click_x, self.click_y)
+        self.set_mode(self.mode)
+
+        x, y = self.pli_stack.get(self.click_x, self.click_y)
+        self.plot_update.emit(x, y, self.rho)
 
     def set_mode(self, mode):
         if mode == "live":
@@ -202,8 +206,7 @@ class CameraWidget(QtWidgets.QWidget):
 
     def update_image(self, image):
         # camera widget
-        self.image_label.setPixmap(
-            QtGui.QPixmap.fromImage(self.convertFrame2Image(image)))
+        self.setPixmap(QtGui.QPixmap.fromImage(self.convertFrame2Image(image)))
 
         # zoom widget
         d = 42
