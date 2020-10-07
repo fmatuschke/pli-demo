@@ -26,6 +26,7 @@ class CameraWidget(QtWidgets.QWidget):
         self.show_angle = True
         self.tracker = Tracker()
         self.pli_stack = PliStack()
+        self.mode = "live"
 
     def init_camera(self):
         self.camera = Camera(fps=25)
@@ -47,10 +48,10 @@ class CameraWidget(QtWidgets.QWidget):
         self.setLayout(self.layout)
 
         # QTimer to access camera frames
-        self.timer = QtCore.QTimer(self)
-        self.timer.timeout.connect(self.update_camera_frame)
+        self.live = QtCore.QTimer(self)
+        self.live.timeout.connect(self.update_camera_frame)
         # self.timer.timeout.connect(self.update_zoomImage)
-        self.timer.start(40)  # 1000/fps
+        self.live.start(40)  # 1000/fps
 
     def resizeEvent(self, event):
         super(CameraWidget, self).resizeEvent(event)
@@ -98,11 +99,42 @@ class CameraWidget(QtWidgets.QWidget):
             self.click_update.emit(self.click_x, self.click_y)
             # self.update_zoomImage()
 
-    def is_alive(self):
-        return self.camera is not None
+    def set_mode(self, mode):
+        self.mode = mode
+
+        if self.pli_stack.transmittance is None:
+            print("pli not ready yet")
+            return
+
+        if self.mode == "live":
+            self.live.start()
+        else:
+            self.live.stop()
+
+        if self.mode == "transmittance":
+            transmittance = (self.pli_stack.transmittance /
+                             np.amax(self.pli_stack.transmittance) *
+                             255).astype(np.uint8)
+            self.image_label.setPixmap(
+                QtGui.QPixmap.fromImage(
+                    self.convertFrame2Image(transmittance,
+                                            QtGui.QImage.Format_Grayscale8)))
+        elif self.mode == "direction":
+            direction = (self.pli_stack.direction / np.pi * 255).astype(
+                np.uint8)
+            self.image_label.setPixmap(
+                QtGui.QPixmap.fromImage(
+                    self.convertFrame2Image(direction,
+                                            QtGui.QImage.Format_Grayscale8)))
+        elif self.mode == "retardation":
+            retardation = (self.pli_stack.retardation * 255).astype(np.uint8)
+            self.image_label.setPixmap(
+                QtGui.QPixmap.fromImage(
+                    self.convertFrame2Image(retardation,
+                                            QtGui.QImage.Format_Grayscale8)))
 
     def update_camera_frame(self):
-        if self.is_alive():
+        if self.camera.is_alive():
             frame = self.camera.frame(crop=True)
             if frame is None:
                 self.image_label.setPixmap(
@@ -144,5 +176,6 @@ class CameraWidget(QtWidgets.QWidget):
                     frame = cv2.line(frame, tuple(p0), tuple(p1), (0, 255, 0),
                                      2)
 
-            self.image_label.setPixmap(
-                QtGui.QPixmap.fromImage(self.convertFrame2Image(frame)))
+            if self.mode == "live":
+                self.image_label.setPixmap(
+                    QtGui.QPixmap.fromImage(self.convertFrame2Image(frame)))

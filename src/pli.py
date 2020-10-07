@@ -49,17 +49,11 @@ class Stack:
             a1 = 2 * np.sum(data * np.sin(rho_2)[:, None, None], 0) / n
             b1 = 2 * np.sum(data * np.cos(rho_2)[:, None, None], 0) / n
 
-            t = 2 * a0
-            d = 0.5 * np.arctan2(-b1, a1) + np.pi
-            r = np.sqrt(a1 * a1 + b1 * b1) / (a0 + 1e-16)
-
-            self.transmittance = t
-            self.direction = d
-            self.retardation = r
-
+            self.transmittance = 2 * a0
+            self.direction = 0.5 * np.arctan2(-b1, a1) + np.pi
+            self.retardation = np.sqrt(a1 * a1 + b1 * b1) / (a0 + 1e-16)
         else:
             print("Error, no 9 mesuered images")
-            return None, None, None  # FIXME:
 
     def clear(self):
         self.frames.clear()

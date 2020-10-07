@@ -1,6 +1,8 @@
 import sys
 import os
 
+from functools import partial
+
 from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
@@ -77,20 +79,20 @@ class MainWindow(QtWidgets.QMainWindow):
         # PLI
         self.pliMenu = self.mainMenu.addMenu('&PLI')
         #
-        extractAction = QtWidgets.QAction("&live", self)
-        self.pliMenu.addAction(extractAction)
+        self.action_live = QtWidgets.QAction("&live", self)
+        self.pliMenu.addAction(self.action_live)
         #
-        extractAction = QtWidgets.QAction("&transmittion", self)
-        self.pliMenu.addAction(extractAction)
+        self.action_transmittance = QtWidgets.QAction("&transmittance", self)
+        self.pliMenu.addAction(self.action_transmittance)
         #
-        extractAction = QtWidgets.QAction("&direction", self)
-        self.pliMenu.addAction(extractAction)
+        self.action_direction = QtWidgets.QAction("&direction", self)
+        self.pliMenu.addAction(self.action_direction)
         #
-        extractAction = QtWidgets.QAction("&retardation", self)
-        self.pliMenu.addAction(extractAction)
+        self.action_retardation = QtWidgets.QAction("&retardation", self)
+        self.pliMenu.addAction(self.action_retardation)
         #
-        extractAction = QtWidgets.QAction("&fom", self)
-        self.pliMenu.addAction(extractAction)
+        self.action_fom = QtWidgets.QAction("&fom", self)
+        self.pliMenu.addAction(self.action_fom)
 
         # CAMERA
         self.cameraMenu = self.mainMenu.addMenu('&camera')
@@ -99,7 +101,16 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def connect_widgets(self):
         '''Connect Signal and Slots of the Widgets for inter Widget communication'''
-        pass
+        self.action_live.triggered.connect(
+            partial(self.camwidget.set_mode, "live"))
+        self.action_transmittance.triggered.connect(
+            partial(self.camwidget.set_mode, "transmittance"))
+        self.action_direction.triggered.connect(
+            partial(self.camwidget.set_mode, "direction"))
+        self.action_retardation.triggered.connect(
+            partial(self.camwidget.set_mode, "retardation"))
+        self.action_fom.triggered.connect(
+            partial(self.camwidget.set_mode, "fom"))
 
     def setBackground(self):
         '''
