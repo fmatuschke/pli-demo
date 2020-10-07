@@ -17,12 +17,9 @@ class CameraWidget(QtWidgets.QWidget):
         super(CameraWidget, self).__init__(parent, *args, **kwargs)
         self.ui = parent
         self.init_camera()
-        self.click_x = int(self.camera.width() / 2 + 0.5)
-        self.click_y = int(self.camera.height() / 2 + 0.5)
 
     def init_camera(self):
-        self.camera = Camera(fps=25, port_id=1)
-        self.is_live = self.camera.live()
+        self.camera = Camera(fps=25)
 
         for width, height in self.camera.working_resolutions:
             self.ui.cameraResolutionMenu.addAction(
@@ -30,6 +27,8 @@ class CameraWidget(QtWidgets.QWidget):
                                   self.ui.cameraResolutionMenu,
                                   triggered=partial(self.camera.set_resolution,
                                                     width, height)))
+        self.click_x = int(self.camera.width() / 2 + 0.5)
+        self.click_y = int(self.camera.height() / 2 + 0.5)
 
         # setup image label
         self.image_label = QtWidgets.QLabel()
@@ -47,12 +46,12 @@ class CameraWidget(QtWidgets.QWidget):
     def resizeEvent(self, event):
         super(CameraWidget, self).resizeEvent(event)
 
-    def convertFrame2Image(self, frame):
+    def convertFrame2Image(self, frame, img_format=QtGui.QImage.Format_RGB888):
         '''
         convert camera frame to qimage with size of qlabel
         '''
         image = QtGui.QImage(frame.data, frame.shape[1], frame.shape[0],
-                             QtGui.QImage.Format_RGB888)
+                             img_format)
         image = image.rgbSwapped()
         image = image.scaledToWidth(self.size().width())
         self.label_offset_y = (self.size().height() -
@@ -89,8 +88,13 @@ class CameraWidget(QtWidgets.QWidget):
             self.click_update.emit(self.click_x, self.click_y)
             # self.update_zoomImage()
 
+    def is_alive(self):
+        return self.camera is not None
+
     def update_camera_frame(self):
-        if self.is_live:
+        if self.is_alive():
+            frame = self.camera.frame()
+            if frame is None:
+                return
             self.image_label.setPixmap(
-                QtGui.QPixmap.fromImage(
-                    self.convertFrame2Image(self.camera.frame())))
+                QtGui.QPixmap.fromImage(self.convertFrame2Image(frame)))
