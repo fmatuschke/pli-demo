@@ -1,6 +1,7 @@
 import cv2
 import sys
 import os
+import numpy as np
 
 pli_logo_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..",
                              "data", "pli-logo.png")
@@ -121,11 +122,9 @@ class Camera:
             self.video_capture.set(cv2.CAP_PROP_FRAME_WIDTH, org_width)
             self.video_capture.set(cv2.CAP_PROP_FRAME_HEIGHT, org_height)
 
-        print(self.working_resolutions)
-
         return self.working_resolutions
 
-    def frame(self):
+    def frame(self, crop=False):
         if self.is_alive():
             ret, frame = self.video_capture.read()
 
@@ -134,6 +133,14 @@ class Camera:
                 self.video_capture = None
                 return None
 
+            if crop:
+                height, width, _ = frame.shape
+                l = min(height, width)
+                delta = np.abs((width - height) // 2)
+
+                frame = np.array(frame[:, delta:delta +
+                                       l, :] if width > height else frame[
+                                           delta:delta + l, :, :])
             return frame
         else:
             return cv2.imread(pli_logo_path, cv2.IMREAD_COLOR)

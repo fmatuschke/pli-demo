@@ -94,7 +94,7 @@ class CameraWidget(QtWidgets.QWidget):
 
     def update_camera_frame(self):
         if self.is_alive():
-            frame = self.camera.frame()
+            frame = self.camera.frame(True)
             if frame is None:
                 return
             self.image_label.setPixmap(
