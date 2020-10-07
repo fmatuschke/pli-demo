@@ -94,11 +94,15 @@ class Camera:
     def list_resolutions(self):
         self.working_resolutions = []
         if self.is_alive():
-            test_resolution = [(320, 480), (640, 480), (800, 600), (1024, 786),
-                               (1280, 720), (1280, 800), (1280, 960),
-                               (1280, 1024), (1440, 720), (1440, 900),
-                               (1600, 1200), (1920, 1080), (1920, 1200),
-                               (2560, 1440), (2560, 1600), (3840, 2160)]
+            # test_resolution = [(320, 480), (640, 480), (800, 600), (1024, 786),
+            #                    (1280, 720), (1280, 800), (1280, 960),
+            #                    (1280, 1024), (1440, 720), (1440, 900),
+            #                    (1600, 1200), (1920, 1080), (1920, 1200),
+            #                    (2560, 1440), (2560, 1600), (3840, 2160)]
+
+            # EXIO cam USB2
+            test_resolution = [(640, 480), (1024, 768), (1280, 720),
+                               (1280, 960), (1920, 1080), (2048, 1536)]
 
             org_width = self.width()
             org_height = self.height()
@@ -116,6 +120,8 @@ class Camera:
 
             self.video_capture.set(cv2.CAP_PROP_FRAME_WIDTH, org_width)
             self.video_capture.set(cv2.CAP_PROP_FRAME_HEIGHT, org_height)
+
+        print(self.working_resolutions)
 
         return self.working_resolutions
 
