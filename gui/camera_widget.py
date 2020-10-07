@@ -1,5 +1,6 @@
 import os
 
+import numpy as np
 from functools import partial
 
 from PyQt5 import QtCore
@@ -7,6 +8,8 @@ from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 
 from src.camera import Camera
+from src.tracker import Tracker
+from src import helper
 
 
 class CameraWidget(QtWidgets.QWidget):
@@ -17,6 +20,8 @@ class CameraWidget(QtWidgets.QWidget):
         super(CameraWidget, self).__init__(parent, *args, **kwargs)
         self.ui = parent
         self.init_camera()
+        self.show_tracker = True
+        self.tracker = Tracker()
 
     def init_camera(self):
         self.camera = Camera(fps=25)
@@ -94,8 +99,26 @@ class CameraWidget(QtWidgets.QWidget):
 
     def update_camera_frame(self):
         if self.is_alive():
-            frame = self.camera.frame(True)
+            frame = self.camera.frame(crop=True)
             if frame is None:
+                self.image_label.setPixmap(
+                    QtGui.QPixmap.fromImage(
+                        self.convertFrame2Image(helper.LOGO_IMG)))
                 return
+
+            if not self.tracker.is_calibrated:
+                self.tracker.calibrate(frame)
+                self.last_angle = 0
+            else:
+                rho = self.tracker.track(frame)
+                if np.rad2deg(
+                        np.abs(helper.diff_orientation(self.last_angle,
+                                                       rho))) > 1:
+                    print(f"{np.rad2deg(rho):.0f}")
+                    self.last_angle = rho
+
+            if self.show_tracker:
+                frame = self.tracker.show()
+
             self.image_label.setPixmap(
                 QtGui.QPixmap.fromImage(self.convertFrame2Image(frame)))

@@ -3,9 +3,6 @@ import sys
 import os
 import numpy as np
 
-pli_logo_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..",
-                             "data", "pli-logo.png")
-
 
 class Camera:
 
@@ -143,4 +140,4 @@ class Camera:
                                            delta:delta + l, :, :])
             return frame
         else:
-            return cv2.imread(pli_logo_path, cv2.IMREAD_COLOR)
+            return None
