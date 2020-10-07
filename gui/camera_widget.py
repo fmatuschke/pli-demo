@@ -23,7 +23,7 @@ class CameraWidget(QtWidgets.QWidget):
         self.ui = parent
         self.init_camera()
         self.show_tracker = False
-        self.show_angle = True
+        self.show_angle = False
         self.tracker = Tracker()
         self.pli_stack = PliStack()
         self.mode = "live"
@@ -70,6 +70,10 @@ class CameraWidget(QtWidgets.QWidget):
         self.label_height = image.size().height()
         self.label_width = image.size().width()
         return image
+
+    def toogle_draw_helper(self):
+        self.show_tracker = not self.show_tracker
+        self.show_angle = not self.show_angle
 
     def widget2framecoordinates(self, click_x, click_y):
         '''

@@ -99,6 +99,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.cameraPortMenu = self.cameraMenu.addMenu('port')
         self.cameraResolutionMenu = self.cameraMenu.addMenu('resolution')
 
+        # HELP
+        self.helpMenu = self.mainMenu.addMenu('&help')
+
+        self.action_tracker = QtWidgets.QAction("&tracker", self)
+        self.helpMenu.addAction(self.action_tracker)
+
     def connect_widgets(self):
         '''Connect Signal and Slots of the Widgets for inter Widget communication'''
         self.action_live.triggered.connect(
@@ -111,6 +117,7 @@ class MainWindow(QtWidgets.QMainWindow):
             partial(self.camwidget.set_mode, "retardation"))
         self.action_fom.triggered.connect(
             partial(self.camwidget.set_mode, "fom"))
+        self.action_tracker.triggered.connect(self.camwidget.toogle_draw_helper)
 
     def setBackground(self):
         '''
