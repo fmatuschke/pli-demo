@@ -54,20 +54,19 @@ class MainWindow(QtWidgets.QMainWindow):
         self.tiltwidget.setMinimumSize(QtCore.QSize(300, 300))
         self.tiltwidget.setMaximumSize(QtCore.QSize(600, 600))
 
-        # self.image = QtGui.QImage(pli_logo_path)
-        # self.logolabel = QtWidgets.QLabel()
-        # self.logolabel.setMaximumSize(QtCore.QSize(100, 100))
-        # self.logolabel.setMinimumSize(QtCore.QSize(100, 100))
-        # self.logolabel.setPixmap(
-        #     QtGui.QPixmap.fromImage(self.image).scaled(
-        #         self.logolabel.size().width(),
-        #         self.logolabel.size().height(), QtCore.Qt.KeepAspectRatio))
+        self.logolabel = QtWidgets.QLabel()
+        self.logolabel.setMaximumSize(QtCore.QSize(100, 100))
+        self.logolabel.setMinimumSize(QtCore.QSize(100, 100))
+        self.logolabel.setPixmap(
+            QtGui.QPixmap.fromImage(QtGui.QImage(pli_logo_path)).scaled(
+                self.logolabel.size().width(),
+                self.logolabel.size().height(), QtCore.Qt.KeepAspectRatio))
 
         self.layout.addWidget(self.camwidget, 0, 0, 3, 1)
         self.layout.addWidget(self.zoomwidget, 0, 1, 1, 1)
         self.layout.addWidget(self.plotwidget, 1, 1, 1, 1)
         self.layout.addWidget(self.tiltwidget, 2, 1, 1, 1)
-        # self.layout.addWidget(self.logolabel, 3, 2)
+        self.layout.addWidget(self.logolabel, 3, 2)
         self.centralWidget().setLayout(self.layout)
 
     def createMenu(self):

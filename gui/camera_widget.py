@@ -53,7 +53,8 @@ class CameraWidget(QtWidgets.QWidget):
         image = QtGui.QImage(frame.data, frame.shape[1], frame.shape[0],
                              img_format)
         image = image.rgbSwapped()
-        image = image.scaledToWidth(self.size().width())
+        image = image.scaled(self.size().width(),
+                             self.size().height(), QtCore.Qt.KeepAspectRatio)
         self.label_offset_y = (self.size().height() -
                                image.size().height()) * 0.5
         return image
