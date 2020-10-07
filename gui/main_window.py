@@ -7,8 +7,9 @@ from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 
-from gui.dummy_widget import ImageWidget
 from gui.camera_widget import CameraWidget
+from gui.dummy_widget import ImageWidget
+from gui.plot_widget import PlotWidget
 from gui.zoom_widget import ZoomWidget
 
 pli_logo_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..",
@@ -45,7 +46,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.camwidget = CameraWidget(self)
         self.camwidget.setMinimumSize(QtCore.QSize(600, 600))
 
-        self.plotwidget = ImageWidget(self)
+        self.plotwidget = PlotWidget(self)
         self.plotwidget.setMinimumSize(QtCore.QSize(300, 300))
         self.plotwidget.setMaximumSize(QtCore.QSize(600, 600))
 
@@ -120,6 +121,7 @@ class MainWindow(QtWidgets.QMainWindow):
             partial(self.camwidget.set_mode, "fom"))
         self.action_tracker.triggered.connect(self.camwidget.toogle_draw_helper)
 
+        self.camwidget.plot_update.connect(self.plotwidget.update_plot)
         self.camwidget.zoom_update.connect(self.zoomwidget.update_image)
 
     def setBackground(self):

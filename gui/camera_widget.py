@@ -16,6 +16,7 @@ from src import helper
 
 class CameraWidget(QtWidgets.QWidget):
 
+    plot_update = QtCore.pyqtSignal(np.ndarray, np.ndarray, float)
     click_update = QtCore.pyqtSignal(int, int)
     zoom_update = QtCore.pyqtSignal(np.ndarray)
 
@@ -109,6 +110,9 @@ class CameraWidget(QtWidgets.QWidget):
             self.click_update.emit(self.click_x, self.click_y)
             self.set_mode(self.mode)
 
+            x, y = self.pli_stack.get(self.click_x, self.click_y)
+            self.plot_update.emit(x, y, self.rho)
+
     def set_mode(self, mode):
         if mode == "live":
             self.live.start()
@@ -151,20 +155,14 @@ class CameraWidget(QtWidgets.QWidget):
         if not self.tracker.is_calibrated:
             self.tracker.calibrate(frame)
             if self.tracker.is_calibrated:
-                rho = 0
+                self.rho = 0
                 self.last_angle = 0
                 self.pli_stack.insert(0, frame)
 
         # get pli stack
         elif not self.pli_stack.full():
-            rho = self.tracker.track(frame)
-            self.pli_stack.insert(rho, frame)
-
-            # print current angle
-            if np.rad2deg(np.abs(helper.diff_orientation(self.last_angle,
-                                                         rho))) > 1:
-                print(f"{np.rad2deg(rho):.0f}")
-                self.last_angle = rho
+            self.rho = self.tracker.track(frame)
+            self.pli_stack.insert(self.rho, frame)
 
             # when done, calculate pli modalities
             if self.pli_stack.full():
@@ -172,7 +170,13 @@ class CameraWidget(QtWidgets.QWidget):
 
         # get only angle
         else:
-            rho = self.tracker.track(frame)
+            self.rho = self.tracker.track(frame)
+
+        # print current angle
+        if np.rad2deg(np.abs(helper.diff_orientation(self.last_angle,
+                                                     self.rho))) > 1:
+            print(f"{np.rad2deg(self.rho):.0f}")
+            self.last_angle = self.rho
 
         if self.mode == "live":
             if self.show_tracker:
@@ -180,8 +184,9 @@ class CameraWidget(QtWidgets.QWidget):
 
             if self.show_angle:
                 if self.tracker.is_calibrated:
-                    d = np.array((np.cos(-rho) * min(frame.shape[:2]) * 0.42,
-                                  np.sin(-rho) * min(frame.shape[:2]) * 0.42))
+                    d = np.array(
+                        (np.cos(-self.rho) * min(frame.shape[:2]) * 0.42,
+                         np.sin(-self.rho) * min(frame.shape[:2]) * 0.42))
                     p0 = (self.tracker.center - d // 2).astype(np.int)
                     p1 = (self.tracker.center + d // 2).astype(np.int)
                     frame = cv2.line(frame, tuple(p0), tuple(p1), (0, 255, 0),
@@ -196,11 +201,17 @@ class CameraWidget(QtWidgets.QWidget):
             self.update_image(frame)
 
     def update_image(self, image):
+        # camera widget
         self.image_label.setPixmap(
             QtGui.QPixmap.fromImage(self.convertFrame2Image(image)))
 
+        # zoom widget
         d = 42
         x = max(d, min(image.shape[1] - d - 1, self.click_x))
         y = max(d, min(image.shape[0] - d - 1, self.click_y))
         image = np.array(image[y - d:y + d, x - d:x + d])
         self.zoom_update.emit(image)
+
+        # plot widget
+        x, y = self.pli_stack.get(self.click_x, self.click_y)
+        self.plot_update.emit(x, y, self.rho)

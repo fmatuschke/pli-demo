@@ -62,6 +62,11 @@ class Stack:
     def get(self, x, y):
         if self.size() == 0:
             return np.array([])
+
+        angles = [
+            self.angles[i] for i, f in enumerate(self.frames) if f is not None
+        ]
+        angles = np.array(angles)
         frames = [f for f in self.frames if f is not None]
         frames = np.array(frames)
-        return frames[:, y, x]
+        return angles, frames[:, y, x]
