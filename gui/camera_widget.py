@@ -3,6 +3,7 @@ import os
 import numpy as np
 from functools import partial
 
+import cv2
 from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
@@ -22,6 +23,7 @@ class CameraWidget(QtWidgets.QWidget):
         self.ui = parent
         self.init_camera()
         self.show_tracker = True
+        self.show_angle = True
         self.tracker = Tracker()
         self.pli_stack = PliStack()
 
@@ -111,6 +113,7 @@ class CameraWidget(QtWidgets.QWidget):
             if not self.tracker.is_calibrated:
                 self.tracker.calibrate(frame)
                 if self.tracker.is_calibrated:
+                    rho = 0
                     self.last_angle = 0
                     self.pli_stack.insert(0, frame.copy())
             elif not self.pli_stack.full():
@@ -126,9 +129,20 @@ class CameraWidget(QtWidgets.QWidget):
 
                 if self.pli_stack.full():
                     self.pli_stack.calc_coeffs()
+            else:
+                rho = self.tracker.track(frame)
 
             if self.show_tracker:
                 frame = self.tracker.show()
+
+            if self.show_angle:
+                if self.tracker.is_calibrated:
+                    d = np.array((np.cos(-rho) * min(frame.shape[:2]) * 0.42,
+                                  np.sin(-rho) * min(frame.shape[:2]) * 0.42))
+                    p0 = (self.tracker.center - d // 2).astype(np.int)
+                    p1 = (self.tracker.center + d // 2).astype(np.int)
+                    frame = cv2.line(frame, tuple(p0), tuple(p1), (0, 255, 0),
+                                     2)
 
             self.image_label.setPixmap(
                 QtGui.QPixmap.fromImage(self.convertFrame2Image(frame)))
