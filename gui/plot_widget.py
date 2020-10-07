@@ -15,21 +15,28 @@ class PlotWidget(QtWidgets.QLabel):
         self.graphWidget = pg.PlotWidget()
         self.layout.addWidget(self.graphWidget)
         self.setLayout(self.layout)
-        # self.setCentralWidget(self.graphWidget)
+        self.resize(min(self.size().width(),
+                        self.size().height()),
+                    min(self.size().width(),
+                        self.size().height()))
 
     def resizeEvent(self, event):
         super(PlotWidget, self).resizeEvent(event)
-        self.graphWidget.scaleToImage
+        self.resize(min(self.size().width(),
+                        self.size().height()),
+                    min(self.size().width(),
+                        self.size().height()))
 
     def update_plot(self, x, y, rho):
+
+        if np.any(x == np.deg2rad(160)):
+            x = np.append(x, np.deg2rad(180))
+            y = np.append(y, y[0])
+
         self.graphWidget.clear()
         self.graphWidget.setAspectLocked(False)
 
-        self.graphWidget.setXRange(0, 160)
-        self.graphWidget.scale(self.size().width(), self.size().height())
+        self.graphWidget.setXRange(0, 180)
         self.graphWidget.plot(np.rad2deg(x), y, symbol='+')
 
-        pen = pg.mkPen(color="y")
-        _, [y_min, y_max] = self.graphWidget.viewRange()
-        self.graphWidget.plot(
-            [np.rad2deg(rho), np.rad2deg(rho)], [y_min, y_max], pen=pen)
+        self.graphWidget.addItem(pg.InfiniteLine(pos=np.rad2deg(rho), angle=90))
