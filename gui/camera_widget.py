@@ -9,6 +9,7 @@ from PyQt5 import QtWidgets
 
 from src.camera import Camera
 from src.tracker import Tracker
+from src.pli import Stack as PliStack
 from src import helper
 
 
@@ -22,6 +23,7 @@ class CameraWidget(QtWidgets.QWidget):
         self.init_camera()
         self.show_tracker = True
         self.tracker = Tracker()
+        self.pli_stack = PliStack()
 
     def init_camera(self):
         self.camera = Camera(fps=25)
@@ -108,14 +110,22 @@ class CameraWidget(QtWidgets.QWidget):
 
             if not self.tracker.is_calibrated:
                 self.tracker.calibrate(frame)
-                self.last_angle = 0
-            else:
+                if self.tracker.is_calibrated:
+                    self.last_angle = 0
+                    self.pli_stack.insert(0, frame.copy())
+            elif not self.pli_stack.full():
                 rho = self.tracker.track(frame)
+                self.pli_stack.insert(rho, frame)
+
+                # print current angle
                 if np.rad2deg(
                         np.abs(helper.diff_orientation(self.last_angle,
                                                        rho))) > 1:
                     print(f"{np.rad2deg(rho):.0f}")
                     self.last_angle = rho
+
+                if self.pli_stack.full():
+                    self.pli_stack.calc_coeffs()
 
             if self.show_tracker:
                 frame = self.tracker.show()
