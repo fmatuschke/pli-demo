@@ -12,6 +12,7 @@ class Tracker:
         self.center = None
         self.frame = None
         self.rho = 0
+        self.img_mask = None
 
     def filter_image(self, frame):
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -42,6 +43,7 @@ class Tracker:
         corners.shape = (-1, 2)
         self.center = np.mean(corners, axis=0)
         self.is_calibrated = len(self.cv_ids) == self.num_sticker
+        self.gen_mask()
 
         print("is calibrated")
 
@@ -97,3 +99,14 @@ class Tracker:
                                (0, 255, 0), 4)
 
         return frame
+
+    def gen_mask(self):
+        if not self.is_calibrated:
+            print("Error, not calibrate yet")
+            return None
+
+        Y, X = np.ogrid[:self.frame.shape[0], :self.frame.shape[1]]
+        dist2_from_center = (X - self.center[0])**2 + (Y - self.center[1])**2
+
+        self.img_mask = dist2_from_center <= (min(self.frame.shape[:2]) *
+                                              0.28)**2
