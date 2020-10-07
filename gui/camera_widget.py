@@ -22,7 +22,7 @@ class CameraWidget(QtWidgets.QWidget):
         super(CameraWidget, self).__init__(parent, *args, **kwargs)
         self.ui = parent
         self.init_camera()
-        self.show_tracker = True
+        self.show_tracker = False
         self.show_angle = True
         self.tracker = Tracker()
         self.pli_stack = PliStack()
@@ -67,6 +67,8 @@ class CameraWidget(QtWidgets.QWidget):
                              self.size().height(), QtCore.Qt.KeepAspectRatio)
         self.label_offset_y = (self.size().height() -
                                image.size().height()) * 0.5
+        self.label_height = image.size().height()
+        self.label_width = image.size().width()
         return image
 
     def widget2framecoordinates(self, click_x, click_y):
@@ -76,10 +78,8 @@ class CameraWidget(QtWidgets.QWidget):
         label_x = click_x
         label_y = click_y - self.label_offset_y
 
-        frame_x = int(label_x * self.camera.height() / self.size().width() +
-                      0.5)
-        frame_y = int(label_y * self.camera.height() / self.size().width() +
-                      0.5)
+        frame_x = int(label_x * self.label_height / self.size().width() + 0.5)
+        frame_y = int(label_y * self.label_height / self.size().width() + 0.5)
 
         #print("widget ", click_x, click_y)
         #print("label  ", label_x, label_y)
@@ -100,16 +100,16 @@ class CameraWidget(QtWidgets.QWidget):
             # self.update_zoomImage()
 
     def set_mode(self, mode):
-        self.mode = mode
 
-        if self.pli_stack.transmittance is None:
-            print("pli not ready yet")
-            return
-
-        if self.mode == "live":
+        if mode == "live":
             self.live.start()
         else:
+            if self.pli_stack.transmittance is None:
+                print("pli not ready yet")
+                return
             self.live.stop()
+
+        self.mode = mode
 
         if self.mode == "transmittance":
             transmittance = (self.pli_stack.transmittance /
@@ -148,6 +148,15 @@ class CameraWidget(QtWidgets.QWidget):
                     rho = 0
                     self.last_angle = 0
                     self.pli_stack.insert(0, frame.copy())
+
+                # gen mask
+                Y, X = np.ogrid[:frame.shape[0], :frame.shape[1]]
+                dist2_from_center = (X - self.tracker.center[0])**2 + (
+                    Y - self.tracker.center[1])**2
+
+                self.mask = dist2_from_center <= (min(frame.shape[:2]) *
+                                                  0.28)**2
+
             elif not self.pli_stack.full():
                 rho = self.tracker.track(frame)
                 self.pli_stack.insert(rho, frame)
@@ -175,6 +184,11 @@ class CameraWidget(QtWidgets.QWidget):
                     p1 = (self.tracker.center + d // 2).astype(np.int)
                     frame = cv2.line(frame, tuple(p0), tuple(p1), (0, 255, 0),
                                      2)
+
+            if not self.show_tracker:
+                frame = np.multiply(frame, self.mask[:, :, None])
+                d = int(min(frame.shape[:2]) * 0.28)
+                frame = np.array(frame[d // 2:-d // 2, d // 2:-d // 2, :])
 
             if self.mode == "live":
                 self.image_label.setPixmap(
