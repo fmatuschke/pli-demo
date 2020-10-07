@@ -9,6 +9,7 @@ from PyQt5 import QtWidgets
 
 from gui.dummy_widget import ImageWidget
 from gui.camera_widget import CameraWidget
+from gui.zoom_widget import ZoomWidget
 
 pli_logo_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..",
                              "data", "pli-logo.png")
@@ -48,7 +49,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.plotwidget.setMinimumSize(QtCore.QSize(300, 300))
         self.plotwidget.setMaximumSize(QtCore.QSize(600, 600))
 
-        self.zoomwidget = ImageWidget(self)
+        self.zoomwidget = ZoomWidget(self)
         self.zoomwidget.setMinimumSize(QtCore.QSize(300, 300))
         self.zoomwidget.setMaximumSize(QtCore.QSize(600, 600))
 
@@ -118,6 +119,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.action_fom.triggered.connect(
             partial(self.camwidget.set_mode, "fom"))
         self.action_tracker.triggered.connect(self.camwidget.toogle_draw_helper)
+
+        self.camwidget.zoom_update.connect(self.zoomwidget.update_image)
 
     def setBackground(self):
         '''

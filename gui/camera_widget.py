@@ -17,6 +17,7 @@ from src import helper
 class CameraWidget(QtWidgets.QWidget):
 
     click_update = QtCore.pyqtSignal(int, int)
+    zoom_update = QtCore.pyqtSignal(np.ndarray)
 
     def __init__(self, parent=None, *args, **kwargs):
         super(CameraWidget, self).__init__(parent, *args, **kwargs)
@@ -56,10 +57,15 @@ class CameraWidget(QtWidgets.QWidget):
     def resizeEvent(self, event):
         super(CameraWidget, self).resizeEvent(event)
 
-    def convertFrame2Image(self, frame, img_format=QtGui.QImage.Format_RGB888):
+    def convertFrame2Image(self, frame):
         '''
         convert camera frame to qimage with size of qlabel
         '''
+        if frame.ndim == 2:
+            img_format = QtGui.QImage.Format_Grayscale8
+        else:
+            img_format = QtGui.QImage.Format_RGB888
+
         image = QtGui.QImage(frame.data, frame.shape[1], frame.shape[0],
                              img_format)
         image = image.rgbSwapped()
@@ -101,10 +107,16 @@ class CameraWidget(QtWidgets.QWidget):
             self.click_x, self.click_y = self.widget2framecoordinates(
                 event.x(), event.y())
             self.click_update.emit(self.click_x, self.click_y)
-            # self.update_zoomImage()
+            self.update_zoomImage()
+
+    def update_zoomImage(self):
+        d = 42
+        x = max(d, min(self.frame.shape[1] - d - 1, self.click_x))
+        y = max(d, min(self.frame.shape[0] - d - 1, self.click_y))
+        image = np.array(self.frame[y - d:y + d, x - d:x + d])
+        self.zoom_update.emit(image)
 
     def set_mode(self, mode):
-
         if mode == "live":
             self.live.start()
         else:
@@ -114,56 +126,46 @@ class CameraWidget(QtWidgets.QWidget):
             self.live.stop()
 
         self.mode = mode
-
         if self.mode == "transmittance":
-            transmittance = (self.pli_stack.transmittance /
-                             np.amax(self.pli_stack.transmittance) *
-                             255).astype(np.uint8)
-            self.image_label.setPixmap(
-                QtGui.QPixmap.fromImage(
-                    self.convertFrame2Image(transmittance,
-                                            QtGui.QImage.Format_Grayscale8)))
+            self.frame = (self.pli_stack.transmittance /
+                          np.amax(self.pli_stack.transmittance) * 255).astype(
+                              np.uint8)
         elif self.mode == "direction":
-            direction = (self.pli_stack.direction / np.pi * 255).astype(
+            self.frame = (self.pli_stack.direction / np.pi * 255).astype(
                 np.uint8)
-            self.image_label.setPixmap(
-                QtGui.QPixmap.fromImage(
-                    self.convertFrame2Image(direction,
-                                            QtGui.QImage.Format_Grayscale8)))
         elif self.mode == "retardation":
-            retardation = (self.pli_stack.retardation * 255).astype(np.uint8)
-            self.image_label.setPixmap(
-                QtGui.QPixmap.fromImage(
-                    self.convertFrame2Image(retardation,
-                                            QtGui.QImage.Format_Grayscale8)))
+            self.frame = (self.pli_stack.retardation * 255).astype(np.uint8)
+        self.image_label.setPixmap(
+            QtGui.QPixmap.fromImage(self.convertFrame2Image(self.frame)))
+        self.update_zoomImage()
 
     def update_camera_frame(self):
         if self.camera.is_alive():
-            frame = self.camera.frame(crop=True)
-            if frame is None:
+            self.frame = self.camera.frame(crop=True)
+            if self.frame is None:
                 self.image_label.setPixmap(
                     QtGui.QPixmap.fromImage(
                         self.convertFrame2Image(helper.LOGO_IMG)))
                 return
 
             if not self.tracker.is_calibrated:
-                self.tracker.calibrate(frame)
+                self.tracker.calibrate(self.frame)
                 if self.tracker.is_calibrated:
                     rho = 0
                     self.last_angle = 0
-                    self.pli_stack.insert(0, frame.copy())
+                    self.pli_stack.insert(0, self.frame)
 
                 # gen mask
-                Y, X = np.ogrid[:frame.shape[0], :frame.shape[1]]
+                Y, X = np.ogrid[:self.frame.shape[0], :self.frame.shape[1]]
                 dist2_from_center = (X - self.tracker.center[0])**2 + (
                     Y - self.tracker.center[1])**2
 
-                self.mask = dist2_from_center <= (min(frame.shape[:2]) *
+                self.mask = dist2_from_center <= (min(self.frame.shape[:2]) *
                                                   0.28)**2
 
             elif not self.pli_stack.full():
-                rho = self.tracker.track(frame)
-                self.pli_stack.insert(rho, frame)
+                rho = self.tracker.track(self.frame)
+                self.pli_stack.insert(rho, self.frame)
 
                 # print current angle
                 if np.rad2deg(
@@ -175,25 +177,29 @@ class CameraWidget(QtWidgets.QWidget):
                 if self.pli_stack.full():
                     self.pli_stack.calc_coeffs()
             else:
-                rho = self.tracker.track(frame)
+                rho = self.tracker.track(self.frame)
 
             if self.show_tracker:
-                frame = self.tracker.show()
+                self.frame = self.tracker.show()
 
             if self.show_angle:
                 if self.tracker.is_calibrated:
-                    d = np.array((np.cos(-rho) * min(frame.shape[:2]) * 0.42,
-                                  np.sin(-rho) * min(frame.shape[:2]) * 0.42))
+                    d = np.array(
+                        (np.cos(-rho) * min(self.frame.shape[:2]) * 0.42,
+                         np.sin(-rho) * min(self.frame.shape[:2]) * 0.42))
                     p0 = (self.tracker.center - d // 2).astype(np.int)
                     p1 = (self.tracker.center + d // 2).astype(np.int)
-                    frame = cv2.line(frame, tuple(p0), tuple(p1), (0, 255, 0),
-                                     2)
+                    self.frame = cv2.line(self.frame, tuple(p0), tuple(p1),
+                                          (0, 255, 0), 2)
 
             if not self.show_tracker:
-                frame = np.multiply(frame, self.mask[:, :, None])
-                d = int(min(frame.shape[:2]) * 0.28)
-                frame = np.array(frame[d // 2:-d // 2, d // 2:-d // 2, :])
+                self.frame = np.multiply(self.frame, self.mask[:, :, None])
+                d = int(min(self.frame.shape[:2]) * 0.28)
+                self.frame = np.array(self.frame[d // 2:-d // 2,
+                                                 d // 2:-d // 2, :])
 
             if self.mode == "live":
                 self.image_label.setPixmap(
-                    QtGui.QPixmap.fromImage(self.convertFrame2Image(frame)))
+                    QtGui.QPixmap.fromImage(self.convertFrame2Image(
+                        self.frame)))
+                self.update_zoomImage()
