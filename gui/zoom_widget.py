@@ -13,7 +13,6 @@ class ZoomWidget(QtWidgets.QLabel):
 
         self.image = helper.LOGO_IMG
         self.layout = QtWidgets.QVBoxLayout(self)
-        self.layout.addWidget(self)
         self.setLayout(self.layout)
 
     def resizeEvent(self, event):

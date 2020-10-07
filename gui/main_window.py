@@ -70,7 +70,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.layout.addWidget(self.zoomwidget, 0, 1, 1, 1)
         self.layout.addWidget(self.plotwidget, 1, 1, 1, 1)
         self.layout.addWidget(self.tiltwidget, 2, 1, 1, 1)
-        self.layout.addWidget(self.logolabel, 3, 2)
+        # self.layout.addWidget(self.logolabel, 0, 0)
         self.centralWidget().setLayout(self.layout)
 
     def createMenu(self):
