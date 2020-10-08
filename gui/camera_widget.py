@@ -23,12 +23,24 @@ class CameraWidget(QtWidgets.QLabel):
     def __init__(self, parent=None, *args, **kwargs):
         super(CameraWidget, self).__init__(parent, *args, **kwargs)
         self.ui = parent
-        self.init_camera()
-        self.show_tracker = False
+        #
+        self.rho = 0
+        self.last_angle = 0
         self.show_angle = False
+        self.show_tracker = False
+        self.mode = "live"
+        #
+        self.init_camera()
         self.tracker = Tracker()
         self.pli_stack = PliStack()
-        self.mode = "live"
+
+        # DEBUG
+        p = self.palette()
+        p.setColor(self.backgroundRole(), QtGui.QColor(255, 0, 0))
+        self.setAutoFillBackground(True)
+        self.setPalette(p)
+        self.camera_and_tracker()  # for debug
+        self.live.start(40)  # 1000/fps
 
     def init_camera(self):
         self.camera = Camera(fps=25)
@@ -52,7 +64,6 @@ class CameraWidget(QtWidgets.QLabel):
         # QTimer to access camera frames
         self.live = QtCore.QTimer(self)
         self.live.timeout.connect(self.camera_and_tracker)
-        # self.timer.timeout.connect(self.update_zoomImage)
         self.live.start(40)  # 1000/fps
 
     def resizeEvent(self, event):
@@ -216,5 +227,6 @@ class CameraWidget(QtWidgets.QLabel):
         self.zoom_update.emit(image)
 
         # plot widget
-        x, y = self.pli_stack.get(self.click_x, self.click_y)
-        self.plot_update.emit(x, y, self.rho)
+        if self.tracker.is_calibrated:
+            x, y = self.pli_stack.get(self.click_x, self.click_y)
+            self.plot_update.emit(x, y, self.rho)

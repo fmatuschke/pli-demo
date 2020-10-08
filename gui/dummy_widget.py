@@ -7,18 +7,23 @@ pli_logo_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..",
                              "data", "pli-logo.png")
 
 
-class ImageWidget(QtWidgets.QWidget):
+class ImageWidget(QtWidgets.QLabel):
 
     def __init__(self, parent=None, *args, **kwargs):
         super(ImageWidget, self).__init__(parent, *args, **kwargs)
         self.create_image()
 
+        p = self.palette()
+        p.setColor(self.backgroundRole(), QtGui.QColor(255, 0, 0))
+        self.setAutoFillBackground(True)
+        self.setPalette(p)
+
     def create_image(self):
         self.layout = QtWidgets.QVBoxLayout(self)
         self.qimage = QtGui.QImage(pli_logo_path)
 
-        self.image_frame = QtWidgets.QLabel()
-        self.layout.addWidget(self.image_frame)
+        # self.image_frame = QtWidgets.QLabel()
+        self.layout.addWidget(self)
         self.setLayout(self.layout)
         self.update_qimage()
 
@@ -39,4 +44,4 @@ class ImageWidget(QtWidgets.QWidget):
         pixmap = pixmap.scaled(self.size().width(),
                                self.size().height(), QtCore.Qt.KeepAspectRatio)
 
-        self.image_frame.setPixmap(pixmap)
+        self.setPixmap(pixmap)

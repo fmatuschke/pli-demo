@@ -15,6 +15,11 @@ class ZoomWidget(QtWidgets.QLabel):
         self.layout = QtWidgets.QVBoxLayout(self)
         self.setLayout(self.layout)
 
+        p = self.palette()
+        p.setColor(self.backgroundRole(), QtGui.QColor(255, 0, 0))
+        self.setAutoFillBackground(True)
+        self.setPalette(p)
+
     def resizeEvent(self, event):
         super(ZoomWidget, self).resizeEvent(event)
         self.update_image(self.image)

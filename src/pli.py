@@ -61,7 +61,7 @@ class Stack:
 
     def get(self, x, y):
         if self.size() == 0:
-            return np.array([])
+            return np.array((0.0)), np.array((0.0))
 
         angles = [
             self.angles[i] for i, f in enumerate(self.frames) if f is not None
