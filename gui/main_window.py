@@ -37,6 +37,19 @@ class MainWindow(QtWidgets.QMainWindow):
     def resizeEvent(self, event):
         super(MainWindow, self).resizeEvent(event)
 
+        w = self.camwidget.size().width() / 3
+        h = self.camwidget.size().height() / 3
+        w, h = min(w, h), min(w, h)
+
+        self.plotwidget.setMinimumSize(QtCore.QSize(w, h))
+        self.plotwidget.setMaximumSize(QtCore.QSize(w, h))
+
+        self.zoomwidget.setMinimumSize(QtCore.QSize(w, h))
+        self.zoomwidget.setMaximumSize(QtCore.QSize(w, h))
+
+        self.tiltwidget.setMinimumSize(QtCore.QSize(w, h))
+        self.tiltwidget.setMaximumSize(QtCore.QSize(w, h))
+
     def createCentralWidget(self):
         self.layout = QtWidgets.QGridLayout()
 
@@ -47,15 +60,15 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.plotwidget = PlotWidget(self)
         self.plotwidget.setMinimumSize(QtCore.QSize(200, 200))
-        # self.plotwidget.setMaximumSize(QtCore.QSize(600, 600))
+        self.plotwidget.setMaximumSize(QtCore.QSize(600, 600))
 
         self.zoomwidget = ZoomWidget(self)
         self.zoomwidget.setMinimumSize(QtCore.QSize(200, 200))
-        # self.zoomwidget.setMaximumSize(QtCore.QSize(600, 600))
+        self.zoomwidget.setMaximumSize(QtCore.QSize(600, 600))
 
         self.tiltwidget = ImageWidget(self)
         self.tiltwidget.setMinimumSize(QtCore.QSize(200, 200))
-        # self.tiltwidget.setMaximumSize(QtCore.QSize(600, 600))
+        self.tiltwidget.setMaximumSize(QtCore.QSize(600, 600))
 
         # self.logolabel = QtWidgets.QLabel()
         # self.logolabel.setMaximumSize(QtCore.QSize(100, 100))
@@ -72,7 +85,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # self.layout.addWidget(self.logolabel, 0, 0)
 
         self.camwidget.setAlignment(QtCore.Qt.AlignRight)
-        self.camwidget.setAlignment(QtCore.Qt.AlignVCenter)
+        # self.camwidget.setAlignment(QtCore.Qt.AlignVCenter)
         self.zoomwidget.setAlignment(QtCore.Qt.AlignLeft)
         self.plotwidget.setAlignment(QtCore.Qt.AlignLeft)
         self.tiltwidget.setAlignment(QtCore.Qt.AlignLeft)

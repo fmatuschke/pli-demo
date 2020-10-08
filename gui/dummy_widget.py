@@ -21,9 +21,6 @@ class ImageWidget(QtWidgets.QLabel):
     def create_image(self):
         self.layout = QtWidgets.QVBoxLayout(self)
         self.qimage = QtGui.QImage(pli_logo_path)
-
-        # self.image_frame = QtWidgets.QLabel()
-        # self.layout.addWidget(self)
         self.setLayout(self.layout)
         self.update_qimage()
 
