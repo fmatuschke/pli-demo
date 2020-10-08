@@ -1,5 +1,6 @@
-numpy>=1.19.1
-PyQt5>=5.14.0
-opencv-python>=4.4.0.42
-scipy>=1.5.2
-pyqtgraph>=0.11.0
+numpy
+PyQt5==5.14.0
+PyQtChart==5.14.0
+# opencv-python>=4.4.0.42
+opencv-contrib-python
+scipy

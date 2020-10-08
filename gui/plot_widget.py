@@ -1,42 +1,36 @@
-import cv2
 from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
-import pyqtgraph as pg
+from PyQt5 import QtChart
+
 import numpy as np
 from src import helper
 
 
-class PlotWidget(QtWidgets.QLabel):
+class PlotWidget(QtChart.QChartView):
 
     def __init__(self, parent=None, *args, **kwargs):
         super(PlotWidget, self).__init__(parent, *args, **kwargs)
+        self.setRenderHint(QtGui.QPainter.Antialiasing)
         self.layout = QtWidgets.QVBoxLayout(self)
-        self.graphWidget = pg.PlotWidget()
-        self.layout.addWidget(self.graphWidget)
         self.setLayout(self.layout)
-        self.resize(min(self.size().width(),
-                        self.size().height()),
-                    min(self.size().width(),
-                        self.size().height()))
+
+        p = self.palette()
+        p.setColor(self.backgroundRole(), QtGui.QColor(255, 0, 0))
+        self.setAutoFillBackground(True)
+        self.setPalette(p)
 
     def resizeEvent(self, event):
         super(PlotWidget, self).resizeEvent(event)
-        self.resize(min(self.size().width(),
-                        self.size().height()),
-                    min(self.size().width(),
-                        self.size().height()))
 
-    def update_plot(self, x, y, rho):
+    def update_plot(self, x_data, y_data, rho):
 
-        if np.any(x == np.deg2rad(160)):
-            x = np.append(x, np.deg2rad(180))
-            y = np.append(y, y[0])
+        series = QtChart.QLineSeries()
 
-        self.graphWidget.clear()
-        self.graphWidget.setAspectLocked(False)
+        for x, y in zip(x_data, y_data):
+            series.append(x, y)
 
-        self.graphWidget.setXRange(0, 180)
-        self.graphWidget.plot(np.rad2deg(x), y, symbol='+')
-
-        self.graphWidget.addItem(pg.InfiniteLine(pos=np.rad2deg(rho), angle=90))
+        chart = QtChart.QChart()
+        chart.addSeries(series)
+        chart.createDefaultAxes()
+        self.setChart(chart)
