@@ -15,6 +15,9 @@ class PlotWidget(QtChart.QChartView):
         self.layout = QtWidgets.QVBoxLayout(self)
         self.setLayout(self.layout)
 
+        self.chart = QtChart.QChart()
+        self.setChart(self.chart)
+
         p = self.palette()
         p.setColor(self.backgroundRole(), QtGui.QColor(255, 0, 0))
         self.setAutoFillBackground(True)
@@ -24,13 +27,9 @@ class PlotWidget(QtChart.QChartView):
         super(PlotWidget, self).resizeEvent(event)
 
     def update_plot(self, x_data, y_data, rho):
-
+        self.chart.removeAllSeries()
         series = QtChart.QLineSeries()
-
         for x, y in zip(x_data, y_data):
             series.append(x, y)
-
-        chart = QtChart.QChart()
-        chart.addSeries(series)
-        chart.createDefaultAxes()
-        self.setChart(chart)
+        self.chart.addSeries(series)
+        self.chart.createDefaultAxes()
