@@ -51,8 +51,10 @@ class CameraWidget(QtWidgets.QLabel):
                                   self.ui.cameraResolutionMenu,
                                   triggered=partial(self.camera.set_resolution,
                                                     width, height)))
-        self.click_x = int(self.camera.width() / 2 + 0.5)
-        self.click_y = int(self.camera.height() / 2 + 0.5)
+
+        # TODO: center, but value change with resize
+        self.click_x = 0
+        self.click_y = 0
 
         # setup image label
         self.layout = QtWidgets.QVBoxLayout(self)
@@ -86,8 +88,8 @@ class CameraWidget(QtWidgets.QLabel):
                              self.size().height(), QtCore.Qt.KeepAspectRatio)
 
         # save parameter for coordinate transformation
-        self.frame_height = frame.shape[1]
-        self.frame_width = frame.shape[0]
+        self.frame_height = frame.shape[0]
+        self.frame_width = frame.shape[1]
 
         return image
 
@@ -111,8 +113,9 @@ class CameraWidget(QtWidgets.QLabel):
                       0.5)
 
         # print("click", click_x, click_y)
-        # print("frame.size", self.pixmap().size())
+        # print("pixmap.size", self.pixmap().size())
         # print("widget.size", self.size())
+        # print("pixmap", int(click_x - offset_x), int(click_y - offset_y))
         # print("frame", frame_x, frame_y)
 
         return frame_x, frame_y

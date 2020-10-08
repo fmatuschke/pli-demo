@@ -37,18 +37,18 @@ class MainWindow(QtWidgets.QMainWindow):
     def resizeEvent(self, event):
         super(MainWindow, self).resizeEvent(event)
 
-        w = self.camwidget.size().width() / 3
-        h = self.camwidget.size().height() / 3
-        w, h = min(w, h), min(w, h)
+        # w = self.camwidget.size().width() / 2
+        # h = self.camwidget.size().height() / 2
+        # w, h = min(w, h), min(w, h)
 
-        self.plotwidget.setMinimumSize(QtCore.QSize(w, h))
-        self.plotwidget.setMaximumSize(QtCore.QSize(w, h))
+        # self.plotwidget.setMinimumSize(QtCore.QSize(w, h))
+        # self.plotwidget.setMaximumSize(QtCore.QSize(w, h))
 
-        self.zoomwidget.setMinimumSize(QtCore.QSize(w, h))
-        self.zoomwidget.setMaximumSize(QtCore.QSize(w, h))
+        # self.zoomwidget.setMinimumSize(QtCore.QSize(w, h))
+        # self.zoomwidget.setMaximumSize(QtCore.QSize(w, h))
 
-        self.tiltwidget.setMinimumSize(QtCore.QSize(w, h))
-        self.tiltwidget.setMaximumSize(QtCore.QSize(w, h))
+        # self.tiltwidget.setMinimumSize(QtCore.QSize(w, h))
+        # self.tiltwidget.setMaximumSize(QtCore.QSize(w, h))
 
     def createCentralWidget(self):
         self.layout = QtWidgets.QGridLayout()
@@ -66,9 +66,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.zoomwidget.setMinimumSize(QtCore.QSize(200, 200))
         self.zoomwidget.setMaximumSize(QtCore.QSize(600, 600))
 
-        self.tiltwidget = ImageWidget(self)
-        self.tiltwidget.setMinimumSize(QtCore.QSize(200, 200))
-        self.tiltwidget.setMaximumSize(QtCore.QSize(600, 600))
+        # self.tiltwidget = ImageWidget(self)
+        # self.tiltwidget.setMinimumSize(QtCore.QSize(200, 200))
+        # self.tiltwidget.setMaximumSize(QtCore.QSize(600, 600))
 
         # self.logolabel = QtWidgets.QLabel()
         # self.logolabel.setMaximumSize(QtCore.QSize(100, 100))
@@ -78,10 +78,10 @@ class MainWindow(QtWidgets.QMainWindow):
         #         self.logolabel.size().width(),
         #         self.logolabel.size().height(), QtCore.Qt.KeepAspectRatio))
 
-        self.layout.addWidget(self.camwidget, 0, 0, 3, 1)
+        self.layout.addWidget(self.camwidget, 0, 0, 2, 1)
         self.layout.addWidget(self.zoomwidget, 0, 1, 1, 1)
         self.layout.addWidget(self.plotwidget, 1, 1, 1, 1)
-        self.layout.addWidget(self.tiltwidget, 2, 1, 1, 1)
+        # self.layout.addWidget(self.tiltwidget, 2, 1, 1, 1)
         # self.layout.addWidget(self.logolabel, 0, 0)
 
         # self.camwidget.setAlignment(QtCore.Qt.AlignRight)
