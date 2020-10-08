@@ -23,7 +23,7 @@ class ImageWidget(QtWidgets.QLabel):
         self.qimage = QtGui.QImage(pli_logo_path)
 
         # self.image_frame = QtWidgets.QLabel()
-        self.layout.addWidget(self)
+        # self.layout.addWidget(self)
         self.setLayout(self.layout)
         self.update_qimage()
 
