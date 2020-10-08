@@ -84,11 +84,11 @@ class MainWindow(QtWidgets.QMainWindow):
         self.layout.addWidget(self.tiltwidget, 2, 1, 1, 1)
         # self.layout.addWidget(self.logolabel, 0, 0)
 
-        self.camwidget.setAlignment(QtCore.Qt.AlignRight)
-        # self.camwidget.setAlignment(QtCore.Qt.AlignVCenter)
-        self.zoomwidget.setAlignment(QtCore.Qt.AlignLeft)
-        self.plotwidget.setAlignment(QtCore.Qt.AlignLeft)
-        self.tiltwidget.setAlignment(QtCore.Qt.AlignLeft)
+        # self.camwidget.setAlignment(QtCore.Qt.AlignRight)
+        self.camwidget.setAlignment(QtCore.Qt.AlignCenter)
+        # self.zoomwidget.setAlignment(QtCore.Qt.AlignLeft)
+        # self.plotwidget.setAlignment(QtCore.Qt.AlignLeft)
+        # self.tiltwidget.setAlignment(QtCore.Qt.AlignLeft)
         # self.logolabel.setAlignment(QtCore.Qt.AlignLeft)
 
         self.centralWidget().setLayout(self.layout)

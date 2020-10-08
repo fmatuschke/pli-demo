@@ -89,23 +89,31 @@ class CameraWidget(QtWidgets.QLabel):
         self.frame_height = frame.shape[1]
         self.frame_width = frame.shape[0]
 
-        # print("frame: ", frame.shape)
-
         return image
 
     def widget2framecoordinates(self, click_x, click_y):
         '''
         Umrechnung der Click- Koordinaten im Widget in QtWidgets.QLabel Koordinaten und dann in Frame-Koordinaten
         '''
-        # label_x = click_x
-        # label_y = click_y - self.label_offset_y
+        pixmap_width = self.pixmap().size().width()
+        pixmap_height = self.pixmap().size().height()
 
-        frame_x = int(click_x / self.size().width() * self.frame_width + 0.5)
-        frame_y = int(click_y / self.size().height() * self.frame_height + 0.5)
+        widget_width = self.size().width()
+        widget_height = self.size().height()
 
-        print("click ", click_x, click_y)
-        print("self.size() ", self.size())
-        print("frame  ", frame_x, frame_y)
+        # For centered alignment:
+        offset_x = (widget_width - pixmap_width) / 2
+        offset_y = (widget_height - pixmap_height) / 2
+
+        frame_x = int((click_x - offset_x) / pixmap_width * self.frame_width +
+                      0.5)
+        frame_y = int((click_y - offset_y) / pixmap_height * self.frame_height +
+                      0.5)
+
+        # print("click", click_x, click_y)
+        # print("frame.size", self.pixmap().size())
+        # print("widget.size", self.size())
+        # print("frame", frame_x, frame_y)
 
         return frame_x, frame_y
 
@@ -150,15 +158,13 @@ class CameraWidget(QtWidgets.QLabel):
             self.update_image(frame)
         elif self.mode == "fom":
             print("fom")
-        else:
-            print("Error, wrong mode")
 
     def camera_and_tracker(self):
         # GET CAMERA FRAME
         if not self.camera.is_alive():
             return
 
-        frame = self.camera.frame(crop=True)
+        frame = self.camera.frame(crop=False)
         if frame is None:
             frame = helper.LOGO_IMG
             return
@@ -202,14 +208,23 @@ class CameraWidget(QtWidgets.QLabel):
                          np.sin(-self.rho) * min(frame.shape[:2]) * 0.42))
                     p0 = (self.tracker.center - d // 2).astype(np.int)
                     p1 = (self.tracker.center + d // 2).astype(np.int)
+
                     frame = cv2.line(frame, tuple(p0), tuple(p1), (0, 255, 0),
                                      2)
+
             else:
                 if self.tracker.is_calibrated:
-                    frame = np.multiply(frame, self.tracker.img_mask[:, :,
-                                                                     None])
-                    d = int(min(frame.shape[:2]) * 0.28)
-                    frame = np.array(frame[d // 2:-d // 2, d // 2:-d // 2, :])
+                    if frame.ndim == 2:
+                        frame = np.multiply(frame, self.tracker.img_mask)
+                        d = int(min(frame.shape[:2]) * 0.28)
+                        frame = np.array(frame[d // 2:-d // 2, d // 2:-d // 2])
+
+                    else:
+                        frame = np.multiply(frame, self.tracker.img_mask[:, :,
+                                                                         None])
+                        d = int(min(frame.shape[:2]) * 0.28)
+                        frame = np.array(frame[d // 2:-d // 2,
+                                               d // 2:-d // 2, :])
 
             self.update_image(frame)
 

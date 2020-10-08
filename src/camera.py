@@ -6,15 +6,15 @@ import numpy as np
 
 class Camera:
 
-    def __init__(
-        self,
-        width=1280,
-        height=960,
-        fps=30,
-        port_start=0,
-        port_end=5,
-        port_id=0,
-    ):
+    def __init__(self,
+                 width=1280,
+                 height=960,
+                 fps=30,
+                 port_start=0,
+                 port_end=5,
+                 port_id=0,
+                 gray_image=True):
+        self.gray_image = gray_image
         self.working_ports = []
         self.working_resolutions = []
         self.list_ports(port_start, port_end)
@@ -53,7 +53,7 @@ class Camera:
         if len(self.working_ports) > i:
             self.video_capture = cv2.VideoCapture(self.working_ports[i])
             # Read the first three images to ensure the cam is ready
-            [self.video_capture.read() for _ in range(3)]
+            [self.video_capture.read() for _ in range(10)]
         else:
             self.video_capture = None
             print("id extend port list")
@@ -69,13 +69,13 @@ class Camera:
                 )
 
             # Read the first three images to ensure the cam is ready
-            [self.video_capture.read() for _ in range(3)]
+            [self.video_capture.read() for _ in range(10)]
 
     def set_fps(self, fps):
         if self.is_alive():
             self.video_capture.set(cv2.CAP_PROP_FPS, fps)
             # Read the first three images to ensure the cam is ready
-            [self.video_capture.read() for _ in range(3)]
+            [self.video_capture.read() for _ in range(10)]
 
     def width(self):
         width = 0
@@ -125,19 +125,23 @@ class Camera:
         if self.is_alive():
             ret, frame = self.video_capture.read()
 
+            if self.gray_image:
+                frame = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
+
             if not ret:
                 print(f"camera disconnected: {ret}")
                 self.video_capture = None
                 return None
 
             if crop:
-                height, width, _ = frame.shape
+                height, width = frame.shape[0], frame.shape[1]
                 l = min(height, width)
                 delta = np.abs((width - height) // 2)
 
                 frame = np.array(frame[:, delta:delta +
-                                       l, :] if width > height else frame[
-                                           delta:delta + l, :, :])
+                                       l] if width > height else frame[
+                                           delta:delta + l, :])
+
             return frame
         else:
             return None

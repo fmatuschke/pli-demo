@@ -31,7 +31,9 @@ class Stack:
         if np.min(np.abs(diff_angles)) < self.angle_threshold_to_insert:
             idx = np.argmin(np.abs(diff_angles))
             if self.frames[idx] is None:
-                self.frames[idx] = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+                if frame.ndim == 3:
+                    frame = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
+                self.frames[idx] = frame
                 print(f"inserted {np.rad2deg(self.angles[idx]):.0f}")
 
     def fit_pixel(self, x, y):

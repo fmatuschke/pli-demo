@@ -15,7 +15,8 @@ class Tracker:
         self.img_mask = None
 
     def filter_image(self, frame):
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        if frame.ndim == 3:
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         frame = cv2.medianBlur(frame, 3)
         frame = (255 - frame)  # inverted codes
         return frame
@@ -27,7 +28,7 @@ class Tracker:
         parameters = cv2.aruco.DetectorParameters_create()
         self.cv_corners, self.cv_ids, _ = cv2.aruco.detectMarkers(
             frame, cv2.aruco_dict, parameters=parameters)
-        self.frame = cv2.cvtColor(frame, cv2.COLOR_GRAY2BGR)
+        self.frame = cv2.cvtColor(frame, cv2.COLOR_GRAY2RGB)
 
         if len(self.cv_corners) != self.num_sticker:
             return
