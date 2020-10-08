@@ -55,16 +55,13 @@ class CameraWidget(QtWidgets.QLabel):
         self.click_y = int(self.camera.height() / 2 + 0.5)
 
         # setup image label
-        # self.image_label = QtWidgets.QLabel()
         self.layout = QtWidgets.QVBoxLayout(self)
         self.layout.setContentsMargins(0, 0, 0, 0)
-        # self.layout.addWidget(self.image_label)
         self.setLayout(self.layout)
 
         # QTimer to access camera frames
         self.live = QtCore.QTimer(self)
         self.live.timeout.connect(self.camera_and_tracker)
-        self.live.start(40)  # 1000/fps
 
     def resizeEvent(self, event):
         super(CameraWidget, self).resizeEvent(event)
@@ -129,31 +126,32 @@ class CameraWidget(QtWidgets.QLabel):
         self.plot_update.emit(x, y, self.rho)
 
     def set_mode(self, mode):
-        if mode == "live":
-            self.live.start()
-            return
-        else:
+        if mode != "live":
             if self.pli_stack.transmittance is None:
                 print("pli not ready yet")
                 return
-            self.live.stop()
 
         self.mode = mode
+        if mode == "live":
+            self.live.start()
+        else:
+            self.live.stop()
+
         if self.mode == "transmittance":
             frame = (self.pli_stack.transmittance /
                      np.amax(self.pli_stack.transmittance) * 255).astype(
                          np.uint8)
+            self.update_image(frame)
         elif self.mode == "direction":
             frame = (self.pli_stack.direction / np.pi * 255).astype(np.uint8)
+            self.update_image(frame)
         elif self.mode == "retardation":
             frame = (self.pli_stack.retardation * 255).astype(np.uint8)
+            self.update_image(frame)
         elif self.mode == "fom":
-            pass
+            print("fom")
         else:
             print("Error, wrong mode")
-            pass
-
-        self.update_image(frame)
 
     def camera_and_tracker(self):
         # GET CAMERA FRAME
