@@ -215,6 +215,9 @@ class CameraWidget(QtWidgets.QLabel):
         # get pli stack
         elif not self.pli_stack.full():
             self.rho = self.tracker.track(frame)
+            if self.rho is None:
+                self.update_image(frame)
+                return
             value = self.pli_stack.insert(self.rho, frame)
 
             if value:
@@ -241,6 +244,9 @@ class CameraWidget(QtWidgets.QLabel):
         # get only angle
         else:
             self.rho = self.tracker.track(frame)
+            if self.rho is None:
+                self.update_image(frame)
+                return
 
         # print current angle
         if np.rad2deg(np.abs(helper.diff_orientation(self.last_angle,
