@@ -156,8 +156,6 @@ class CameraWidget(QtWidgets.QLabel):
             self.plot_x = [self.click_x + self.mask_offset]
             self.plot_y = [self.click_y + self.mask_offset]
 
-        print(self.plot_x, self.plot_y)
-
         self.plot_update.emit(x, y, self.rho, self.plot_add)
 
     def set_mode(self, mode):
@@ -212,6 +210,7 @@ class CameraWidget(QtWidgets.QLabel):
                 self.rho = 0
                 self.last_angle = 0
                 self.pli_stack.insert(0, frame)
+                self.ui.textwidget.setText("Calibrated")
 
         # get pli stack
         elif not self.pli_stack.full():
