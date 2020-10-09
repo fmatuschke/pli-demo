@@ -153,6 +153,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.action_tracker = QtWidgets.QAction("&tracker", self)
         self.helpMenu.addAction(self.action_tracker)
+        self.action_reset = QtWidgets.QAction("&reset", self)
+        self.helpMenu.addAction(self.action_reset)
 
     def connect_widgets(self):
         self.action_live.triggered.connect(
@@ -166,9 +168,24 @@ class MainWindow(QtWidgets.QMainWindow):
         self.action_fom.triggered.connect(
             partial(self.camwidget.set_mode, "fom"))
         self.action_tracker.triggered.connect(self.camwidget.toogle_draw_helper)
+        self.action_reset.triggered.connect(lambda: self.reset())
 
         self.camwidget.plot_update.connect(self.plotwidget.update_plot)
         self.camwidget.zoom_update.connect(self.zoomwidget.update_image)
+
+    def reset(self):
+        self.camwidget.setVisible(False)
+        self.zoomwidget.setVisible(False)
+
+        self.camwidget.camera.video_capture.release()
+        self.camwidget.live.stop()
+        del self.camwidget
+        self.mainMenu.clear()
+
+        self.createMenu()
+        self.createCentralWidget()
+        self.connect_widgets()
+        self.setBackground()
 
     def setBackground(self):
         p = self.palette()

@@ -25,8 +25,9 @@ class Camera:
         # TODO:
         # self.set_fps(fps)
 
-    def reset(self):
-        self.__init__()
+    def __del__(self):
+        if self.video_capture:
+            self.video_capture.release()
 
     def is_alive(self):
         return self.video_capture is not None
