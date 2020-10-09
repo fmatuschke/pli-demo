@@ -38,7 +38,6 @@ class ImageWidget(QtWidgets.QLabel):
             qimage = self.qimage
 
         pixmap = QtGui.QPixmap.fromImage(qimage)
-        pixmap = pixmap.scaled(self.size().width(),
-                               self.size().height(), QtCore.Qt.KeepAspectRatio)
+        pixmap = pixmap.scaled(self.size().width(), self.size().height())
 
         self.setPixmap(pixmap)

@@ -7,8 +7,8 @@ from src import helper
 class Stack:
 
     def __init__(self):
-        self.angles = np.linspace(0, np.pi, 9, False)
-        self.frames = [None] * 9
+        self.angles = np.linspace(0, np.pi, 18, False)
+        self.frames = [None] * 18
         self.coeffs_calced = False
         self.angle_threshold_to_insert = np.deg2rad(2.5)
         self.transmittance = None

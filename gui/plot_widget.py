@@ -18,10 +18,10 @@ class PlotWidget(QtChart.QChartView):
         self.chart = QtChart.QChart()
         self.setChart(self.chart)
 
-        p = self.palette()
-        p.setColor(self.backgroundRole(), QtGui.QColor(255, 0, 0))
-        self.setAutoFillBackground(True)
-        self.setPalette(p)
+        # p = self.palette()
+        # p.setColor(self.backgroundRole(), QtGui.QColor(255, 0, 0))
+        # self.setAutoFillBackground(True)
+        # self.setPalette(p)
 
     def resizeEvent(self, event):
         super(PlotWidget, self).resizeEvent(event)

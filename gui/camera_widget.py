@@ -35,10 +35,10 @@ class CameraWidget(QtWidgets.QLabel):
         self.pli_stack = PliStack()
 
         # DEBUG
-        p = self.palette()
-        p.setColor(self.backgroundRole(), QtGui.QColor(255, 0, 0))
-        self.setAutoFillBackground(True)
-        self.setPalette(p)
+        # p = self.palette()
+        # p.setColor(self.backgroundRole(), QtGui.QColor(255, 0, 0))
+        # self.setAutoFillBackground(True)
+        # self.setPalette(p)
         self.camera_and_tracker()  # for debug
         self.live.start(40)  # 1000/fps
 
@@ -167,7 +167,7 @@ class CameraWidget(QtWidgets.QLabel):
         if not self.camera.is_alive():
             return
 
-        frame = self.camera.frame(crop=False)
+        frame = self.camera.frame(crop=True)
         if frame is None:
             frame = helper.LOGO_IMG
             return

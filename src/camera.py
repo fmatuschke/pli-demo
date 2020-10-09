@@ -125,13 +125,13 @@ class Camera:
         if self.is_alive():
             ret, frame = self.video_capture.read()
 
-            if self.gray_image:
-                frame = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
-
             if not ret:
                 print(f"camera disconnected: {ret}")
                 self.video_capture = None
                 return None
+
+            if self.gray_image:
+                frame = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
 
             if crop:
                 height, width = frame.shape[0], frame.shape[1]

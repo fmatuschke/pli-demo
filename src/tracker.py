@@ -22,7 +22,6 @@ class Tracker:
         return frame
 
     def calibrate(self, frame):
-
         frame = self.filter_image(frame)
         cv2.aruco_dict = cv2.aruco.Dictionary_get(cv2.aruco.DICT_6X6_250)
         parameters = cv2.aruco.DetectorParameters_create()
