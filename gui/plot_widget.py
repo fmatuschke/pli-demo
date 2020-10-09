@@ -40,3 +40,6 @@ class PlotWidget(QtChart.QChartView):
 
         if not flag_add:
             self.chart.createDefaultAxes()
+            axes = self.chart.axes()
+            for a in axes:
+                a.applyNiceNumbers()
