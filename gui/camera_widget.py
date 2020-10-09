@@ -139,7 +139,7 @@ class CameraWidget(QtWidgets.QLabel):
     def set_mode(self, mode):
         if mode != "live":
             if self.pli_stack.transmittance is None:
-                print("pli not ready yet")
+                self.ui.setText("pli not ready yet")
                 return
 
         self.mode = mode
@@ -184,7 +184,16 @@ class CameraWidget(QtWidgets.QLabel):
         # get pli stack
         elif not self.pli_stack.full():
             self.rho = self.tracker.track(frame)
-            self.pli_stack.insert(self.rho, frame)
+            value = self.pli_stack.insert(self.rho, frame)
+
+            if value:
+                p = self.palette()
+                p.setColor(self.backgroundRole(), QtGui.QColor(0, 255, 0))
+                self.ui.textwidget.setPalette(p)
+                self.ui.textwidget.setText(
+                    f"inserted: {np.rad2deg(self.rho):.0f}")
+                p.setColor(self.backgroundRole(), QtGui.QColor(255, 0, 0))
+                self.ui.textwidget.setPalette(p)
 
             # when done, calculate pli modalities
             if self.pli_stack.full():
@@ -197,7 +206,7 @@ class CameraWidget(QtWidgets.QLabel):
         # print current angle
         if np.rad2deg(np.abs(helper.diff_orientation(self.last_angle,
                                                      self.rho))) > 1:
-            print(f"{np.rad2deg(self.rho):.0f}")
+            self.ui.textwidget.setText(f"{np.rad2deg(self.rho):.0f}")
             self.last_angle = self.rho
 
         if self.mode == "live":

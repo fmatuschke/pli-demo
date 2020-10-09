@@ -34,7 +34,8 @@ class Stack:
                 if frame.ndim == 3:
                     frame = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
                 self.frames[idx] = frame
-                print(f"inserted {np.rad2deg(self.angles[idx]):.0f}")
+                return True
+        return False
 
     def fit_pixel(self, x, y):
         pass

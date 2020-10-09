@@ -55,6 +55,10 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.setCentralWidget(QtWidgets.QWidget(self))
 
+        self.textwidget = QtWidgets.QLabel(self)
+        self.textwidget.setAutoFillBackground(True)
+        self.textwidget.setMaximumSize(QtCore.QSize(500, 25))
+
         self.camwidget = CameraWidget(self)
         self.camwidget.setMinimumSize(QtCore.QSize(600, 600))
 
@@ -80,12 +84,14 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.layout.addWidget(self.logolabel, 0, 0, 1, 1)
         self.layout.addWidget(self.setupwidget, 1, 0, 3, 1)
+        self.layout.addWidget(self.textwidget, 3, 0, 1, 1)
         self.layout.addWidget(self.camwidget, 0, 1, 4, 4)
         self.layout.addWidget(self.zoomwidget, 0, 5, 2, 2)
         self.layout.addWidget(self.plotwidget, 2, 5, 2, 2)
 
         # self.camwidget.setAlignment(QtCore.Qt.AlignRight)
         self.camwidget.setAlignment(QtCore.Qt.AlignCenter)
+        self.textwidget.setAlignment(QtCore.Qt.AlignBottom)
         # self.zoomwidget.setAlignment(QtCore.Qt.AlignLeft)
         # self.plotwidget.setAlignment(QtCore.Qt.AlignLeft)
         # self.setupwidget.setAlignment(QtCore.Qt.AlignLeft)
