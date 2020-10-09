@@ -55,6 +55,7 @@ class CameraWidget(QtWidgets.QLabel):
         # TODO: center, but value change with resize
         self.click_x = 0
         self.click_y = 0
+        self.mask_offset = 0
 
         # setup image label
         self.layout = QtWidgets.QVBoxLayout(self)
@@ -133,7 +134,8 @@ class CameraWidget(QtWidgets.QLabel):
         self.click_update.emit(self.click_x, self.click_y)
         self.set_mode(self.mode)
 
-        x, y = self.pli_stack.get(self.click_x, self.click_y)
+        x, y = self.pli_stack.get(self.click_x + self.mask_offset,
+                                  self.click_y + self.mask_offset)
         self.plot_update.emit(x, y, self.rho)
 
     def set_mode(self, mode):
@@ -210,6 +212,7 @@ class CameraWidget(QtWidgets.QLabel):
             self.last_angle = self.rho
 
         if self.mode == "live":
+            self.mask_offset = 0
             if self.show_tracker:
                 frame = self.tracker.show()
 
@@ -237,6 +240,7 @@ class CameraWidget(QtWidgets.QLabel):
                         d = int(min(frame.shape[:2]) * 0.28)
                         frame = np.array(frame[d // 2:-d // 2,
                                                d // 2:-d // 2, :])
+                    self.mask_offset = d
 
             self.update_image(frame)
 
@@ -253,5 +257,5 @@ class CameraWidget(QtWidgets.QLabel):
 
         # plot widget
         if self.tracker.is_calibrated:
-            x, y = self.pli_stack.get(self.click_x, self.click_y)
-            self.plot_update.emit(x, y, self.rho)
+            x, y = self.pli_stack.get(self.click_x + self.mask_offset,
+                                      self.click_y + self.mask_offset)
