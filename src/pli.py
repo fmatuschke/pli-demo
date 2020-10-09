@@ -1,7 +1,61 @@
 import numpy as np
 import cv2
+import numba
 
 from src import helper
+
+
+@numba.njit()
+def _hsv_black_to_rgb_space(h, s, v):
+    # images have to be saved in rgb space
+
+    h = (h + 360) % 360
+
+    hi = np.floor(h / 60)
+    f = h / 60.0 - hi
+
+    p = v * (1 - s)
+    q = v * (1 - s * f)
+    t = v * (1 - s * (1 - f))
+
+    if hi == 1:
+        r, g, b = q, v, p
+    elif hi == 2:
+        r, g, b = p, v, t
+    elif hi == 3:
+        r, g, b = p, q, v
+    elif hi == 4:
+        r, g, b = t, p, v
+    elif hi == 5:
+        r, g, b = v, p, q
+    else:
+        r, g, b = v, t, p
+
+    return np.array((r * 255, g * 255, b * 255), np.uint8)
+
+
+@numba.njit()
+def _orientation_to_hsv(directionValue, inclinationValue):
+    h = 360.0 * np.abs(directionValue) / np.pi
+    s = 1.0
+    v = 1.0 - (2 * np.abs(inclinationValue) / np.pi)
+
+    return _hsv_black_to_rgb_space(h, s, v)
+
+
+def fom_hsv_black(direction, inclination, mask=None):
+    if mask is None:
+        mask = np.ones_like(direction, dtype=np.bool)
+
+    hsv = np.zeros((mask.shape[0], mask.shape[1], 3), np.uint8)
+    for x in range(mask.shape[0]):
+        for y in range(mask.shape[1]):
+            if not mask[x, y]:
+                continue
+
+            hsv[x, y, :] = _orientation_to_hsv(direction[x, y], inclination[x,
+                                                                            y])
+    return hsv
 
 
 class Stack:
@@ -58,6 +112,10 @@ class Stack:
             self.retardation = np.sqrt(a1 * a1 + b1 * b1) / (a0 + 1e-16)
         else:
             print(f"Error, no {self.n_images} mesuered images")
+
+    def calc_fom(self):
+        self.inclination = self.retardation / np.amax(self.retardation)
+        self.fom = fom_hsv_black(self.direction, self.inclination)
 
     def clear(self):
         self.frames.clear()

@@ -4,3 +4,4 @@ PyQtChart==5.14.0
 # opencv-python>=4.4.0.42
 opencv-contrib-python
 scipy
+numba

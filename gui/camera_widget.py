@@ -47,7 +47,7 @@ class CameraWidget(QtWidgets.QLabel):
         # p.setColor(self.backgroundRole(), QtGui.QColor(255, 0, 0))
         # self.setAutoFillBackground(True)
         # self.setPalette(p)
-        self.camera_and_tracker()  # for debug
+        self.camera_and_tracker()  # for debug run one time without qtimer
         self.live.start(40)  # 1000/fps
 
     def toogleAddPlot(self):
@@ -167,6 +167,7 @@ class CameraWidget(QtWidgets.QLabel):
         self.mode = mode
         if mode == "live":
             self.live.start()
+            return
         else:
             self.live.stop()
 
@@ -174,15 +175,27 @@ class CameraWidget(QtWidgets.QLabel):
             frame = (self.pli_stack.transmittance /
                      np.amax(self.pli_stack.transmittance) * 255).astype(
                          np.uint8)
-            self.update_image(frame)
         elif self.mode == "direction":
             frame = (self.pli_stack.direction / np.pi * 255).astype(np.uint8)
-            self.update_image(frame)
         elif self.mode == "retardation":
             frame = (self.pli_stack.retardation * 255).astype(np.uint8)
-            self.update_image(frame)
+        elif self.mode == "inclination":
+            frame = (self.pli_stack.inclination * 2 / np.pi * 255).astype(
+                np.uint8)
         elif self.mode == "fom":
-            print("fom")
+            frame = self.pli_stack.fom
+
+        if frame.ndim == 2:
+            frame = np.multiply(frame, self.tracker.img_mask)
+            d = int(min(frame.shape[:2]) * 0.28)
+            frame = np.array(frame[d // 2:-d // 2, d // 2:-d // 2])
+
+        else:
+            frame = np.multiply(frame, self.tracker.img_mask[:, :, None])
+            d = int(min(frame.shape[:2]) * 0.28)
+            frame = np.array(frame[d // 2:-d // 2, d // 2:-d // 2, :])
+        self.mask_offset = d
+        self.update_image(frame)
 
     def camera_and_tracker(self):
         # GET CAMERA FRAME
@@ -240,6 +253,7 @@ class CameraWidget(QtWidgets.QLabel):
             # when done, calculate pli modalities
             if self.pli_stack.full():
                 self.pli_stack.calc_coeffs()
+                self.pli_stack.calc_fom()
 
         # get only angle
         else:

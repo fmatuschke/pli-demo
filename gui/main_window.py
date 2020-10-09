@@ -140,6 +140,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.action_retardation = QtWidgets.QAction("&retardation", self)
         self.pliMenu.addAction(self.action_retardation)
         #
+        self.action_inclination = QtWidgets.QAction("&inclination", self)
+        self.pliMenu.addAction(self.action_inclination)
+        #
         self.action_fom = QtWidgets.QAction("&fom", self)
         self.pliMenu.addAction(self.action_fom)
 
@@ -165,6 +168,8 @@ class MainWindow(QtWidgets.QMainWindow):
             partial(self.camwidget.set_mode, "direction"))
         self.action_retardation.triggered.connect(
             partial(self.camwidget.set_mode, "retardation"))
+        self.action_inclination.triggered.connect(
+            partial(self.camwidget.set_mode, "inclination"))
         self.action_fom.triggered.connect(
             partial(self.camwidget.set_mode, "fom"))
         self.action_tracker.triggered.connect(self.camwidget.toogle_draw_helper)
