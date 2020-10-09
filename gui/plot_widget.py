@@ -26,10 +26,17 @@ class PlotWidget(QtChart.QChartView):
     def resizeEvent(self, event):
         super(PlotWidget, self).resizeEvent(event)
 
-    def update_plot(self, x_data, y_data, rho):
-        self.chart.removeAllSeries()
+    def update_plot(self, x_data, y_data, rho, flag_add):
+        if not flag_add:
+            self.chart.removeAllSeries()
+
+        if x_data[0] == 0:
+            x_data = np.append(x_data, [np.pi])
+            y_data = np.append(y_data, [y_data[0]])
         series = QtChart.QLineSeries()
         for x, y in zip(x_data, y_data):
             series.append(np.rad2deg(x), y)
         self.chart.addSeries(series)
-        self.chart.createDefaultAxes()
+
+        if not flag_add:
+            self.chart.createDefaultAxes()

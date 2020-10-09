@@ -16,8 +16,8 @@ from src import helper
 
 class CameraWidget(QtWidgets.QLabel):
 
-    plot_update = QtCore.pyqtSignal(np.ndarray, np.ndarray, float)
-    click_update = QtCore.pyqtSignal(int, int)
+    plot_update = QtCore.pyqtSignal(np.ndarray, np.ndarray, float, bool)
+    # click_update = QtCore.pyqtSignal(int, int)
     zoom_update = QtCore.pyqtSignal(np.ndarray)
 
     def __init__(self, parent=None, *args, **kwargs):
@@ -29,6 +29,14 @@ class CameraWidget(QtWidgets.QLabel):
         self.show_angle = False
         self.show_tracker = False
         self.mode = "live"
+
+        #
+        self.plot_add = False
+        self.plot_x = []
+        self.plot_y = []
+        QtWidgets.QShortcut(QtGui.QKeySequence(QtCore.Qt.Key_A),
+                            self,
+                            activated=partial(self.toogleAddPlot))
         #
         self.init_camera()
         self.tracker = Tracker()
@@ -41,6 +49,10 @@ class CameraWidget(QtWidgets.QLabel):
         # self.setPalette(p)
         self.camera_and_tracker()  # for debug
         self.live.start(40)  # 1000/fps
+
+    def toogleAddPlot(self):
+        self.plot_add = not self.plot_add
+        self.ui.textwidget.setText(f"plot_add: {self.plot_add}")
 
     def init_camera(self):
         self.camera = Camera(fps=25)
@@ -131,12 +143,22 @@ class CameraWidget(QtWidgets.QLabel):
 
         self.click_x, self.click_y = self.widget2framecoordinates(
             event.x(), event.y())
-        self.click_update.emit(self.click_x, self.click_y)
+        # self.click_update.emit(self.click_x, self.click_y)
         self.set_mode(self.mode)
 
         x, y = self.pli_stack.get(self.click_x + self.mask_offset,
                                   self.click_y + self.mask_offset)
-        self.plot_update.emit(x, y, self.rho)
+
+        if self.plot_add:
+            self.plot_x.append(self.click_x + self.mask_offset)
+            self.plot_y.append(self.click_y + self.mask_offset)
+        else:
+            self.plot_x = [self.click_x + self.mask_offset]
+            self.plot_y = [self.click_y + self.mask_offset]
+
+        print(self.plot_x, self.plot_y)
+
+        self.plot_update.emit(x, y, self.rho, self.plot_add)
 
     def set_mode(self, mode):
         if mode != "live":
@@ -189,6 +211,14 @@ class CameraWidget(QtWidgets.QLabel):
             value = self.pli_stack.insert(self.rho, frame)
 
             if value:
+                for i, (x, y) in enumerate(zip(self.plot_x, self.plot_y)):
+                    x, y = self.pli_stack.get(x, y)
+
+                    if i == 0:
+                        self.plot_update.emit(x, y, self.rho, False)
+                    else:
+                        self.plot_update.emit(x, y, self.rho, True)
+
                 p = self.palette()
                 p.setColor(self.backgroundRole(), QtGui.QColor(0, 255, 0))
                 self.ui.textwidget.setPalette(p)
@@ -254,8 +284,3 @@ class CameraWidget(QtWidgets.QLabel):
         y = max(d, min(image.shape[0] - d - 1, self.click_y))
         image = np.array(image[y - d:y + d, x - d:x + d])
         self.zoom_update.emit(image)
-
-        # plot widget
-        if self.tracker.is_calibrated:
-            x, y = self.pli_stack.get(self.click_x + self.mask_offset,
-                                      self.click_y + self.mask_offset)

@@ -7,8 +7,9 @@ from src import helper
 class Stack:
 
     def __init__(self):
-        self.angles = np.linspace(0, np.pi, 18, False)
-        self.frames = [None] * 18
+        self.n_images = 18
+        self.angles = np.linspace(0, np.pi, self.n_images, False)
+        self.frames = [None] * self.n_images
         self.coeffs_calced = False
         self.angle_threshold_to_insert = np.deg2rad(2.5)
         self.transmittance = None
@@ -41,7 +42,7 @@ class Stack:
         pass
 
     def calc_coeffs(self):
-        if len(self.frames) == 9:
+        if len(self.frames) == self.n_images:
 
             data = np.array(self.frames, np.float32)
             n = data.shape[0]
@@ -56,7 +57,7 @@ class Stack:
             self.direction = 0.5 * np.arctan2(-b1, a1) + np.pi
             self.retardation = np.sqrt(a1 * a1 + b1 * b1) / (a0 + 1e-16)
         else:
-            print("Error, no 9 mesuered images")
+            print(f"Error, no {self.n_images} mesuered images")
 
     def clear(self):
         self.frames.clear()
