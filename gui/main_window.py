@@ -12,8 +12,8 @@ from gui.plot_widget import PlotWidget
 from gui.setup_widget import SetupWidget
 from gui.zoom_widget import ZoomWidget
 
-pli_logo_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..",
-                             "data", "pli-logo.png")
+logo_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..",
+                         "data")
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -28,7 +28,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def __initUI__(self):
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         self.setWindowTitle("3D-PLI Demo")
-        self.setWindowIcon(QtGui.QIcon(pli_logo_path))
+        self.setWindowIcon(QtGui.QIcon(os.path.join(logo_path, "pli-logo.png")))
         self.createMenu()
         self.createCentralWidget()
         self.connect_widgets()
@@ -52,6 +52,12 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def createCentralWidget(self):
         self.layout = QtWidgets.QGridLayout()
+        self.layout_left = QtWidgets.QGridLayout()
+        self.layout_center = QtWidgets.QGridLayout()
+        self.layout_right = QtWidgets.QGridLayout()
+        self.layout.addLayout(self.layout_left, 0, 0, 1, 1)
+        self.layout.addLayout(self.layout_center, 0, 1, 1, 1)
+        self.layout.addLayout(self.layout_right, 0, 2, 1, 1)
 
         self.setCentralWidget(QtWidgets.QWidget(self))
 
@@ -74,20 +80,35 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setupwidget.setMinimumSize(QtCore.QSize(200, 200))
         self.setupwidget.setMaximumSize(QtCore.QSize(300, 1000))
 
-        self.logolabel = QtWidgets.QLabel()
-        self.logolabel.setMaximumSize(QtCore.QSize(200, 200))
-        self.logolabel.setMinimumSize(QtCore.QSize(200, 200))
-        self.logolabel.setPixmap(
-            QtGui.QPixmap.fromImage(QtGui.QImage(pli_logo_path)).scaled(
-                self.logolabel.size().width(),
-                self.logolabel.size().height(), QtCore.Qt.KeepAspectRatio))
+        self.logolabelpli = QtWidgets.QLabel()
+        self.logolabelpli.setMaximumSize(QtCore.QSize(200, 200))
+        self.logolabelpli.setMinimumSize(QtCore.QSize(200, 200))
+        self.logolabelpli.setPixmap(
+            QtGui.QPixmap.fromImage(
+                QtGui.QImage(os.path.join(logo_path, "pli-logo.png"))).scaled(
+                    self.logolabelpli.size().width(),
+                    self.logolabelpli.size().height(),
+                    QtCore.Qt.KeepAspectRatio))
 
-        self.layout.addWidget(self.logolabel, 0, 0, 1, 1)
-        self.layout.addWidget(self.setupwidget, 1, 0, 3, 1)
-        self.layout.addWidget(self.textwidget, 3, 0, 1, 1)
-        self.layout.addWidget(self.camwidget, 0, 1, 4, 4)
-        self.layout.addWidget(self.zoomwidget, 0, 5, 2, 2)
-        self.layout.addWidget(self.plotwidget, 2, 5, 2, 2)
+        self.logolabelfzj = QtWidgets.QLabel()
+        self.logolabelfzj.setMaximumSize(QtCore.QSize(200, 100))
+        self.logolabelfzj.setMinimumSize(QtCore.QSize(200, 100))
+        self.logolabelfzj.setPixmap(
+            QtGui.QPixmap.fromImage(
+                QtGui.QImage(os.path.join(logo_path, "fzj-gray.png"))).scaled(
+                    self.logolabelfzj.size().width(),
+                    self.logolabelfzj.size().height(),
+                    QtCore.Qt.KeepAspectRatio))
+
+        self.layout_left.addWidget(self.logolabelpli, 0, 0, 1, 1)
+        self.layout_left.addWidget(self.logolabelfzj, 1, 0, 1, 1)
+        self.layout_left.addWidget(self.setupwidget, 2, 0, 1, 1)
+        self.layout_left.addWidget(self.textwidget, 3, 0, 1, 1)
+
+        self.layout_center.addWidget(self.camwidget, 0, 0, 1, 1)
+
+        self.layout_right.addWidget(self.zoomwidget, 0, 0, 1, 1)
+        self.layout_right.addWidget(self.plotwidget, 1, 0, 1, 1)
 
         # self.camwidget.setAlignment(QtCore.Qt.AlignRight)
         self.camwidget.setAlignment(QtCore.Qt.AlignCenter)
@@ -95,7 +116,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # self.zoomwidget.setAlignment(QtCore.Qt.AlignLeft)
         # self.plotwidget.setAlignment(QtCore.Qt.AlignLeft)
         # self.setupwidget.setAlignment(QtCore.Qt.AlignLeft)
-        # self.logolabel.setAlignment(QtCore.Qt.AlignLeft)
+        # self.logolabelpli.setAlignment(QtCore.Qt.AlignLeft)
 
         self.centralWidget().setLayout(self.layout)
 

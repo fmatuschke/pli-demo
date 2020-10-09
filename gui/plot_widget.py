@@ -30,6 +30,6 @@ class PlotWidget(QtChart.QChartView):
         self.chart.removeAllSeries()
         series = QtChart.QLineSeries()
         for x, y in zip(x_data, y_data):
-            series.append(x, y)
+            series.append(np.rad2deg(x), y)
         self.chart.addSeries(series)
         self.chart.createDefaultAxes()
