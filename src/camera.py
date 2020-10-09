@@ -52,8 +52,8 @@ class Camera:
     def set_port_id(self, i):
         if len(self.working_ports) > i:
             self.video_capture = cv2.VideoCapture(self.working_ports[i])
-            # Read the first three images to ensure the cam is ready
-            [self.video_capture.read() for _ in range(10)]
+            # Read some images to ensure the cam is ready
+            [self.video_capture.read() for _ in range(42)]
         else:
             self.video_capture = None
             print("id extend port list")
@@ -68,14 +68,14 @@ class Camera:
                     f"resolution {width}x{height} not available. Switch to {self.width()}x{self.height()}",
                 )
 
-            # Read the first three images to ensure the cam is ready
-            [self.video_capture.read() for _ in range(10)]
+            # Read some images to ensure the cam is ready
+            [self.video_capture.read() for _ in range(42)]
 
     def set_fps(self, fps):
         if self.is_alive():
             self.video_capture.set(cv2.CAP_PROP_FPS, fps)
-            # Read the first three images to ensure the cam is ready
-            [self.video_capture.read() for _ in range(10)]
+            # Read some images to ensure the cam is ready
+            [self.video_capture.read() for _ in range(42)]
 
     def width(self):
         width = 0

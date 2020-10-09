@@ -8,8 +8,8 @@ from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 
 from gui.camera_widget import CameraWidget
-from gui.dummy_widget import ImageWidget
 from gui.plot_widget import PlotWidget
+from gui.setup_widget import SetupWidget
 from gui.zoom_widget import ZoomWidget
 
 pli_logo_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..",
@@ -47,8 +47,8 @@ class MainWindow(QtWidgets.QMainWindow):
         # self.zoomwidget.setMinimumSize(QtCore.QSize(w, h))
         # self.zoomwidget.setMaximumSize(QtCore.QSize(w, h))
 
-        # self.tiltwidget.setMinimumSize(QtCore.QSize(w, h))
-        # self.tiltwidget.setMaximumSize(QtCore.QSize(w, h))
+        # self.setupwidget.setMinimumSize(QtCore.QSize(w, h))
+        # self.setupwidget.setMaximumSize(QtCore.QSize(w, h))
 
     def createCentralWidget(self):
         self.layout = QtWidgets.QGridLayout()
@@ -66,9 +66,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.zoomwidget.setMinimumSize(QtCore.QSize(200, 200))
         self.zoomwidget.setMaximumSize(QtCore.QSize(500, 500))
 
-        self.tiltwidget = ImageWidget(self)
-        self.tiltwidget.setMinimumSize(QtCore.QSize(200, 200))
-        self.tiltwidget.setMaximumSize(QtCore.QSize(300, 1000))
+        self.setupwidget = SetupWidget(self)
+        self.setupwidget.setMinimumSize(QtCore.QSize(200, 200))
+        self.setupwidget.setMaximumSize(QtCore.QSize(300, 1000))
 
         self.logolabel = QtWidgets.QLabel()
         self.logolabel.setMaximumSize(QtCore.QSize(200, 200))
@@ -79,7 +79,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.logolabel.size().height(), QtCore.Qt.KeepAspectRatio))
 
         self.layout.addWidget(self.logolabel, 0, 0, 1, 1)
-        self.layout.addWidget(self.tiltwidget, 1, 0, 3, 1)
+        self.layout.addWidget(self.setupwidget, 1, 0, 3, 1)
         self.layout.addWidget(self.camwidget, 0, 1, 4, 4)
         self.layout.addWidget(self.zoomwidget, 0, 5, 2, 2)
         self.layout.addWidget(self.plotwidget, 2, 5, 2, 2)
@@ -88,7 +88,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.camwidget.setAlignment(QtCore.Qt.AlignCenter)
         # self.zoomwidget.setAlignment(QtCore.Qt.AlignLeft)
         # self.plotwidget.setAlignment(QtCore.Qt.AlignLeft)
-        # self.tiltwidget.setAlignment(QtCore.Qt.AlignLeft)
+        # self.setupwidget.setAlignment(QtCore.Qt.AlignLeft)
         # self.logolabel.setAlignment(QtCore.Qt.AlignLeft)
 
         self.centralWidget().setLayout(self.layout)
