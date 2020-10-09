@@ -29,7 +29,7 @@ class CameraWidget(QtWidgets.QLabel):
         self.show_angle = False
         self.show_tracker = False
         self.mode = "live"
-
+        self.filter_image = True
         #
         self.plot_add = False
         self.plot_x = []
@@ -195,6 +195,14 @@ class CameraWidget(QtWidgets.QLabel):
         if frame is None:
             frame = helper.LOGO_IMG
             return
+
+        # pre filter images
+        if self.filter_image:
+            if frame.ndim == 2:
+                frame = cv2.medianBlur(frame, 5)
+            else:
+                for i in frame.shape[2]:
+                    frame[:, :, i] = cv2.medianBlur(frame[:, :, i], 5)
 
         # RUN TRACKER
         # calibrate tracker
