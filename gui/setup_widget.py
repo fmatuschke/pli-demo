@@ -1,43 +1,96 @@
 import os
+
 from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
+from PyQt5 import QtOpenGL
+
+from OpenGL.GL import *
+from OpenGL.GLU import *
+
+DELTA = 0.25
+HEIGHT = 0.1
+RADIUS = 0.5
+NUM_POLYGON = 42
 
 
-class SetupWidget(QtWidgets.QLabel):
+class SetupWidget(QtOpenGL.QGLWidget):
 
     def __init__(self, parent=None, *args, **kwargs):
         super(SetupWidget, self).__init__(parent, *args, **kwargs)
-        self.create_image()
 
-        # p = self.palette()
-        # p.setColor(self.backgroundRole(), QtGui.QColor(255, 0, 0))
-        # self.setAutoFillBackground(True)
-        # self.setPalette(p)
+        self.setMinimumSize(640, 480)
+        self.quadObj = gluNewQuadric()
 
-    def create_image(self):
-        self.layout = QtWidgets.QVBoxLayout(self)
-        self.qimage = QtGui.QImage(
-            os.path.join(os.path.dirname(os.path.abspath(__file__)), "..",
-                         "data", "aufbau.png"))
-        self.setLayout(self.layout)
-        self.update_qimage()
+    def cylinder(self, y, rot=[0, 0, 0], color=[0, 0.42, 0]):
+        glPushMatrix()
+        glColor3f(0.0, 0.42, 0.42)
+        glTranslatef(0, y, 0)
+        # glRotatef(rot[0], 1.0, 0.0, 0.0)
+        # glRotatef(rot[1], 0.0, 1.0, 0.0)
+        # glRotatef(rot[2], 0.0, 0.0, 1.0)
 
-    def resizeEvent(self, event):
-        super(SetupWidget, self).resizeEvent(event)
-        self.update_qimage()
+        glRotatef(-90, 1.0, 0.0, 0.0)
+        gluCylinder(self.quadObj, RADIUS, RADIUS, HEIGHT, NUM_POLYGON, 1)
+        gluDisk(self.quadObj, 0, RADIUS, NUM_POLYGON, 1)
+        glTranslatef(0, 0, HEIGHT)
+        gluDisk(self.quadObj, 0, RADIUS, NUM_POLYGON, 1)
+        glPopMatrix()
 
-    def contextMenuEvent(self, event):
-        menu = QtGui.QMenu(self)
-        menu.addAction("action")
-        menu.exec_(self.mapToGlobal(event.pos()))
+    def paintGL(self):
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+        glLoadIdentity()
 
-    def update_qimage(self, qimage=None):
-        if qimage is None:
-            qimage = self.qimage
+        glTranslatef(0, 0, -6)
+        glPolygonMode(GL_FRONT, GL_FILL)
+        glBegin(GL_POLYGON)
+        glColor3f(1.0, 1.0, 1.0)
+        glVertex3f(3.0, 0.0, 0.0)
+        glVertex3f(3.0, -2.0, 0.0)
+        glVertex3f(-3.0, -2.0, 0.0)
+        glVertex3f(-3.0, 0.0, 0.0)
+        glEnd()
 
-        pixmap = QtGui.QPixmap.fromImage(qimage)
-        pixmap = pixmap.scaled(self.size().width(),
-                               self.size().height(), QtCore.Qt.KeepAspectRatio)
+        # glTranslatef(-2, -2, 0)
 
-        self.setPixmap(pixmap)
+        # # coordinate system
+        # glPolygonMode(GL_FRONT, GL_FILL)
+        # glBegin(GL_LINES)
+        # glColor3f(1.0, 0.0, 0.0)
+        # glVertex3f(0.0, 0.0, 0.0)
+        # glVertex3f(10.0, 0.0, 0.0)
+
+        # glColor3f(0.0, 1.0, 0.0)
+        # glVertex3f(0.0, 0.0, 0.0)
+        # glVertex3f(0.0, 10.0, 0.0)
+
+        # glColor3f(0.0, 0.0, 1.0)
+        # glVertex3f(0.0, 0.0, 0.0)
+        # glVertex3f(0.0, 0.0, 10.0)
+        # glEnd()
+
+        # # cylinder
+        # for i in range(4):
+        #     self.cylinder(i * DELTA)
+
+        glFlush()
+
+    def initializeGL(self):
+        glClearDepth(1.0)
+        glDepthFunc(GL_LESS)
+        glEnable(GL_DEPTH_TEST)
+        glShadeModel(GL_SMOOTH)
+        glMatrixMode(GL_PROJECTION)
+        glLoadIdentity()
+        gluPerspective(45.0, 1.33, 0.1, 100000.0)
+        glMatrixMode(GL_MODELVIEW)
+
+        # setting scene
+        glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE)
+        glEnable(GL_LIGHTING)
+        glEnable(GL_LIGHT0)
+        glEnable(GL_COLOR_MATERIAL)
+
+        glLightfv(GL_LIGHT0, GL_AMBIENT, (0.2, 0.2, 0.2, 1.0))
+        glLightfv(GL_LIGHT0, GL_DIFFUSE, [0.8, 0.8, 0.8, 1.0])
+        glLightfv(GL_LIGHT0, GL_SPECULAR, [0.8, 0.8, 0.8, 1.0])
