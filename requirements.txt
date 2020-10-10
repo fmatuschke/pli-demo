@@ -5,3 +5,5 @@ PyQtChart==5.14.0
 opencv-contrib-python
 scipy
 numba
+moderngl
+moderngl-window
