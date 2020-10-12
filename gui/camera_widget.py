@@ -186,12 +186,12 @@ class CameraWidget(QtWidgets.QLabel):
             frame = self.pli_stack.fom
 
         if frame.ndim == 2:
-            frame = np.multiply(frame, self.tracker.img_mask)
+            frame = np.multiply(frame, self.tracker.mask)
             d = int(min(frame.shape[:2]) * 0.28)
             frame = np.array(frame[d // 2:-d // 2, d // 2:-d // 2])
 
         else:
-            frame = np.multiply(frame, self.tracker.img_mask[:, :, None])
+            frame = np.multiply(frame, self.tracker.mask[:, :, None])
             d = int(min(frame.shape[:2]) * 0.28)
             frame = np.array(frame[d // 2:-d // 2, d // 2:-d // 2, :])
         self.mask_offset = d

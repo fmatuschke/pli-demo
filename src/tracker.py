@@ -17,10 +17,14 @@ class Tracker:
 
     @property
     def radius(self):
+        if not self._is_calibrated:
+            print("Warning, not yet calibrated")
         return self._radius
 
     @property
     def center(self):
+        if not self._is_calibrated:
+            print("Warning, not yet calibrated")
         return self._center
 
     @property
@@ -29,10 +33,14 @@ class Tracker:
 
     @property
     def rho(self):
+        if not self._is_calibrated:
+            print("Warning, not yet calibrated")
         return self._rho
 
     @property
     def mask(self):
+        if not self._is_calibrated:
+            print("Warning, not yet calibrated")
         return self._mask
 
     @property
@@ -57,6 +65,9 @@ class Tracker:
         if len(self._cv_corners) != self._num_sticker:
             return
 
+        # SAVE calibration
+        self._is_calibrated = True
+
         # save data for reference
         self._cal_corners = np.array(self._cv_corners)
         self._cal_corners.shape = (-1, 4, 2)
@@ -74,14 +85,13 @@ class Tracker:
         self._radius = np.mean(np.linalg.norm(corners - self._center, axis=1),
                                axis=0)
         self._gen_mask()
-        self._is_calibrated = True
 
         print("is calibrated")
 
     def track(self, frame):
 
         if not self._is_calibrated:
-            print("Error, not calibrate yet")
+            print("Warning, not yet calibrated")
             return None
 
         frame = self._filter_image(frame)
@@ -135,7 +145,7 @@ class Tracker:
 
     def _gen_mask(self):
         if not self._is_calibrated:
-            print("Error, not calibrate yet")
+            print("Warning, not yet calibrated")
             return None
 
         Y, X = np.ogrid[:self._frame.shape[0], :self._frame.shape[1]]
