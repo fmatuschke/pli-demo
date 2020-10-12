@@ -202,7 +202,7 @@ class CameraWidget(QtWidgets.QLabel):
         if not self.camera.is_alive():
             return
 
-        frame = self.camera.frame(crop=True)
+        frame = self.camera.frame(quadratic=True)
         if frame is None:
             frame = helper.LOGO_IMG
             return
@@ -284,26 +284,41 @@ class CameraWidget(QtWidgets.QLabel):
                     frame = cv2.line(frame, tuple(p0), tuple(p1), (0, 255, 0),
                                      2)
 
-            else:
-                if self.tracker.is_calibrated:
-                    if frame.ndim == 2:
-                        frame = np.multiply(frame, self.tracker.img_mask)
-                        d = int(min(frame.shape[:2]) * 0.28)
-                        frame = np.array(frame[d // 2:-d // 2, d // 2:-d // 2])
+            # else:
+            #     if self.tracker.is_calibrated:
+            #         if frame.ndim == 2:
+            #             frame = np.multiply(frame, self.tracker.img_mask)
+            #             d = int(min(frame.shape[:2]) * 0.28)
+            #             frame = np.array(frame[d // 2:-d // 2, d // 2:-d // 2])
 
-                    else:
-                        frame = np.multiply(frame, self.tracker.img_mask[:, :,
-                                                                         None])
-                        d = int(min(frame.shape[:2]) * 0.28)
-                        frame = np.array(frame[d // 2:-d // 2,
-                                               d // 2:-d // 2, :])
-                    self.mask_offset = d
+            #         else:
+            #             frame = np.multiply(frame, self.tracker.img_mask[:, :,
+            #                                                              None])
+            #             d = int(min(frame.shape[:2]) * 0.28)
+            #             frame = np.array(frame[d // 2:-d // 2,
+            #                                    d // 2:-d // 2, :])
+            #         self.mask_offset = d
 
             self.update_image(frame)
 
     def update_image(self, image):
         # camera widget
-        self.setPixmap(QtGui.QPixmap.fromImage(self.convertFrame2Image(image)))
+        pixmap = QtGui.QPixmap.fromImage(self.convertFrame2Image(image))
+
+        if self.tracker.is_calibrated:
+            painter = QtGui.QPainter(pixmap)
+            scale = pixmap.width() / image.shape[1]
+            painter.setPen(QtGui.QColor(255, 34, 255, 255))
+            painter.drawEllipse(
+                QtCore.QPointF(self.tracker.center[0] * scale,
+                               self.tracker.center[1] * scale),
+                self.tracker.radius * scale, self.tracker.radius * scale)
+
+            painter.drawEllipse(
+                QtCore.QPointF(self.tracker.center[0] * scale,
+                               self.tracker.center[1] * scale), 10, 10)
+            del painter
+        self.setPixmap(pixmap)
 
         # zoom widget
         d = 42

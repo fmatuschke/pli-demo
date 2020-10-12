@@ -34,3 +34,4 @@ python3 main.py
 - visual feedback for captured angles
 - rho = 0
 - demo data for no camera mode
+- check qt camera viewfinder again

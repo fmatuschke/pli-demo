@@ -128,7 +128,7 @@ class Camera:
 
         return self.working_resolutions
 
-    def frame(self, crop=False):
+    def frame(self, quadratic=False):
         if self.is_alive():
             ret, frame = self.video_capture.read()
 
@@ -140,7 +140,7 @@ class Camera:
             if self.gray_image:
                 frame = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
 
-            if crop:
+            if quadratic:
                 height, width = frame.shape[0], frame.shape[1]
                 l = min(height, width)
                 delta = np.abs((width - height) // 2)
