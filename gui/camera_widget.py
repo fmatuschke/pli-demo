@@ -210,10 +210,10 @@ class CameraWidget(QtWidgets.QLabel):
         # pre filter images
         if self.filter_image:
             if frame.ndim == 2:
-                frame = cv2.medianBlur(frame, 5)
+                frame = cv2.GaussianBlur(frame, (5, 5), 1)
             else:
                 for i in frame.shape[2]:
-                    frame[:, :, i] = cv2.medianBlur(frame[:, :, i], 5)
+                    frame[:, :, i] = cv2.GaussianBlur(frame[:, :, i], (5, 5), 1)
 
         # RUN TRACKER
         # calibrate tracker
