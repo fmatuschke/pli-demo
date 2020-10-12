@@ -67,7 +67,7 @@ class CameraWidget(QtWidgets.QLabel):
         # TODO: center, but value change with resize
         self.click_x = 0
         self.click_y = 0
-        self.mask_offset = 0
+        self.mask_origin = 0
 
         # setup image label
         self.layout = QtWidgets.QVBoxLayout(self)
@@ -146,15 +146,15 @@ class CameraWidget(QtWidgets.QLabel):
         # self.click_update.emit(self.click_x, self.click_y)
         self.set_mode(self.mode)
 
-        x, y = self.pli_stack.get(self.click_x + self.mask_offset,
-                                  self.click_y + self.mask_offset)
+        x, y = self.pli_stack.get(self.click_x + self.mask_origin,
+                                  self.click_y + self.mask_origin)
 
         if self.plot_add:
-            self.plot_x.append(self.click_x + self.mask_offset)
-            self.plot_y.append(self.click_y + self.mask_offset)
+            self.plot_x.append(self.click_x + self.mask_origin)
+            self.plot_y.append(self.click_y + self.mask_origin)
         else:
-            self.plot_x = [self.click_x + self.mask_offset]
-            self.plot_y = [self.click_y + self.mask_offset]
+            self.plot_x = [self.click_x + self.mask_origin]
+            self.plot_y = [self.click_y + self.mask_origin]
 
         self.plot_update.emit(x, y, self.rho, self.plot_add)
 
@@ -185,16 +185,9 @@ class CameraWidget(QtWidgets.QLabel):
         elif self.mode == "fom":
             frame = self.pli_stack.fom
 
-        if frame.ndim == 2:
-            frame = np.multiply(frame, self.tracker.mask)
-            d = int(min(frame.shape[:2]) * 0.28)
-            frame = np.array(frame[d // 2:-d // 2, d // 2:-d // 2])
-
-        else:
-            frame = np.multiply(frame, self.tracker.mask[:, :, None])
-            d = int(min(frame.shape[:2]) * 0.28)
-            frame = np.array(frame[d // 2:-d // 2, d // 2:-d // 2, :])
-        self.mask_offset = d
+        frame = self.tracker.mask(frame)
+        frame = self.tracker.crop(frame)
+        self.mask_origin = self.tracker.mask_origin
         self.update_image(frame)
 
     def camera_and_tracker(self):
@@ -269,7 +262,7 @@ class CameraWidget(QtWidgets.QLabel):
             self.last_angle = self.rho
 
         if self.mode == "live":
-            self.mask_offset = 0
+            self.mask_origin = 0
             if self.show_tracker:
                 frame = self.tracker.show()
 
@@ -284,20 +277,11 @@ class CameraWidget(QtWidgets.QLabel):
                     frame = cv2.line(frame, tuple(p0), tuple(p1), (0, 255, 0),
                                      2)
 
-            # else:
-            #     if self.tracker.is_calibrated:
-            #         if frame.ndim == 2:
-            #             frame = np.multiply(frame, self.tracker.img_mask)
-            #             d = int(min(frame.shape[:2]) * 0.28)
-            #             frame = np.array(frame[d // 2:-d // 2, d // 2:-d // 2])
-
-            #         else:
-            #             frame = np.multiply(frame, self.tracker.img_mask[:, :,
-            #                                                              None])
-            #             d = int(min(frame.shape[:2]) * 0.28)
-            #             frame = np.array(frame[d // 2:-d // 2,
-            #                                    d // 2:-d // 2, :])
-            #         self.mask_offset = d
+            else:
+                if self.tracker.is_calibrated:
+                    frame = self.tracker.mask(frame)
+                    frame = self.tracker.crop(frame)
+                    self.mask_origin = self.tracker.mask_origin
 
             self.update_image(frame)
 

@@ -37,11 +37,40 @@ class Tracker:
             print("Warning, not yet calibrated")
         return self._rho
 
-    @property
-    def mask(self):
+    def mask(self, frame):
         if not self._is_calibrated:
             print("Warning, not yet calibrated")
-        return self._mask
+            return frame
+
+        if frame.ndim == 2:
+            frame = np.multiply(frame, self._mask)
+        else:
+            frame = frame.copy()
+            for i in range(frame.shape[2]):
+                frame[:, :, i] = np.multiply(frame[:, :, i], self._mask)
+        return np.array(frame, frame.dtype)
+
+    def crop(self, frame):
+        if not self._is_calibrated:
+            print("Warning, not yet calibrated")
+            return frame
+
+        if frame.ndim == 2:
+            frame_ = frame[self.mask_origin[0]:self.mask_origin[0] +
+                           self._mask.shape[0],
+                           self.mask_origin[1]:self.mask_origin[1] +
+                           self._mask.shape[1]]
+        else:
+            frame_ = frame[self.mask_origin[0]:self.mask_origin[0] +
+                           self._mask.shape[0],
+                           self.mask_origin[1]:self.mask_origin[1] +
+                           self._mask.shape[1], :]
+        return np.ascontiguousarray(frame_, frame.dtype)
+
+    @property
+    def mask_origin(self):
+        return np.array((self._center[0] - self._radius + 0.5,
+                         self._center[1] - self._radius + 0.5), np.int)
 
     @property
     def is_calibrated(self):
