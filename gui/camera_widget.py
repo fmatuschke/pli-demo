@@ -94,8 +94,10 @@ class CameraWidget(QtWidgets.QLabel):
         else:
             img_format = QtGui.QImage.Format_RGB888
 
+        totalBytes = frame.nbytes
+        bytesPerLine = int(totalBytes / frame.shape[0])
         image = QtGui.QImage(frame.data, frame.shape[1], frame.shape[0],
-                             img_format)
+                             bytesPerLine, img_format)
         image = image.rgbSwapped()
         image = image.scaled(self.size().width(),
                              self.size().height(), QtCore.Qt.KeepAspectRatio)
@@ -195,6 +197,7 @@ class CameraWidget(QtWidgets.QLabel):
         if not self.camera.is_alive():
             return
 
+        # get frame, quadratic -> less data to analyse
         frame = self.camera.frame(quadratic=True)
         if frame is None:
             frame = helper.LOGO_IMG

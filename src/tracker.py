@@ -40,32 +40,29 @@ class Tracker:
     def mask(self, frame):
         if not self._is_calibrated:
             print("Warning, not yet calibrated")
-            return frame
+            return frame.copy()
 
+        frame_ = np.empty_like(frame)
         if frame.ndim == 2:
-            frame = np.multiply(frame, self._mask)
+            frame_ = np.multiply(frame, self._mask)
         else:
-            frame = frame.copy()
             for i in range(frame.shape[2]):
-                frame[:, :, i] = np.multiply(frame[:, :, i], self._mask)
-        return np.array(frame, frame.dtype)
+                frame_[:, :, i] = np.multiply(frame[:, :, i], self._mask)
+        return frame_
 
     def crop(self, frame):
         if not self._is_calibrated:
             print("Warning, not yet calibrated")
-            return frame
+            return frame.copy()
+
+        begin = np.array(self._center - self._radius + 0.5, np.int)
+        end = np.array(self._center + self._radius + 0.5, np.int)
 
         if frame.ndim == 2:
-            frame_ = frame[self.mask_origin[0]:self.mask_origin[0] +
-                           self._mask.shape[0],
-                           self.mask_origin[1]:self.mask_origin[1] +
-                           self._mask.shape[1]]
+            frame_ = frame[begin[1]:end[1], begin[0]:end[0]]
         else:
-            frame_ = frame[self.mask_origin[0]:self.mask_origin[0] +
-                           self._mask.shape[0],
-                           self.mask_origin[1]:self.mask_origin[1] +
-                           self._mask.shape[1], :]
-        return np.ascontiguousarray(frame_, frame.dtype)
+            frame_ = frame[begin[1]:end[1], begin[0]:end[0], :]
+        return np.array(frame_)
 
     @property
     def mask_origin(self):
@@ -109,10 +106,10 @@ class Tracker:
         self._center = np.mean(corners, axis=0)
 
         # calc image radius:
-        # for c in self._cal_corners:
-
+        # radius sticker to radius hole ~ 0.75
         self._radius = np.mean(np.linalg.norm(corners - self._center, axis=1),
-                               axis=0)
+                               axis=0) * 0.75
+
         self._gen_mask()
 
         print("is calibrated")
@@ -175,9 +172,8 @@ class Tracker:
     def _gen_mask(self):
         if not self._is_calibrated:
             print("Warning, not yet calibrated")
-            return None
+            return np.ones(self.frame.shape[:2], dtype=bool)
 
         Y, X = np.ogrid[:self._frame.shape[0], :self._frame.shape[1]]
         dist2_from_center = (X - self._center[0])**2 + (Y - self._center[1])**2
-
-        self._mask = dist2_from_center <= (min(self._frame.shape[:2]) * 0.28)**2
+        self._mask = dist2_from_center <= self._radius**2
