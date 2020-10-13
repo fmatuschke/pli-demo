@@ -17,6 +17,8 @@ class PlotWidget(QtChart.QChartView):
 
         self.chart = QtChart.QChart()
         self.chart.setTheme(QtChart.QChart.ChartThemeDark)
+        self.chart.layout().setContentsMargins(0, 0, 0, 0)
+        self.chart.setBackgroundRoundness(0)
         self.setChart(self.chart)
 
         # p = self.palette()
@@ -56,6 +58,6 @@ class PlotWidget(QtChart.QChartView):
 
         if not flag_add:
             self.chart.createDefaultAxes()
-            axes = self.chart.axes()
-            for a in axes:
-                a.applyNiceNumbers()
+        axes = self.chart.axes()
+        for a in axes:
+            a.applyNiceNumbers()
