@@ -38,4 +38,17 @@ class ZoomWidget(QtWidgets.QLabel):
         image = image.scaled(self.size().width(),
                              self.size().height(), QtCore.Qt.KeepAspectRatio)
         pixmap = QtGui.QPixmap.fromImage(image)
+
+        # target indicator
+        painter = QtGui.QPainter(pixmap)
+        pen = QtGui.QPen()
+        pen.setColor(QtCore.Qt.magenta)
+        pen.setWidth(3)
+        painter.setPen(pen)
+        painter.drawEllipse(
+            QtCore.QPointF(pixmap.width() / 2,
+                           pixmap.height() / 2), 10, 10)
+
+        del painter
+
         self.setPixmap(pixmap)
