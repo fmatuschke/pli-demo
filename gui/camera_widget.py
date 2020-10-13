@@ -58,21 +58,9 @@ class CameraWidget(QtWidgets.QLabel):
         self.ui.textwidget.setText(f"plot_add: {self.plot_add}")
 
     def init_camera(self):
-        self.camera = Camera(fps=25)
-
-        for width, height in self.camera.working_resolutions:
-            self.ui.cameraResolutionMenu.addAction(
-                QtWidgets.QAction(f"{width}x{height}",
-                                  self.ui.cameraResolutionMenu,
-                                  triggered=partial(self.camera.set_resolution,
-                                                    width, height)))
-
-        for port in self.camera.working_ports:
-            self.ui.cameraPortMenu.addAction(
-                QtWidgets.QAction(f"{port}",
-                                  self.ui.cameraPortMenu,
-                                  triggered=partial(self.camera.set_resolution,
-                                                    width, height)))
+        self.camera = Camera(fps=30)
+        self.set_ports_to_menu()
+        self.set_resolutions_to_menu()
 
         for file in glob.glob(
                 os.path.join(os.path.basename(os.path.abspath(__file__)), "..",
@@ -83,9 +71,6 @@ class CameraWidget(QtWidgets.QLabel):
                                   self.ui.cameraPortMenu,
                                   triggered=partial(self.camera.set_video,
                                                     file)))
-
-        if len(self.camera.working_ports) == 0:
-            self.camera.set_video()
 
         # TODO: center, but value change with resize
         self.click_x = 0
@@ -100,6 +85,28 @@ class CameraWidget(QtWidgets.QLabel):
         # QTimer to access camera frames
         self.live = QtCore.QTimer(self)
         self.live.timeout.connect(self.next_frame)
+
+    def set_ports_to_menu(self):
+
+        def set_port(self, port):
+            self.live.stop()
+            self.camera.set_port(port)
+            self.set_resolutions_to_menu()
+            self.live.start()
+
+        for port in self.camera.available_ports:
+            self.ui.cameraPortMenu.addAction(
+                QtWidgets.QAction(f"{port}",
+                                  self.ui.cameraPortMenu,
+                                  triggered=partial(set_port, self, port)))
+
+    def set_resolutions_to_menu(self):
+        for width, height in self.camera.available_resolutions:
+            self.ui.cameraResolutionMenu.addAction(
+                QtWidgets.QAction(f"{width}x{height}",
+                                  self.ui.cameraResolutionMenu,
+                                  triggered=partial(self.camera.set_prop, width,
+                                                    height, 30)))
 
     def resizeEvent(self, event):
         super(CameraWidget, self).resizeEvent(event)
@@ -217,9 +224,6 @@ class CameraWidget(QtWidgets.QLabel):
 
     def next_frame(self):
         # GET CAMERA FRAME
-        if not self.camera.is_alive():
-            return
-
         # get frame, quadratic -> less data to analyse
         frame = self.camera.frame(quadratic=True)
         if frame is None:
