@@ -62,6 +62,13 @@ class CameraWidget(QtWidgets.QLabel):
         self.set_ports_to_menu()
         self.set_resolutions_to_menu()
 
+        def video(self, file):
+            self.camera.set_video(file)
+            self.live.stop()
+            self.tracker = Tracker()
+            self.pli_stack = PliStack()
+            self.live.start(40)
+
         for file in glob.glob(
                 os.path.join(os.path.basename(os.path.abspath(__file__)), "..",
                              "data", "*mp4")):
@@ -69,8 +76,7 @@ class CameraWidget(QtWidgets.QLabel):
             self.ui.cameraDemoMenu.addAction(
                 QtWidgets.QAction(f"{file}",
                                   self.ui.cameraPortMenu,
-                                  triggered=partial(self.camera.set_video,
-                                                    file)))
+                                  triggered=partial(video, self, file)))
 
         # TODO: center, but value change with resize
         self.click_x = 0
@@ -92,7 +98,9 @@ class CameraWidget(QtWidgets.QLabel):
             self.live.stop()
             self.camera.set_port(port)
             self.set_resolutions_to_menu()
-            self.live.start()
+            self.tracker = Tracker()
+            self.pli_stack = PliStack()
+            self.live.start(40)
 
         for port in self.camera.available_ports:
             self.ui.cameraPortMenu.addAction(
@@ -188,7 +196,7 @@ class CameraWidget(QtWidgets.QLabel):
 
         self.mode = mode
         if mode == "live":
-            self.live.start()
+            self.live.start(40)
             return
         else:
             self.live.stop()
