@@ -24,13 +24,16 @@ class CameraWidget(QtWidgets.QLabel):
     def __init__(self, parent=None, *args, **kwargs):
         super(CameraWidget, self).__init__(parent, *args, **kwargs)
         self.ui = parent
-        #
+        self.setFrameStyle(QtWidgets.QFrame.StyledPanel)
+        self.setFrameStyle(QtWidgets.QFrame.Plain)
+
+        # variables
         self.rho = 0
         self.last_angle = 0
         self.show_angle = False
         self.show_tracker = False
         self.mode = "live"
-        self.filter_image = True
+        self.filter_image = "nlmd"
 
         # plot variables
         self.plot_add = False
@@ -39,17 +42,14 @@ class CameraWidget(QtWidgets.QLabel):
         QtWidgets.QShortcut(QtGui.QKeySequence(QtCore.Qt.Key_A),
                             self,
                             activated=partial(self.toogleAddPlot))
+
         #
         self.init_camera()
         self.tracker = Tracker()
         self.pli_stack = PliStack()
 
         # DEBUG
-        # p = self.palette()
-        # p.setColor(self.backgroundRole(), QtGui.QColor(255, 0, 0))
-        # self.setAutoFillBackground(True)
-        # self.setPalette(p)
-        self.camera_and_tracker()  # for debug run one time without qtimer
+        self.camera_and_tracker()  # first run for debug
         self.live.start(40)  # 1000/fps
 
     def toogleAddPlot(self):
@@ -191,6 +191,16 @@ class CameraWidget(QtWidgets.QLabel):
         self.mask_origin = self.tracker.mask_origin
         self.update_image(frame)
 
+    def set_filter(self, filter):
+        if filter == "nlmd":
+            self.filter_image = filter
+        elif filter == "none":
+            self.filter_image = filter
+        elif filter == "gaus":
+            self.filter_image = filter
+        else:
+            raise ValueError("wrong input")
+
     def camera_and_tracker(self):
         # GET CAMERA FRAME
         if not self.camera.is_alive():
@@ -203,12 +213,20 @@ class CameraWidget(QtWidgets.QLabel):
             return
 
         # pre filter images
-        if self.filter_image:
-            if frame.ndim == 2:
-                frame = cv2.GaussianBlur(frame, (5, 5), 1)
-            else:
-                for i in frame.shape[2]:
-                    frame[:, :, i] = cv2.GaussianBlur(frame[:, :, i], (5, 5), 1)
+        if self.filter_image == "nlmd":
+            denoise = lambda x: cv2.fastNlMeansDenoising(frame, x, 5, 5, 9)
+        elif self.filter_image == "none":
+            denoise = lambda x: x
+        elif self.filter_image == "gaus":
+            denoise = lambda x: cv2.GaussianBlur(x, (5, 5), 1)
+        else:
+            raise ValueError("wrong input")
+
+        if frame.ndim == 2:
+            frame = denoise(frame)
+        else:
+            for i in frame.shape[2]:
+                frame[:, :, i] = denoise(frame[:, :, i])
 
         # RUN TRACKER
         # calibrate tracker
