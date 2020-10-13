@@ -14,7 +14,8 @@ class SetupWidget(QtOpenGL.QGLWidget):
 
     def __init__(self, parent=None, *args, **kwargs):
         self.init_shaders()
-        self.tilt = 0
+        self.tilt = 1
+        self.rotation = 0
         fmt = QtOpenGL.QGLFormat()
         fmt.setVersion(3, 3)
         fmt.setProfile(QtOpenGL.QGLFormat.CoreProfile)
@@ -48,14 +49,25 @@ class SetupWidget(QtOpenGL.QGLWidget):
             tiltdirection = [0, 1, 0.2]
         elif (self.tilt == 4):
             tiltdirection = [-0.2, 1, 0]
+        else:
+            raise ValueError("Wrong tilt")
 
-        positions = np.array([[0, -0.714, -5], [0, -0.571, -5], [0, -0.286, -5],
-                              [0, -0.143, -5], [0, 0.143, -5], [0, 0.286, -5],
-                              [0, 0.571, -5], [0, 0.741, -5]])
-        orientations = np.array([[0, 1, 0], [0, 1, 0], [0, 1, 0], [0, 1, 0],
+        z_pos = -50
+        positions = np.array([[0, -0.714, z_pos], [0, -0.571, z_pos],
+                              [0, -0.286, z_pos], [0, -0.143, z_pos],
+                              [0, 0.143, z_pos], [0, 0.286, z_pos],
+                              [0, 0.571, z_pos], [0, 0.741, z_pos]])
+        orientations = np.array([[0, 1, 0], [0, 1, 0], [0, 1, 0],
                                  tiltdirection, tiltdirection, [0, 1, 0],
-                                 [0, 1, 0]])
+                                 [0, 1, 0], [0, 1, 0]])
         self.data = np.hstack((positions, orientations))
+
+    def set_rotation(self, rotation):
+        '''
+        Slot function which changes the tiltdirection and updates the rendering scene
+        '''
+        self.rotation = rotation
+        self.update()
 
     def set_tilt(self, tilt):
         '''
@@ -74,7 +86,7 @@ class SetupWidget(QtOpenGL.QGLWidget):
             fragment_shader=self.frag_string,
         )
 
-        project = Projection3D(self.width() / self.height(), 45, 0.1, 1000.0)
+        project = Projection3D(self.width() / self.height(), 4.2, 0.1, 1000.0)
         project = tuple(np.array(project.matrix).flatten().T)
         self.prog['worldToCamera'].value = project
 
