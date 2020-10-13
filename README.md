@@ -3,6 +3,7 @@
 ## install
 
 ### unix
+
 ``` sh
 python3 -m venv env
 source env/bin/activate
@@ -12,9 +13,10 @@ python3 main.py
 ```
 
 ### windows
+
 ``` sh
 python3 -m venv env
-source env/bin/activate
+.\env\Scripts\activate
 pip install pip --upgrade
 pip install -r requirements.txt
 python3 main.py
