@@ -64,6 +64,13 @@ class CameraWidget(QtWidgets.QLabel):
                                   triggered=partial(self.camera.set_resolution,
                                                     width, height)))
 
+        for port in self.camera.working_ports:
+            self.ui.cameraPortMenu.addAction(
+                QtWidgets.QAction(f"{port}",
+                                  self.ui.cameraPortMenu,
+                                  triggered=partial(self.camera.set_resolution,
+                                                    width, height)))
+
         # TODO: center, but value change with resize
         self.click_x = 0
         self.click_y = 0
@@ -110,7 +117,7 @@ class CameraWidget(QtWidgets.QLabel):
 
     def widget2framecoordinates(self, click_x, click_y):
         '''
-        Umrechnung der Click- Koordinaten im Widget in QtWidgets.QLabel Koordinaten und dann in Frame-Koordinaten
+        return pixmap coordinate. if data is cropped after masked, add mask offset if you want pli_stack.get()!
         '''
         pixmap_width = self.pixmap().size().width()
         pixmap_height = self.pixmap().size().height()
@@ -127,37 +134,27 @@ class CameraWidget(QtWidgets.QLabel):
         frame_y = int((click_y - offset_y) / pixmap_height * self.frame_height +
                       0.5)
 
-        # print("click", click_x, click_y)
-        # print("pixmap.size", self.pixmap().size())
-        # print("widget.size", self.size())
-        # print("pixmap", int(click_x - offset_x), int(click_y - offset_y))
-        # print("frame", frame_x, frame_y)
-
         return frame_x, frame_y
 
     def mousePressEvent(self, event):
         '''
         Sets Tracking coordinate to the clicked coordinate
         '''
-        # if y coordinate is in QtWidgets.QLabel
-        # if (event.y() > self.label_offset_y and
-        #         event.y() < self.size().height() - self.label_offset_y):
-
         self.click_x, self.click_y = self.widget2framecoordinates(
             event.x(), event.y())
-        # self.click_update.emit(self.click_x, self.click_y)
         self.set_mode(self.mode)
 
-        x, y = self.pli_stack.get(self.click_x + self.mask_origin,
-                                  self.click_y + self.mask_origin)
-
+        # save click coordinates
         if self.plot_add:
-            self.plot_x.append(self.click_x + self.mask_origin)
-            self.plot_y.append(self.click_y + self.mask_origin)
+            self.plot_x.append(self.click_x)
+            self.plot_y.append(self.click_y)
         else:
-            self.plot_x = [self.click_x + self.mask_origin]
-            self.plot_y = [self.click_y + self.mask_origin]
+            self.plot_x = [self.click_x]
+            self.plot_y = [self.click_y]
 
+        # emit last clicked data
+        x, y = self.pli_stack.get(self.click_x + self.mask_origin[1],
+                                  self.click_y + self.mask_origin[0])
         self.plot_update.emit(x, y, self.rho, self.plot_add)
 
     def set_mode(self, mode):
@@ -222,7 +219,7 @@ class CameraWidget(QtWidgets.QLabel):
                 self.ui.textwidget.setText("Calibrated")
 
         # get pli stack
-        elif not self.pli_stack.full():
+        elif not self.pli_stack.full:
             self.rho = self.tracker.track(frame)
             if self.rho is None:
                 self.update_image(frame)
@@ -231,7 +228,8 @@ class CameraWidget(QtWidgets.QLabel):
 
             if value:
                 for i, (x, y) in enumerate(zip(self.plot_x, self.plot_y)):
-                    x, y = self.pli_stack.get(x, y)
+                    x, y = self.pli_stack.get(x + self.mask_origin[0],
+                                              y + self.mask_origin[1])
 
                     if i == 0:
                         self.plot_update.emit(x, y, self.rho, False)
@@ -245,11 +243,6 @@ class CameraWidget(QtWidgets.QLabel):
                     f"inserted: {np.rad2deg(self.rho):.0f}")
                 p.setColor(self.backgroundRole(), QtGui.QColor(255, 0, 0))
                 self.ui.textwidget.setPalette(p)
-
-            # when done, calculate pli modalities
-            if self.pli_stack.full():
-                self.pli_stack.calc_coeffs()
-                self.pli_stack.calc_fom()
 
         # get only angle
         else:
@@ -294,8 +287,12 @@ class CameraWidget(QtWidgets.QLabel):
 
         if self.tracker.is_calibrated:
             painter = QtGui.QPainter(pixmap)
+            pen = QtGui.QPen()
+            pen.setColor(QtCore.Qt.magenta)
+            pen.setWidth(3)
+            painter.setPen(pen)
             scale = pixmap.width() / image.shape[1]
-            painter.setPen(QtGui.QColor(255, 34, 255, 255))
+            # painter.setPen(QtCore.Qt.magenta)
 
             painter.drawEllipse(
                 QtCore.QPointF(
@@ -303,11 +300,12 @@ class CameraWidget(QtWidgets.QLabel):
                     (self.tracker.center[1] - self.mask_origin[1]) * scale),
                 self.tracker.radius * scale, self.tracker.radius * scale)
 
-            painter.drawEllipse(
-                QtCore.QPointF(
-                    (self.tracker.center[0] - self.mask_origin[0]) * scale,
-                    (self.tracker.center[1] - self.mask_origin[1]) * scale), 10,
-                10)
+            # draw center
+            # painter.drawEllipse(
+            #     QtCore.QPointF(
+            #         (self.tracker.center[0] - self.mask_origin[0]) * scale,
+            #         (self.tracker.center[1] - self.mask_origin[1]) * scale), 10,
+            #     10)
 
             del painter
         self.setPixmap(pixmap)

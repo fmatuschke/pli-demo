@@ -61,44 +61,85 @@ def fom_hsv_black(direction, inclination, mask=None):
 class Stack:
 
     def __init__(self):
-        self.n_images = 18
-        self.angles = np.linspace(0, np.pi, self.n_images, False)
-        self.frames = [None] * self.n_images
-        self.coeffs_calced = False
-        self.angle_threshold_to_insert = np.deg2rad(2.5)
-        self.transmittance = None
-        self.direction = None
-        self.retardation = None
+        self._n_images = 18
+        self._angle_threshold_to_insert = np.deg2rad(2.5)
+        self._angles = np.linspace(0, np.pi, self._n_images, False)
+        self._frames = [None] * self._n_images
+        self._transmittance = None
+        self._direction = None
+        self._retardation = None
+        self._inclination = None
+        self._fom = None
 
+    @property
     def size(self):
-        return len([x for x in self.frames if x is not None])
+        return len([x for x in self._frames if x is not None])
 
+    @property
     def full(self):
-        return len([None for f in self.frames if f is not None
-                   ]) == self.angles.size
+        return self.size == self._angles.size
+
+    @property
+    def angles(self):
+        return np.array([
+            self._angles[i] for i, f in enumerate(self._frames) if f is not None
+        ])
+
+    @property
+    def frames(self):
+        return np.array([f for f in self._frames if f is not None])
+
+    @property
+    def transmittance(self):
+        return self._transmittance.copy()
+
+    @property
+    def direction(self):
+        return self._direction.copy()
+
+    @property
+    def retardation(self):
+        return self._retardation.copy()
+
+    @property
+    def inclination(self):
+        return self._inclination.copy()
+
+    @property
+    def fom(self):
+        return self._fom.copy()
 
     def insert(self, rho, frame):
         # get closest angle
         diff_angles = [
-            helper.diff_orientation(rho, target) for target in self.angles
+            helper.diff_orientation(rho, target) for target in self._angles
         ]
 
-        if np.min(np.abs(diff_angles)) < self.angle_threshold_to_insert:
+        is_inserted = False
+        if np.min(np.abs(diff_angles)) < self._angle_threshold_to_insert:
             idx = np.argmin(np.abs(diff_angles))
-            if self.frames[idx] is None:
+            if self._frames[idx] is None:
                 if frame.ndim == 3:
                     frame = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
-                self.frames[idx] = frame
-                return True
-        return False
+                print(frame.shape)
+                self._frames[idx] = frame
+                is_inserted = True
+
+        if self.full:
+            print("calc_coeffs")
+            self.calc_coeffs()
+            print("calc_fom")
+            self.calc_fom()
+
+        return is_inserted
 
     def fit_pixel(self, x, y):
         pass
 
     def calc_coeffs(self):
-        if len(self.frames) == self.n_images:
+        if len(self._frames) == self._n_images:
 
-            data = np.array(self.frames, np.float32)
+            data = np.array(self._frames, np.float32)
             n = data.shape[0]
 
             rho_2 = 2 * np.linspace(0, np.pi, n, False, dtype=data.dtype)
@@ -107,28 +148,30 @@ class Stack:
             a1 = 2 * np.sum(data * np.sin(rho_2)[:, None, None], 0) / n
             b1 = 2 * np.sum(data * np.cos(rho_2)[:, None, None], 0) / n
 
-            self.transmittance = 2 * a0
-            self.direction = 0.5 * np.arctan2(-b1, a1) + np.pi
-            self.retardation = np.sqrt(a1 * a1 + b1 * b1) / (a0 + 1e-16)
+            self._transmittance = 2 * a0
+            self._direction = 0.5 * np.arctan2(-b1, a1) + np.pi
+            self._retardation = np.sqrt(a1 * a1 + b1 * b1) / (a0 + 1e-16)
         else:
-            print(f"Error, no {self.n_images} mesuered images")
+            print(f"Error, no {self._n_images} mesuered images")
 
     def calc_fom(self):
-        self.inclination = self.retardation / np.amax(self.retardation)
-        self.fom = fom_hsv_black(self.direction, self.inclination)
+        self._inclination = self._retardation / np.amax(self._retardation)
+        self._fom = fom_hsv_black(self._direction, self._inclination)
 
     def clear(self):
-        self.frames.clear()
-        self.angles.clear()
+        self._angles = np.linspace(0, np.pi, self._n_images, False)
+        self._frames = [None] * self._n_images
+        self._transmittance = None
+        self._direction = None
+        self._retardation = None
+        self._inclination = None
+        self._fom = None
 
     def get(self, x, y):
-        if self.size() == 0:
+        x = int(x)
+        y = int(y)
+
+        if self.size == 0:
             return np.array((0.0)), np.array((0.0))
 
-        angles = [
-            self.angles[i] for i, f in enumerate(self.frames) if f is not None
-        ]
-        angles = np.array(angles)
-        frames = [f for f in self.frames if f is not None]
-        frames = np.array(frames)
-        return angles, frames[:, y, x]
+        return self.angles, self.frames[:, y, x]

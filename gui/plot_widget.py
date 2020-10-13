@@ -30,6 +30,11 @@ class PlotWidget(QtChart.QChartView):
         if not flag_add:
             self.chart.removeAllSeries()
 
+        if x_data.ndim != 1:
+            print("x FOOOOOO")
+        if y_data.ndim != 1:
+            print("y FOOOOOO")
+
         if x_data[0] == 0:
             x_data = np.append(x_data, [np.pi])
             y_data = np.append(y_data, [y_data[0]])
