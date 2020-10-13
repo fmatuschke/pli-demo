@@ -67,7 +67,7 @@ class CameraWidget(QtWidgets.QLabel):
         # TODO: center, but value change with resize
         self.click_x = 0
         self.click_y = 0
-        self.mask_origin = 0
+        self.mask_origin = np.zeros(2, np.int)
 
         # setup image label
         self.layout = QtWidgets.QVBoxLayout(self)
@@ -265,7 +265,7 @@ class CameraWidget(QtWidgets.QLabel):
             self.last_angle = self.rho
 
         if self.mode == "live":
-            self.mask_origin = 0
+            self.mask_origin = np.zeros(2, np.int)
             if self.show_tracker:
                 frame = self.tracker.show()
 
@@ -296,14 +296,19 @@ class CameraWidget(QtWidgets.QLabel):
             painter = QtGui.QPainter(pixmap)
             scale = pixmap.width() / image.shape[1]
             painter.setPen(QtGui.QColor(255, 34, 255, 255))
+
             painter.drawEllipse(
-                QtCore.QPointF(self.tracker.center[0] * scale,
-                               self.tracker.center[1] * scale),
+                QtCore.QPointF(
+                    (self.tracker.center[0] - self.mask_origin[0]) * scale,
+                    (self.tracker.center[1] - self.mask_origin[1]) * scale),
                 self.tracker.radius * scale, self.tracker.radius * scale)
 
             painter.drawEllipse(
-                QtCore.QPointF(self.tracker.center[0] * scale,
-                               self.tracker.center[1] * scale), 10, 10)
+                QtCore.QPointF(
+                    (self.tracker.center[0] - self.mask_origin[0]) * scale,
+                    (self.tracker.center[1] - self.mask_origin[1]) * scale), 10,
+                10)
+
             del painter
         self.setPixmap(pixmap)
 
