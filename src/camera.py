@@ -2,6 +2,13 @@ import cv2
 import sys
 import os
 import numpy as np
+import enum
+
+
+class CamMode(enum.Enum):
+    NONE = 0
+    CAMERA = 1
+    VIDEO = 2
 
 
 class Camera:
@@ -15,6 +22,7 @@ class Camera:
                  port_id=0,
                  gray_image=True):
         self.gray_image = gray_image
+        self.mode = CamMode.NONE
         self.working_ports = []
         self.working_resolutions = []
         self.list_ports(port_start, port_end)
@@ -54,20 +62,25 @@ class Camera:
 
     def set_video(self, file_name="data/medium.webm"):
         self.video_capture = cv2.VideoCapture(file_name)
+        self.mode = CamMode.VIDEO
 
     def set_port_id(self, i):
+        self.mode = CamMode.NONE
         if len(self.working_ports) > i:
             self.video_capture = cv2.VideoCapture(self.working_ports[i])
             # Read some images to ensure the cam is ready
             for _ in range(42):
                 if self.video_capture.read()[0]:
+                    self.mode = CamMode.CAMERA
                     break
         else:
-            self.video_capture = None
             print("port id unavailable")
 
+        if self.mode == CamMode.NONE:
+            print("camera unavailable")
+
     def set_resolution(self, width, height):
-        if self.is_alive():
+        if self.is_alive() and self.mode == CamMode.CAMERA:
             self.video_capture.set(cv2.CAP_PROP_FRAME_WIDTH, width)
             self.video_capture.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
 
@@ -82,7 +95,7 @@ class Camera:
                     break
 
     def set_fps(self, fps):
-        if self.is_alive():
+        if self.is_alive() and self.mode == CamMode.CAMERA:
             self.video_capture.set(cv2.CAP_PROP_FPS, fps)
             # Read some images to ensure the cam is ready
             for _ in range(42):
@@ -134,26 +147,34 @@ class Camera:
         return self.working_resolutions
 
     def frame(self, quadratic=False):
-        if self.is_alive():
+        if self.mode == CamMode.CAMERA:
             ret, frame = self.video_capture.read()
 
             if not ret:
                 print(f"camera disconnected: {ret}")
                 self.video_capture = None
                 return None
-
-            if self.gray_image:
-                frame = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
-
-            if quadratic:
-                height, width = frame.shape[0], frame.shape[1]
-                l = min(height, width)
-                delta = np.abs((width - height) // 2)
-
-                frame = np.array(frame[:, delta:delta +
-                                       l] if width > height else frame[
-                                           delta:delta + l, :])
-
-            return frame
+        elif self.mode == CamMode.VIDEO:
+            ret, frame = self.video_capture.read()
+            if not ret:
+                print(self.video_capture.set(cv2.CAP_PROP_POS_FRAMES, 0))
+                ret, frame = self.video_capture.read()
+                if not ret:
+                    print("video file corrupted")
+                    self.is_video = False
+                    self.video_capture = None
+                    return None
         else:
             return None
+
+        if self.gray_image:
+            frame = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
+        if quadratic:
+            height, width = frame.shape[0], frame.shape[1]
+            l = min(height, width)
+            delta = np.abs((width - height) // 2)
+
+            frame = np.array(frame[:, delta:delta +
+                                   l] if width > height else frame[delta:delta +
+                                                                   l, :])
+        return frame

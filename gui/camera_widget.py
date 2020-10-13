@@ -1,4 +1,5 @@
 import os
+import glob
 
 import numpy as np
 import itertools
@@ -72,6 +73,16 @@ class CameraWidget(QtWidgets.QLabel):
                                   self.ui.cameraPortMenu,
                                   triggered=partial(self.camera.set_resolution,
                                                     width, height)))
+
+        for file in glob.glob(
+                os.path.join(os.path.basename(os.path.abspath(__file__)), "..",
+                             "data", "*mp4")):
+            print(file)
+            self.ui.cameraDemoMenu.addAction(
+                QtWidgets.QAction(f"{file}",
+                                  self.ui.cameraPortMenu,
+                                  triggered=partial(self.camera.set_video,
+                                                    file)))
 
         if len(self.camera.working_ports) == 0:
             self.camera.set_video()

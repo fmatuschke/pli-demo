@@ -151,13 +151,14 @@ class MainWindow(QtWidgets.QMainWindow):
         self.cameraPortMenu = self.cameraMenu.addMenu('&port')
         self.cameraResolutionMenu = self.cameraMenu.addMenu('&resolution')
         self.cameraFilterMenu = self.cameraMenu.addMenu('&filter')
+        self.cameraDemoMenu = self.cameraMenu.addMenu('&demo')
         #
+        self.action_filter_nlmd = QtWidgets.QAction("&nlmd")
+        self.cameraFilterMenu.addAction(self.action_filter_nlmd)
         self.action_filter_none = QtWidgets.QAction("&none", self)
         self.cameraFilterMenu.addAction(self.action_filter_none)
         self.action_filter_gaus = QtWidgets.QAction("&gaus")
         self.cameraFilterMenu.addAction(self.action_filter_gaus)
-        self.action_filter_nlmd = QtWidgets.QAction("&nlmd")
-        self.cameraFilterMenu.addAction(self.action_filter_nlmd)
 
         # HELP
         self.helpMenu = self.mainMenu.addMenu('&help')
