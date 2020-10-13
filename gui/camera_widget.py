@@ -49,7 +49,7 @@ class CameraWidget(QtWidgets.QLabel):
         self.pli_stack = PliStack()
 
         # DEBUG
-        self.camera_and_tracker()  # first run for debug
+        self.next_frame()  # first run for debug
         self.live.start(40)  # 1000/fps
 
     def toogleAddPlot(self):
@@ -73,6 +73,9 @@ class CameraWidget(QtWidgets.QLabel):
                                   triggered=partial(self.camera.set_resolution,
                                                     width, height)))
 
+        if len(self.camera.working_ports) == 0:
+            self.camera.set_video()
+
         # TODO: center, but value change with resize
         self.click_x = 0
         self.click_y = 0
@@ -85,7 +88,7 @@ class CameraWidget(QtWidgets.QLabel):
 
         # QTimer to access camera frames
         self.live = QtCore.QTimer(self)
-        self.live.timeout.connect(self.camera_and_tracker)
+        self.live.timeout.connect(self.next_frame)
 
     def resizeEvent(self, event):
         super(CameraWidget, self).resizeEvent(event)
@@ -201,7 +204,7 @@ class CameraWidget(QtWidgets.QLabel):
         else:
             raise ValueError("wrong input")
 
-    def camera_and_tracker(self):
+    def next_frame(self):
         # GET CAMERA FRAME
         if not self.camera.is_alive():
             return

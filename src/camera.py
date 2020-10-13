@@ -52,6 +52,9 @@ class Camera:
         print(f"working ports: {self.working_ports}")
         return self.working_ports
 
+    def set_video(self, file_name="data/medium.webm"):
+        self.video_capture = cv2.VideoCapture(file_name)
+
     def set_port_id(self, i):
         if len(self.working_ports) > i:
             self.video_capture = cv2.VideoCapture(self.working_ports[i])
@@ -61,7 +64,7 @@ class Camera:
                     break
         else:
             self.video_capture = None
-            print("id extend port list")
+            print("port id unavailable")
 
     def set_resolution(self, width, height):
         if self.is_alive():
