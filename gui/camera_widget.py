@@ -1,6 +1,7 @@
 import os
 
 import numpy as np
+import itertools
 from functools import partial
 
 import cv2
@@ -315,7 +316,8 @@ class CameraWidget(QtWidgets.QLabel):
 
             # draw click coordinates
 
-            for x, y, c in zip(self.plot_x, self.plot_y, colors):
+            for x, y, c in zip(self.plot_x, self.plot_y,
+                               itertools.cycle(colors)):
                 pen.setColor(QtGui.QColor(c[0], c[1], c[2], c[3]))
                 painter.setPen(pen)
                 painter.drawEllipse(QtCore.QPointF(x * scale, y * scale), 5, 5)

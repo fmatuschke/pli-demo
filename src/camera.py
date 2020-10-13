@@ -40,6 +40,8 @@ class Camera:
             is_reading, _ = camera.read()
             if is_reading:
                 port_works = True
+            name = camera.getBackendName()
+            print("port:", port, name)
             camera.release()
         return port_works
 
