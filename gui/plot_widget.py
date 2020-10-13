@@ -16,6 +16,7 @@ class PlotWidget(QtChart.QChartView):
         self.setLayout(self.layout)
 
         self.chart = QtChart.QChart()
+        self.chart.setTheme(QtChart.QChart.ChartThemeDark)
         self.setChart(self.chart)
 
         # p = self.palette()
@@ -30,18 +31,28 @@ class PlotWidget(QtChart.QChartView):
         if not flag_add:
             self.chart.removeAllSeries()
 
-        if x_data.ndim != 1:
-            print("x FOOOOOO")
-        if y_data.ndim != 1:
-            print("y FOOOOOO")
+        if x_data.size == 0 or y_data.size == 0:
+            return
+
+        if x_data.ndim != 1 or y_data.ndim != 1:
+            raise ValueError("x,y,data length")
 
         if x_data[0] == 0:
             x_data = np.append(x_data, [np.pi])
             y_data = np.append(y_data, [y_data[0]])
         series = QtChart.QLineSeries()
+
         for x, y in zip(x_data, y_data):
             series.append(np.rad2deg(x), y)
         self.chart.addSeries(series)
+
+        # colors for ChartThemeDark
+        # print(self.chart.series()[-1].pen().color().getRgb())
+        # (56, 173, 107, 255)
+        # (60, 132, 167, 255)
+        # (235, 136, 23, 255)
+        # (123, 127, 140, 255)
+        # (191, 89, 62, 255)
 
         if not flag_add:
             self.chart.createDefaultAxes()

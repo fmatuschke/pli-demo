@@ -1,4 +1,6 @@
 import cv2
+import numpy as np
+
 from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
@@ -15,16 +17,11 @@ class ZoomWidget(QtWidgets.QLabel):
         self.layout = QtWidgets.QVBoxLayout(self)
         self.setLayout(self.layout)
 
-        # p = self.palette()
-        # p.setColor(self.backgroundRole(), QtGui.QColor(255, 0, 0))
-        # self.setAutoFillBackground(True)
-        # self.setPalette(p)
-
     def resizeEvent(self, event):
         super(ZoomWidget, self).resizeEvent(event)
-        self.update_image(self.image)
+        self.update_image(self.image, (56, 173, 107, 255))
 
-    def update_image(self, frame):
+    def update_image(self, frame, color):
         self.image = frame.copy()
 
         if frame.ndim == 2:
@@ -42,7 +39,7 @@ class ZoomWidget(QtWidgets.QLabel):
         # target indicator
         painter = QtGui.QPainter(pixmap)
         pen = QtGui.QPen()
-        pen.setColor(QtCore.Qt.magenta)
+        pen.setColor(QtGui.QColor(color[0], color[1], color[2], color[3]))
         pen.setWidth(3)
         painter.setPen(pen)
         painter.drawEllipse(

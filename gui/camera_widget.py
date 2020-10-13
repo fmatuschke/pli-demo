@@ -18,7 +18,7 @@ class CameraWidget(QtWidgets.QLabel):
 
     plot_update = QtCore.pyqtSignal(np.ndarray, np.ndarray, float, bool)
     # click_update = QtCore.pyqtSignal(int, int)
-    zoom_update = QtCore.pyqtSignal(np.ndarray)
+    zoom_update = QtCore.pyqtSignal(np.ndarray, np.ndarray)
 
     def __init__(self, parent=None, *args, **kwargs):
         super(CameraWidget, self).__init__(parent, *args, **kwargs)
@@ -30,7 +30,8 @@ class CameraWidget(QtWidgets.QLabel):
         self.show_tracker = False
         self.mode = "live"
         self.filter_image = True
-        #
+
+        # plot variables
         self.plot_add = False
         self.plot_x = []
         self.plot_y = []
@@ -285,6 +286,11 @@ class CameraWidget(QtWidgets.QLabel):
         # camera widget
         pixmap = QtGui.QPixmap.fromImage(self.convertFrame2Image(image))
 
+        colors = np.array([(56, 173, 107, 255), (60, 132, 167, 255),
+                           (235, 136, 23, 255), (123, 127, 140, 255),
+                           (191, 89, 62, 255)], np.uint8)  # ChartThemeDark
+        last_color = colors[0]
+
         if self.tracker.is_calibrated:
             painter = QtGui.QPainter(pixmap)
             pen = QtGui.QPen()
@@ -307,6 +313,14 @@ class CameraWidget(QtWidgets.QLabel):
             #         (self.tracker.center[1] - self.mask_origin[1]) * scale), 10,
             #     10)
 
+            # draw click coordinates
+
+            for x, y, c in zip(self.plot_x, self.plot_y, colors):
+                pen.setColor(QtGui.QColor(c[0], c[1], c[2], c[3]))
+                painter.setPen(pen)
+                painter.drawEllipse(QtCore.QPointF(x * scale, y * scale), 5, 5)
+                last_color = c
+
             del painter
         self.setPixmap(pixmap)
 
@@ -315,4 +329,4 @@ class CameraWidget(QtWidgets.QLabel):
         x = max(d, min(image.shape[1] - d - 1, self.click_x))
         y = max(d, min(image.shape[0] - d - 1, self.click_y))
         image = np.array(image[y - d:y + d, x - d:x + d])
-        self.zoom_update.emit(image)
+        self.zoom_update.emit(image, last_color)

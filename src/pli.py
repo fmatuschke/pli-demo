@@ -121,7 +121,6 @@ class Stack:
             if self._frames[idx] is None:
                 if frame.ndim == 3:
                     frame = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
-                print(frame.shape)
                 self._frames[idx] = frame
                 is_inserted = True
 
@@ -172,6 +171,6 @@ class Stack:
         y = int(y)
 
         if self.size == 0:
-            return np.array((0.0)), np.array((0.0))
+            return np.array([]), np.array([])
 
         return self.angles, self.frames[:, y, x]
