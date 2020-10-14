@@ -59,6 +59,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.layout.addLayout(self.layout_center, 0, 1, 1, 1)
         self.layout.addLayout(self.layout_right, 0, 2, 1, 1)
 
+        self.layout.setColumnStretch(0, 1)
+        self.layout.setColumnStretch(1, 4)
+        self.layout.setColumnStretch(2, 2)
+
         self.setCentralWidget(QtWidgets.QWidget(self))
 
         self.textwidget = QtWidgets.QLabel(self)
@@ -70,15 +74,15 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.plotwidget = PlotWidget(self)
         self.plotwidget.setMinimumSize(QtCore.QSize(200, 200))
-        self.plotwidget.setMaximumSize(QtCore.QSize(500, 500))
+        # self.plotwidget.setMaximumSize(QtCore.QSize(500, 500))
 
         self.zoomwidget = ZoomWidget(self)
         self.zoomwidget.setMinimumSize(QtCore.QSize(200, 200))
-        self.zoomwidget.setMaximumSize(QtCore.QSize(500, 500))
+        # self.zoomwidget.setMaximumSize(QtCore.QSize(500, 500))
 
         self.setupwidget = SetupWidget(self)
         self.setupwidget.setMinimumSize(QtCore.QSize(200, 200))
-        self.setupwidget.setMaximumSize(QtCore.QSize(300, 1000))
+        # self.setupwidget.setMaximumSize(QtCore.QSize(300, 1000))
 
         self.logolabelpli = QtWidgets.QLabel()
         self.logolabelpli.setMaximumSize(QtCore.QSize(200, 200))
@@ -104,11 +108,17 @@ class MainWindow(QtWidgets.QMainWindow):
         self.layout_left.addWidget(self.logolabelfzj, 1, 0, 1, 1)
         self.layout_left.addWidget(self.setupwidget, 2, 0, 1, 1)
         self.layout_left.addWidget(self.textwidget, 3, 0, 1, 1)
+        # self.layout_left.setRowStretch(0, 4)
+        # self.layout_left.setRowStretch(1, 4)
+        # self.layout_left.setRowStretch(2, 10)
+        # self.layout_left.setRowStretch(3, 1)
 
         self.layout_center.addWidget(self.camwidget, 0, 0, 1, 1)
 
         self.layout_right.addWidget(self.zoomwidget, 0, 0, 1, 1)
         self.layout_right.addWidget(self.plotwidget, 1, 0, 1, 1)
+        self.layout_right.setRowStretch(0, 1)
+        self.layout_right.setRowStretch(1, 1)
 
         # self.camwidget.setAlignment(QtCore.Qt.AlignRight)
         self.camwidget.setAlignment(QtCore.Qt.AlignCenter)
