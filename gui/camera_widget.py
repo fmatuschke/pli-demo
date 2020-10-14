@@ -51,7 +51,8 @@ class CameraWidget(QtWidgets.QLabel):
 
         # DEBUG
         self.next_frame()  # first run for debug
-        self.live.start(40)  # 1000/fps
+        if self.camera.fps > 0:
+            self.live.start(1000 // self.camera.fps)
 
     def toogleAddPlot(self):
         self.plot_add = not self.plot_add
@@ -67,11 +68,10 @@ class CameraWidget(QtWidgets.QLabel):
             self.live.stop()
             self.tracker = Tracker()
             self.pli_stack = PliStack()
-            self.live.start(40)
+            if self.camera.fps > 0:
+                self.live.start(1000 // self.camera.fps)
 
-        for file in glob.glob(
-                os.path.join(os.path.basename(os.path.abspath(__file__)), "..",
-                             "data", "*mp4")):
+        for file in glob.glob(os.path.join("data", "*mp4")):
             print(file)
             self.ui.cameraDemoMenu.addAction(
                 QtWidgets.QAction(f"{file}",
@@ -100,7 +100,8 @@ class CameraWidget(QtWidgets.QLabel):
             self.set_resolutions_to_menu()
             self.tracker = Tracker()
             self.pli_stack = PliStack()
-            self.live.start(40)
+            if self.camera.fps > 0:
+                self.live.start(1000 // self.camera.fps)
 
         for port in self.camera.available_ports:
             self.ui.cameraPortMenu.addAction(
@@ -109,11 +110,20 @@ class CameraWidget(QtWidgets.QLabel):
                                   triggered=partial(set_port, self, port)))
 
     def set_resolutions_to_menu(self):
+
+        def set_res(self, width, height, fps):
+            self.live.stop()
+            self.camera.set_prop(width, height, fps)
+            self.tracker = Tracker()
+            self.pli_stack = PliStack()
+            if self.camera.fps > 0:
+                self.live.start(1000 // self.camera.fps)
+
         for width, height in self.camera.available_resolutions:
             self.ui.cameraResolutionMenu.addAction(
                 QtWidgets.QAction(f"{width}x{height}",
                                   self.ui.cameraResolutionMenu,
-                                  triggered=partial(self.camera.set_prop, width,
+                                  triggered=partial(set_res, self, width,
                                                     height, 30)))
 
     def resizeEvent(self, event):
@@ -196,7 +206,7 @@ class CameraWidget(QtWidgets.QLabel):
 
         self.mode = mode
         if mode == "live":
-            self.live.start(40)
+            self.live.start(1000 // self.camera.fps)
             return
         else:
             self.live.stop()

@@ -29,12 +29,25 @@ class Camera:
         self._working_resolutions = []
 
         self._check_ports(port_start, port_end)
-        self.set_port(
-            self._port if self._port is not None else self._working_ports[0])
+        if len(self._working_ports) > 0:
+            self.set_port(self._port if self._port is not None else self.
+                          _working_ports[0])
         self._check_resolutions()
         self.set_prop(width, height, fps)
         self._gray_image = gray_image
         self.check_readout()
+
+    @property
+    def width(self):
+        return int(self._video_capture.get(cv2.CAP_PROP_FRAME_WIDTH))
+
+    @property
+    def height(self):
+        return int(self._video_capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
+
+    @property
+    def fps(self):
+        return int(self._video_capture.get(cv2.CAP_PROP_FPS))
 
     @property
     def available_ports(self):
@@ -49,11 +62,12 @@ class Camera:
         return self._working_resolutions
 
     def __del__(self):
-        if self._video_capture:
+        if self._video_capture.isOpened():
             self._video_capture.release()
 
     def _reset(self):
-        self._video_capture.release()
+        if self._video_capture.isOpened():
+            self._video_capture.release()
         self._mode = CamMode.NONE
         self._port = None
         self._video_capture = cv2.VideoCapture()
@@ -85,6 +99,7 @@ class Camera:
         return self._working_ports
 
     def set_port(self, i):
+        # be sure to stop thread first
         self._port = i
         self._mode = CamMode.CAMERA
         if self._video_capture.isOpened():
@@ -105,8 +120,6 @@ class Camera:
         if self._video_capture.isOpened():
             for _ in range(i):
                 if self._video_capture.read()[0]:
-                    self._mode = CamMode.CAMERA
-                    self._port = i
                     break
 
     def _check_resolutions(self):
@@ -144,7 +157,8 @@ class Camera:
 
         return self._working_resolutions
 
-    def set_prop(self, width, height, fps=25):
+    def set_prop(self, width, height, fps=30):
+        # be sure to stop thread first
         if self._mode == CamMode.CAMERA:
 
             # reset camera to set setting befor image capture
@@ -152,25 +166,12 @@ class Camera:
 
             self._video_capture.set(cv2.CAP_PROP_FRAME_WIDTH, width)
             self._video_capture.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
-
-            # self._video_capture = cv2.
-            if self._video_capture.get(cv2.CAP_PROP_FRAME_WIDTH
-                                      ) != width or self._video_capture.get(
-                                          cv2.CAP_PROP_FRAME_HEIGHT) != height:
-                print(
-                    f"resolution {width}x{height} not available. Switch to {int(self._video_capture.get(cv2.CAP_PROP_FRAME_WIDTH))}x{int(self._video_capture.get(cv2.CAP_PROP_FRAME_HEIGHT))}"
-                )
-
             self._video_capture.set(cv2.CAP_PROP_FPS, fps)
-            if self._video_capture.get(cv2.CAP_PROP_FPS) != fps:
-                print(
-                    f"fps {fps} not available. Switch to {self._video_capture.get(cv2.CAP_PROP_FPS)}"
-                )
 
             # Read some images to ensure the cam is ready
-            for _ in range(42):
-                if self._video_capture.read()[0]:
-                    break
+            self.check_readout()
+
+        print(f"resolution: {self.width}x{self.height}, fps: {self.fps}")
 
     def frame(self, quadratic=False):
         if self._mode == CamMode.CAMERA:
@@ -178,7 +179,7 @@ class Camera:
 
             if not ret:
                 print(f"camera disconnected: {ret}")
-                self._mode == CamMode.NONE
+                self._mode = CamMode.NONE
                 return None
         elif self._mode == CamMode.VIDEO:
             ret, frame = self._video_capture.read()
@@ -187,7 +188,7 @@ class Camera:
                 ret, frame = self._video_capture.read()
                 if not ret:
                     print("video file corrupted")
-                    self._mode == CamMode.NONE
+                    self._mode = CamMode.NONE
                     return None
         else:
             return None

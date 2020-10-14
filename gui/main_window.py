@@ -198,8 +198,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.camwidget.setVisible(False)
         self.zoomwidget.setVisible(False)
 
-        self.camwidget.camera.video_capture.release()
         self.camwidget.live.stop()
+        self.camwidget.camera._video_capture.release()
         del self.camwidget
         self.mainMenu.clear()
 
