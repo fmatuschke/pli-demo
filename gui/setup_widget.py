@@ -93,7 +93,15 @@ class SetupWidget(QtOpenGL.QGLWidget):
         self.prog['worldToCamera'].value = project
 
     def paintGL(self):
-        self.ctx.viewport = (0, 0, self.width(), self.height())
+        # always same vie aspect ratio
+        w = self.width()
+        h = self.height()
+        if h > 3 * w:
+            h = w * 3
+        else:
+            w = h // 3
+
+        self.ctx.viewport = (0, 0, w, h)
         self.ctx.clear(0.9, 0.9, 0.9)
         self.create_data()
         vbo = self.ctx.buffer(self.data.astype('f4').tobytes())
