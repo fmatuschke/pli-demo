@@ -86,7 +86,9 @@ class SetupWidget(QtOpenGL.QGLWidget):
             fragment_shader=self.frag_string,
         )
 
-        project = Projection3D(self.width() / self.height(), 4.2, 0.1, 1000.0)
+        project = Projection3D(min(1,
+                                   self.width() / self.height()), 4.2, 0.1,
+                               1000.0)
         project = tuple(np.array(project.matrix).flatten().T)
         self.prog['worldToCamera'].value = project
 

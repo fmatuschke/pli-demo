@@ -51,7 +51,7 @@ class CameraWidget(QtWidgets.QLabel):
 
         # DEBUG
         self.next_frame()  # first run for debug
-        if self.camera.fps > 0:
+        if self.camera.live:
             self.live.start(1000 // self.camera.fps)
 
     def toogleAddPlot(self):
@@ -68,7 +68,7 @@ class CameraWidget(QtWidgets.QLabel):
             self.live.stop()
             self.tracker = Tracker()
             self.pli_stack = PliStack()
-            if self.camera.fps > 0:
+            if self.camera.live:
                 self.live.start(1000 // self.camera.fps)
 
         for file in glob.glob(os.path.join("data", "*mp4")):
@@ -100,7 +100,7 @@ class CameraWidget(QtWidgets.QLabel):
             self.set_resolutions_to_menu()
             self.tracker = Tracker()
             self.pli_stack = PliStack()
-            if self.camera.fps > 0:
+            if self.camera.live:
                 self.live.start(1000 // self.camera.fps)
 
         for port in self.camera.available_ports:
@@ -116,7 +116,7 @@ class CameraWidget(QtWidgets.QLabel):
             self.camera.set_prop(width, height, fps)
             self.tracker = Tracker()
             self.pli_stack = PliStack()
-            if self.camera.fps > 0:
+            if self.camera.live:
                 self.live.start(1000 // self.camera.fps)
 
         for width, height in self.camera.available_resolutions:
@@ -181,6 +181,9 @@ class CameraWidget(QtWidgets.QLabel):
         '''
         Sets Tracking coordinate to the clicked coordinate
         '''
+        if self.pixmap() is None:
+            return
+
         self.click_x, self.click_y = self.widget2framecoordinates(
             event.x(), event.y())
         self.set_mode(self.mode)
@@ -206,7 +209,8 @@ class CameraWidget(QtWidgets.QLabel):
 
         self.mode = mode
         if mode == "live":
-            self.live.start(1000 // self.camera.fps)
+            if self.camera.live:
+                self.live.start(1000 // self.camera.fps)
             return
         else:
             self.live.stop()
@@ -261,7 +265,7 @@ class CameraWidget(QtWidgets.QLabel):
         if frame.ndim == 2:
             frame = denoise(frame)
         else:
-            for i in frame.shape[2]:
+            for i in range(frame.shape[2]):
                 frame[:, :, i] = denoise(frame[:, :, i])
 
         # RUN TRACKER

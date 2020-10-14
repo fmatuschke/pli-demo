@@ -24,6 +24,7 @@ class Camera:
 
         self._mode = CamMode.NONE
         self._port = port
+        self._success = False
         self._video_capture = cv2.VideoCapture()
         self._working_ports = []
         self._working_resolutions = []
@@ -50,6 +51,10 @@ class Camera:
         return int(self._video_capture.get(cv2.CAP_PROP_FPS))
 
     @property
+    def live(self):
+        return self._success
+
+    @property
     def available_ports(self):
         if len(self._working_ports) == 0:
             self._check_ports(0, 5)
@@ -71,6 +76,7 @@ class Camera:
         self._mode = CamMode.NONE
         self._port = None
         self._video_capture = cv2.VideoCapture()
+        self._success = False
         self._working_ports = []
         self._working_resolutions = []
 
@@ -100,7 +106,6 @@ class Camera:
 
     def set_port(self, i):
         # be sure to stop thread first
-        self._port = i
         self._mode = CamMode.CAMERA
         if self._video_capture.isOpened():
             self._video_capture.release()
@@ -110,10 +115,16 @@ class Camera:
         self._video_capture = cv2.VideoCapture(i)
 
         if not self._video_capture.isOpened():
-            print("camera unavailable")
+            print(f"camera {i} unavailable")
             if i in self._working_ports:
                 self._working_ports = list(
                     filter(lambda x: x != i, self._working_ports))
+            if len(self._working_ports) > 0:
+                self._port = self._working_ports[0]
+            else:
+                self._port = None
+        else:
+            self._port = i
 
     def check_readout(self, i=42):
         # Read some images to ensure the cam is ready
@@ -133,7 +144,8 @@ class Camera:
 
             # EXIO cam USB2
             test_resolution = [(640, 480), (1024, 768), (1280, 720),
-                               (1280, 960), (1920, 1080), (2048, 1536)]
+                               (1280, 960), (1920, 1080), (2048, 1536),
+                               (2560, 1440), (2560, 1600), (3840, 2160)]
 
             org_width = int(self._video_capture.get(cv2.CAP_PROP_FRAME_WIDTH))
             org_height = int(self._video_capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
@@ -175,32 +187,34 @@ class Camera:
 
     def frame(self, quadratic=False):
         if self._mode == CamMode.CAMERA:
-            ret, frame = self._video_capture.read()
+            self._success, frame = self._video_capture.read()
 
-            if not ret:
-                print(f"camera disconnected: {ret}")
+            if not self._success:
+                print(f"camera disconnected")
                 self._mode = CamMode.NONE
-                return None
+                print(frame)
+                # frame = np.ndarray()
         elif self._mode == CamMode.VIDEO:
-            ret, frame = self._video_capture.read()
-            if not ret:
+            self._success, frame = self._video_capture.read()
+            if not self._success:
                 print(self._video_capture.set(cv2.CAP_PROP_POS_FRAMES, 0))
-                ret, frame = self._video_capture.read()
-                if not ret:
+                self._success, frame = self._video_capture.read()
+                if not self._success:
                     print("video file corrupted")
                     self._mode = CamMode.NONE
-                    return None
+                    # frame = np.ndarray()
         else:
-            return None
+            frame = None
 
-        if self._gray_image:
-            frame = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
-        if quadratic:
-            height, width = frame.shape[0], frame.shape[1]
-            l = min(height, width)
-            delta = np.abs((width - height) // 2)
+        if self._success:
+            if self._gray_image:
+                frame = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
+            if quadratic:
+                height, width = frame.shape[0], frame.shape[1]
+                l = min(height, width)
+                delta = np.abs((width - height) // 2)
 
-            frame = np.array(frame[:, delta:delta +
-                                   l] if width > height else frame[delta:delta +
-                                                                   l, :])
+                frame = np.array(frame[:, delta:delta +
+                                       l] if width > height else frame[
+                                           delta:delta + l, :])
         return frame
