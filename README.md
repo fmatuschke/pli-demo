@@ -24,19 +24,17 @@ python3 main.py
 
 ## TODO
 
+- plot widget: stop maximal resizing
 - only live view mode
 - sufficient brain segmentation
-- change camera port
 - right click mouse on image functions?
-- improve 3d rendering
 - crop image top and bottom
 - visual feedback when resetting
 - visual feedback instead of QLabel text?, at least improving
-- destroyer for camera capture class
 - visual feedback for captured angles
 - rho = 0
-- demo data for no camera mode
 - check qt camera viewfinder again
-- non central camera view
-- rotatable filters
-- RFC shaders
+- improve 3d rendering
+- resize event rendering
+- opengl: rotatable filters
+- opengl: RFC shaders
