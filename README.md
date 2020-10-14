@@ -24,6 +24,7 @@ python3 main.py
 
 ## TODO
 
+- improve pli mask
 - plot widget: stop maximal resizing
 - only live view mode
 - sufficient brain segmentation

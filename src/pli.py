@@ -70,6 +70,7 @@ class Stack:
         self._retardation = None
         self._inclination = None
         self._fom = None
+        self._mask = None
 
     @property
     def size(self):
@@ -108,6 +109,10 @@ class Stack:
     @property
     def fom(self):
         return self._fom.copy()
+
+    @property
+    def mask(self):
+        return self._mask.copy()
 
     def insert(self, rho, frame):
         # get closest angle
@@ -156,6 +161,7 @@ class Stack:
     def calc_fom(self):
         self._inclination = self._retardation / np.amax(self._retardation)
         self._fom = fom_hsv_black(self._direction, self._inclination)
+        self._mask = self.retardation > 0.05
 
     def clear(self):
         self._angles = np.linspace(0, np.pi, self._n_images, False)
