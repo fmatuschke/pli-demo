@@ -39,14 +39,23 @@ class PlotWidget(QtChart.QChartView):
         if x_data.ndim != 1 or y_data.ndim != 1:
             raise ValueError("x,y,data length")
 
-        if x_data[0] == 0:
+        if x_data.size == 18:
             x_data = np.append(x_data, [np.pi])
             y_data = np.append(y_data, [y_data[0]])
-        series = QtChart.QLineSeries()
 
+        series = QtChart.QScatterSeries()
         for x, y in zip(x_data, y_data):
             series.append(np.rad2deg(x), y)
         self.chart.addSeries(series)
+
+        # if x_data.size == 18:
+        # self.chart.setTheme(QtChart.QChart.ChartThemeDark)
+        # x_data = np.append(x_data, [np.pi])
+        # y_data = np.append(y_data, [y_data[0]])
+        # series = QtChart.QLineSeries()
+        # for x, y in zip(x_data, y_data):
+        #     series.append(np.rad2deg(x), y)
+        # self.chart.addSeries(series)
 
         # colors for ChartThemeDark
         # print(self.chart.series()[-1].pen().color().getRgb())
@@ -56,8 +65,7 @@ class PlotWidget(QtChart.QChartView):
         # (123, 127, 140, 255)
         # (191, 89, 62, 255)
 
-        if not flag_add:
-            self.chart.createDefaultAxes()
-        axes = self.chart.axes()
-        for a in axes:
-            a.applyNiceNumbers()
+        self.chart.createDefaultAxes()
+        self.chart.axes()[0].setMin(0)
+        self.chart.axes()[0].setMax(180)
+        self.chart.axes()[1].applyNiceNumbers()
