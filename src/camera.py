@@ -52,7 +52,7 @@ class Camera:
 
     @property
     def live(self):
-        return self._success
+        return self._video_capture.isOpened()
 
     @property
     def available_ports(self):
@@ -192,8 +192,6 @@ class Camera:
             if not self._success:
                 print(f"camera disconnected")
                 self._mode = CamMode.NONE
-                print(frame)
-                # frame = np.ndarray()
         elif self._mode == CamMode.VIDEO:
             self._success, frame = self._video_capture.read()
             if not self._success:
@@ -202,7 +200,6 @@ class Camera:
                 if not self._success:
                     print("video file corrupted")
                     self._mode = CamMode.NONE
-                    # frame = np.ndarray()
         else:
             frame = None
 

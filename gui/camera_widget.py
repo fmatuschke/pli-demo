@@ -64,12 +64,11 @@ class CameraWidget(QtWidgets.QLabel):
         self.set_resolutions_to_menu()
 
         def video(self, file):
-            self.camera.set_video(file)
             self.live.stop()
+            self.camera.set_video(file)
             self.tracker = Tracker()
             self.pli_stack = PliStack()
-            if self.camera.live:
-                self.live.start(1000 // self.camera.fps)
+            self.live.start(1000 // self.camera.fps)
 
         for file in glob.glob(os.path.join("data", "*mp4")):
             print(file)
