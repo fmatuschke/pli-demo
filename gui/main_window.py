@@ -16,6 +16,17 @@ logo_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..",
                          "data")
 
 
+class Color(QtWidgets.QWidget):
+
+    def __init__(self, qcolor, *args, **kwargs):
+        super(Color, self).__init__(*args, **kwargs)
+        self.setAutoFillBackground(True)
+
+        palette = self.palette()
+        palette.setColor(QtGui.QPalette.Window, qcolor)
+        self.setPalette(palette)
+
+
 class MainWindow(QtWidgets.QMainWindow):
     '''
     MainWindow of the application, which contains all widgets and sort them in a layout
@@ -51,26 +62,12 @@ class MainWindow(QtWidgets.QMainWindow):
         # self.setupwidget.setMaximumSize(QtCore.QSize(w, h))
 
     def createCentralWidget(self):
-        self.layout = QtWidgets.QGridLayout()
-        self.layout_left = QtWidgets.QGridLayout()
-        self.layout_center = QtWidgets.QGridLayout()
-        self.layout_right = QtWidgets.QGridLayout()
-        self.layout.addLayout(self.layout_left, 0, 0, 1, 1)
-        self.layout.addLayout(self.layout_center, 0, 1, 1, 1)
-        self.layout.addLayout(self.layout_right, 0, 2, 1, 1)
-
-        self.layout.setColumnStretch(0, 1)
-        self.layout.setColumnStretch(1, 4)
-        self.layout.setColumnStretch(2, 2)
 
         self.setCentralWidget(QtWidgets.QWidget(self))
 
-        self.textwidget = QtWidgets.QLabel(self)
-        self.textwidget.setAutoFillBackground(True)
-        self.textwidget.setMaximumSize(QtCore.QSize(500, 25))
-
         self.camwidget = CameraWidget(self)
         self.camwidget.setMinimumSize(QtCore.QSize(600, 600))
+        self.camwidget.setAlignment(QtCore.Qt.AlignCenter)
 
         self.plotwidget = PlotWidget(self)
         self.plotwidget.setMinimumSize(QtCore.QSize(200, 200))
@@ -79,10 +76,11 @@ class MainWindow(QtWidgets.QMainWindow):
         self.zoomwidget = ZoomWidget(self)
         self.zoomwidget.setMinimumSize(QtCore.QSize(200, 200))
         # self.zoomwidget.setMaximumSize(QtCore.QSize(500, 500))
+        self.zoomwidget.setAlignment(QtCore.Qt.AlignTop)
 
         self.setupwidget = SetupWidget(self)
-        self.setupwidget.setMinimumSize(QtCore.QSize(200, 200))
-        # self.setupwidget.setMaximumSize(QtCore.QSize(300, 1000))
+        self.setupwidget.setMinimumSize(QtCore.QSize(300, 500))
+        self.setupwidget.setMaximumSize(QtCore.QSize(300, 500))
 
         self.logolabelpli = QtWidgets.QLabel()
         self.logolabelpli.setMaximumSize(QtCore.QSize(200, 200))
@@ -104,29 +102,28 @@ class MainWindow(QtWidgets.QMainWindow):
                     self.logolabelfzj.size().height(),
                     QtCore.Qt.KeepAspectRatio))
 
+        # layout
+        self.layout = QtWidgets.QGridLayout()
+        self.layout_left = QtWidgets.QGridLayout()
+        self.layout_right = QtWidgets.QGridLayout()
+        self.layout.addLayout(self.layout_left, 0, 0, 1, 1)
+        self.layout.addWidget(self.camwidget, 0, 1, 1, 1)
+        self.layout.addLayout(self.layout_right, 0, 2, 1, 1)
+
         self.layout_left.addWidget(self.logolabelpli, 0, 0, 1, 1)
         self.layout_left.addWidget(self.logolabelfzj, 1, 0, 1, 1)
-        self.layout_left.addWidget(self.setupwidget, 2, 0, 1, 1)
-        self.layout_left.addWidget(self.textwidget, 3, 0, 1, 1)
-        # self.layout_left.setRowStretch(0, 4)
-        # self.layout_left.setRowStretch(1, 4)
-        # self.layout_left.setRowStretch(2, 10)
-        # self.layout_left.setRowStretch(3, 1)
-
-        self.layout_center.addWidget(self.camwidget, 0, 0, 1, 1)
+        self.layout_left.addWidget(Color(QtGui.QColor(250, 0, 0, 0)), 2, 0, 1,
+                                   1)  # invisible stretchable widget
+        self.layout_left.addWidget(self.setupwidget, 3, 0, 1, 1)
 
         self.layout_right.addWidget(self.zoomwidget, 0, 0, 1, 1)
         self.layout_right.addWidget(self.plotwidget, 1, 0, 1, 1)
         self.layout_right.setRowStretch(0, 1)
         self.layout_right.setRowStretch(1, 1)
 
-        # self.camwidget.setAlignment(QtCore.Qt.AlignRight)
-        self.camwidget.setAlignment(QtCore.Qt.AlignCenter)
-        self.textwidget.setAlignment(QtCore.Qt.AlignBottom)
-        # self.zoomwidget.setAlignment(QtCore.Qt.AlignLeft)
-        # self.plotwidget.setAlignment(QtCore.Qt.AlignLeft)
-        # self.setupwidget.setAlignment(QtCore.Qt.AlignLeft)
-        # self.logolabelpli.setAlignment(QtCore.Qt.AlignLeft)
+        self.layout.setColumnStretch(0, 2)
+        self.layout.setColumnStretch(1, 4)
+        self.layout.setColumnStretch(2, 2)
 
         self.centralWidget().setLayout(self.layout)
 

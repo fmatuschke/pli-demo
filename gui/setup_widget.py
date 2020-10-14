@@ -97,12 +97,12 @@ class SetupWidget(QtOpenGL.QGLWidget):
         w = self.width()
         h = self.height()
         if h > 3 * w:
-            h = w * 3
+            h = w * 2
         else:
-            w = h // 3
+            w = h // 2
 
         self.ctx.viewport = (0, 0, w, h)
-        self.ctx.clear(0.9, 0.9, 0.9)
+        self.ctx.clear(38 / 255, 65 / 255, 100 / 255)
         self.create_data()
         vbo = self.ctx.buffer(self.data.astype('f4').tobytes())
         self.vao = self.ctx.simple_vertex_array(self.prog, vbo, 'v_position',

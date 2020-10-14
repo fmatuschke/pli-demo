@@ -28,6 +28,12 @@ class CameraWidget(QtWidgets.QLabel):
         self.setFrameStyle(QtWidgets.QFrame.StyledPanel)
         self.setFrameStyle(QtWidgets.QFrame.Plain)
 
+        # black background
+        self.setAutoFillBackground(True)
+        palette = self.palette()
+        palette.setColor(QtGui.QPalette.Window, QtGui.QColor(0, 0, 0))
+        self.setPalette(palette)
+
         # variables
         self.rho = 0
         self.last_angle = 0
@@ -35,6 +41,7 @@ class CameraWidget(QtWidgets.QLabel):
         self.show_tracker = False
         self.mode = "live"
         self.filter_image = "nlmd"
+        self._string = ""
 
         # plot variables
         self.plot_add = False
@@ -54,9 +61,12 @@ class CameraWidget(QtWidgets.QLabel):
         if self.camera.live:
             self.live.start(1000 // self.camera.fps)
 
+    def text(self, string):
+        self._string = string
+
     def toogleAddPlot(self):
         self.plot_add = not self.plot_add
-        self.ui.textwidget.setText(f"plot_add: {self.plot_add}")
+        self.text(f"plot_add: {self.plot_add}")
 
     def init_camera(self):
         self.camera = Camera(fps=30)
@@ -276,7 +286,7 @@ class CameraWidget(QtWidgets.QLabel):
                 self.rho = 0
                 self.last_angle = 0
                 self.pli_stack.insert(0, frame)
-                self.ui.textwidget.setText("Calibrated")
+                self.text("Calibrated")
 
         # get pli stack
         elif not self.pli_stack.full:
@@ -296,13 +306,7 @@ class CameraWidget(QtWidgets.QLabel):
                     else:
                         self.plot_update.emit(x, y, self.rho, True)
 
-                p = self.palette()
-                p.setColor(self.backgroundRole(), QtGui.QColor(0, 255, 0))
-                self.ui.textwidget.setPalette(p)
-                self.ui.textwidget.setText(
-                    f"inserted: {np.rad2deg(self.rho):.0f}")
-                p.setColor(self.backgroundRole(), QtGui.QColor(255, 0, 0))
-                self.ui.textwidget.setPalette(p)
+                self.text(f"inserted: {np.rad2deg(self.rho):.0f}")
 
         # get only angle
         else:
@@ -314,7 +318,7 @@ class CameraWidget(QtWidgets.QLabel):
         # print current angle
         if np.rad2deg(np.abs(helper.diff_orientation(self.last_angle,
                                                      self.rho))) > 1:
-            self.ui.textwidget.setText(f"{np.rad2deg(self.rho):.0f}")
+            self.text(f"{np.rad2deg(self.rho):.0f}")
             self.last_angle = self.rho
 
         if self.mode == "live":

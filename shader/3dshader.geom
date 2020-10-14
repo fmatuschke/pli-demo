@@ -75,18 +75,18 @@ void draw() {
         gl_Position = worldToCamera * (end + rot * (vec4(0, radius*cos(alpha), radius*sin(alpha), 1)));
         f_normal = rot * vec4(0, radius*cos(alpha), radius*sin(alpha), 1);
         f_position = gl_Position.xyz;
-        f_color = vec3(0.02, 0.235, 0.431);
+        f_color = vec3(0.02, 0.431, 0.235);
         EmitVertex();
         gl_Position = worldToCamera * (end + rot * (vec4(0, radius*cos(nextalpha), radius*sin(nextalpha), 1)));
         f_normal = rot * vec4(0, radius*cos(nextalpha), radius*sin(nextalpha), 1);
         f_position = gl_Position.xyz;
-        f_color = vec3(0.02, 0.235, 0.431);
+        f_color = vec3(0.02, 0.431, 0.235);
         EmitVertex();
 
         gl_Position = worldToCamera * end;
         f_normal = rot * vec4(normalize(vecOrientation), 1);
         f_position = gl_Position.xyz;
-        f_color =  vec3(0.02, 0.235, 0.431);
+        f_color = vec3(0.02, 0.431, 0.235);
         EmitVertex();
     }
 }
