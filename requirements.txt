@@ -1,5 +1,5 @@
 numpy
-PyQt5==5.14.0
+PyQt5==5.14.0 # 5.15 buggy with plugin libraries
 PyQtChart==5.14.0
 # opencv-python>=4.4.0.42
 opencv-contrib-python

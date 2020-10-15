@@ -368,40 +368,92 @@ class CameraWidget(QtWidgets.QLabel):
             pen.setColor(QtCore.Qt.green)
             pen.setWidth(3)
             painter.setPen(pen)
+
+            point_0 = QtCore.QPointF(
+                (self.tracker.center[0] - self.mask_origin[0] +
+                 np.cos(-self.rho) * self.tracker.radius * 0.98) * scale,
+                (self.tracker.center[1] - self.mask_origin[1] +
+                 np.sin(-self.rho) * self.tracker.radius * 0.98) * scale)
+            point_1 = QtCore.QPointF(
+                (self.tracker.center[0] - self.mask_origin[0] +
+                 np.cos(-self.rho) * self.tracker.radius * 1.02) * scale,
+                (self.tracker.center[1] - self.mask_origin[1] +
+                 np.sin(-self.rho) * self.tracker.radius * 1.02) * scale)
+            painter.drawLine(point_0, point_1)
+
+            point_0 = QtCore.QPointF(
+                (self.tracker.center[0] - self.mask_origin[0] +
+                 np.cos(-self.rho+np.pi) * self.tracker.radius * 0.98) * scale,
+                (self.tracker.center[1] - self.mask_origin[1] +
+                 np.sin(-self.rho+np.pi) * self.tracker.radius * 0.98) * scale)
+            point_1 = QtCore.QPointF(
+                (self.tracker.center[0] - self.mask_origin[0] +
+                 np.cos(-self.rho+np.pi) * self.tracker.radius * 1.02) * scale,
+                (self.tracker.center[1] - self.mask_origin[1] +
+                 np.sin(-self.rho+np.pi) * self.tracker.radius * 1.02) * scale)
+            painter.drawLine(point_0, point_1)
+
             for rho in self.pli_stack.angles:
-                rho = int(np.rad2deg(rho))
+                for a, b in zip(
+                        np.linspace(-1, 1, 10)[:-1],
+                        np.linspace(-1, 1, 10)[1:]):
+                    point_0 = QtCore.QPointF(
+                        (self.tracker.center[0] - self.mask_origin[0] +
+                         np.cos(-rho + np.deg2rad(a * 5)) * self.tracker.radius)
+                        * scale,
+                        (self.tracker.center[1] - self.mask_origin[1] +
+                         np.sin(-rho + np.deg2rad(a * 5)) * self.tracker.radius)
+                        * scale)
+                    point_1 = QtCore.QPointF(
+                        (self.tracker.center[0] - self.mask_origin[0] +
+                         np.cos(-rho + np.deg2rad(b * 5)) * self.tracker.radius)
+                        * scale,
+                        (self.tracker.center[1] - self.mask_origin[1] +
+                         np.sin(-rho + np.deg2rad(b * 5)) * self.tracker.radius)
+                        * scale)
+                    painter.drawLine(point_0, point_1)
+
+                    rho = rho + np.pi
+                    point_0 = QtCore.QPointF(
+                        (self.tracker.center[0] - self.mask_origin[0] +
+                         np.cos(-rho + np.deg2rad(a * 5)) * self.tracker.radius)
+                        * scale,
+                        (self.tracker.center[1] - self.mask_origin[1] +
+                         np.sin(-rho + np.deg2rad(a * 5)) * self.tracker.radius)
+                        * scale)
+                    point_1 = QtCore.QPointF(
+                        (self.tracker.center[0] - self.mask_origin[0] +
+                         np.cos(-rho + np.deg2rad(b * 5)) * self.tracker.radius)
+                        * scale,
+                        (self.tracker.center[1] - self.mask_origin[1] +
+                         np.sin(-rho + np.deg2rad(b * 5)) * self.tracker.radius)
+                        * scale)
+                    painter.drawLine(point_0, point_1)
+
                 # Qt says full circle equals 5760 (16 * 360), but here *8
                 # Qt says Positive values for the angles mean counter-clockwise
                 #         while negative values mean the clockwise direction
                 #         Zero degrees is at the 3 o'clock position.
                 # buggy first drawArc, not dependend on value of rho
-                painter.drawArc((self.tracker.center[0] - self.mask_origin[0] -
-                                 self.tracker.radius) * scale,
-                                (self.tracker.center[1] - self.mask_origin[1] -
-                                 self.tracker.radius) * scale,
-                                (self.tracker.center[0] - self.mask_origin[0] +
-                                 self.tracker.radius) * scale,
-                                (self.tracker.center[1] - self.mask_origin[1] +
-                                 self.tracker.radius) * scale, (rho - 5) * 8,
-                                (rho + 5) * 8)
-                painter.drawArc((self.tracker.center[0] - self.mask_origin[0] -
-                                 self.tracker.radius) * scale,
-                                (self.tracker.center[1] - self.mask_origin[1] -
-                                 self.tracker.radius) * scale,
-                                (self.tracker.center[0] - self.mask_origin[0] +
-                                 self.tracker.radius) * scale,
-                                (self.tracker.center[1] - self.mask_origin[1] +
-                                 self.tracker.radius) * scale,
-                                (rho - 5 + 180) * 8, (rho + 5 + 180) * 8)
-
-            # draw center
-            # painter.drawEllipse(
-            #     QtCore.QPointF(
-            #         (self.tracker.center[0] - self.mask_origin[0]) * scale,
-            #         (self.tracker.center[1] - self.mask_origin[1]) * scale), 10,
-            #     10)
-
-            # draw click coordinates
+                # rho = int(np.rad2deg(rho))
+                # painter.drawArc((self.tracker.center[0] - self.mask_origin[0] -
+                #                  self.tracker.radius) * scale,
+                #                 (self.tracker.center[1] - self.mask_origin[1] -
+                #                  self.tracker.radius) * scale,
+                #                 (self.tracker.center[0] - self.mask_origin[0] +
+                #                  self.tracker.radius) * scale,
+                #                 (self.tracker.center[1] - self.mask_origin[1] +
+                #                  self.tracker.radius) * scale, (rho - 5) * 8,
+                #                 (rho + 5) * 8)
+                # painter.drawArc((self.tracker.center[0] - self.mask_origin[0] -
+                #                  self.tracker.radius) * scale,
+                #                 (self.tracker.center[1] - self.mask_origin[1] -
+                #                  self.tracker.radius) * scale,
+                #                 (self.tracker.center[0] - self.mask_origin[0] +
+                #                  self.tracker.radius) * scale,
+                #                 (self.tracker.center[1] - self.mask_origin[1] +
+                #                  self.tracker.radius) * scale,
+                #                 (rho - 5 + 180) * 8, (rho + 5 + 180) * 8)
 
             for x, y, c in zip(self.plot_x, self.plot_y,
                                itertools.cycle(colors)):
