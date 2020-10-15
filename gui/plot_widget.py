@@ -46,7 +46,7 @@ class PlotWidget(QtChart.QChartView):
         if x_data.ndim != 1 or y_data.ndim != 1:
             raise ValueError("x,y,data length")
 
-        if x_data.size == 18:
+        if 0 in x_data:
             x_data = np.append(x_data, [np.pi])
             y_data = np.append(y_data, [y_data[0]])
 
