@@ -49,6 +49,13 @@ class Tracker:
         else:
             for i in range(frame.shape[2]):
                 frame_[:, :, i] = np.multiply(frame[:, :, i], self._mask)
+
+        begin = np.array(self._center - self._radius + 0.5, np.int)
+        end = np.array(self._center + self._radius + 0.5, np.int)
+
+        # unique for each tissue sample
+        frame_[0:int(begin[1] + self._radius * 0.25), :] = 0
+        frame_[int(end[1] - self._radius * 0.35):, :] = 0
         return frame_
 
     def crop(self, frame):

@@ -198,7 +198,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def set_pli(self, value):
         value = bool(value)
-        print(f"set enable: {value}")
         self.action_transmittance.setEnabled(value)
         self.action_direction.setEnabled(value)
         self.action_retardation.setEnabled(value)

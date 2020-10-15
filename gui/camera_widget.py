@@ -75,10 +75,10 @@ class CameraWidget(QtWidgets.QLabel):
             self.ui.set_pli(False)
             self.live.start(30)
 
-        for file in glob.glob(os.path.join("data", "*mp4")):
-            print(file)
+        for i, file in enumerate(sorted(glob.glob(os.path.join("data",
+                                                               "*mp4")))):
             self.ui.cameraDemoMenu.addAction(
-                QtWidgets.QAction(f"{file}",
+                QtWidgets.QAction(f"&{i} - {file}",
                                   self.ui.cameraPortMenu,
                                   triggered=partial(video, self, file)))
 
@@ -366,45 +366,42 @@ class CameraWidget(QtWidgets.QLabel):
             pen = QtGui.QPen()
             scale = pixmap.width() / image.shape[1]
 
+            radius = self.tracker.radius * 0.99
             pen.setColor(QtCore.Qt.red)
-            pen.setWidth(2)
+            pen.setWidth(3)
             painter.setPen(pen)
             painter.drawEllipse(
                 QtCore.QPointF(
                     (self.tracker.center[0] - self.mask_origin[0]) * scale,
                     (self.tracker.center[1] - self.mask_origin[1]) * scale),
-                self.tracker.radius * scale, self.tracker.radius * scale)
+                radius * scale, radius * scale)
 
             pen.setColor(QtCore.Qt.green)
-            pen.setWidth(3)
+            pen.setWidth(4)
             painter.setPen(pen)
 
             point_0 = QtCore.QPointF(
                 (self.tracker.center[0] - self.mask_origin[0] +
-                 np.cos(-self.rho) * self.tracker.radius * 0.98) * scale,
+                 np.cos(-self.rho) * radius * 0.98) * scale,
                 (self.tracker.center[1] - self.mask_origin[1] +
-                 np.sin(-self.rho) * self.tracker.radius * 0.98) * scale)
+                 np.sin(-self.rho) * radius * 0.98) * scale)
             point_1 = QtCore.QPointF(
                 (self.tracker.center[0] - self.mask_origin[0] +
-                 np.cos(-self.rho) * self.tracker.radius * 1.02) * scale,
+                 np.cos(-self.rho) * radius * 1.02) * scale,
                 (self.tracker.center[1] - self.mask_origin[1] +
-                 np.sin(-self.rho) * self.tracker.radius * 1.02) * scale)
+                 np.sin(-self.rho) * radius * 1.02) * scale)
             painter.drawLine(point_0, point_1)
 
             point_0 = QtCore.QPointF(
                 (self.tracker.center[0] - self.mask_origin[0] +
-                 np.cos(-self.rho + np.pi) * self.tracker.radius * 0.98) *
-                scale,
+                 np.cos(-self.rho + np.pi) * radius * 0.98) * scale,
                 (self.tracker.center[1] - self.mask_origin[1] +
-                 np.sin(-self.rho + np.pi) * self.tracker.radius * 0.98) *
-                scale)
+                 np.sin(-self.rho + np.pi) * radius * 0.98) * scale)
             point_1 = QtCore.QPointF(
                 (self.tracker.center[0] - self.mask_origin[0] +
-                 np.cos(-self.rho + np.pi) * self.tracker.radius * 1.02) *
-                scale,
+                 np.cos(-self.rho + np.pi) * radius * 1.02) * scale,
                 (self.tracker.center[1] - self.mask_origin[1] +
-                 np.sin(-self.rho + np.pi) * self.tracker.radius * 1.02) *
-                scale)
+                 np.sin(-self.rho + np.pi) * radius * 1.02) * scale)
             painter.drawLine(point_0, point_1)
 
             for rho in self.pli_stack.angles:
@@ -413,35 +410,27 @@ class CameraWidget(QtWidgets.QLabel):
                         np.linspace(-1, 1, 10)[1:]):
                     point_0 = QtCore.QPointF(
                         (self.tracker.center[0] - self.mask_origin[0] +
-                         np.cos(-rho + np.deg2rad(a * 5)) * self.tracker.radius)
-                        * scale,
+                         np.cos(-rho + np.deg2rad(a * 5)) * radius) * scale,
                         (self.tracker.center[1] - self.mask_origin[1] +
-                         np.sin(-rho + np.deg2rad(a * 5)) * self.tracker.radius)
-                        * scale)
+                         np.sin(-rho + np.deg2rad(a * 5)) * radius) * scale)
                     point_1 = QtCore.QPointF(
                         (self.tracker.center[0] - self.mask_origin[0] +
-                         np.cos(-rho + np.deg2rad(b * 5)) * self.tracker.radius)
-                        * scale,
+                         np.cos(-rho + np.deg2rad(b * 5)) * radius) * scale,
                         (self.tracker.center[1] - self.mask_origin[1] +
-                         np.sin(-rho + np.deg2rad(b * 5)) * self.tracker.radius)
-                        * scale)
+                         np.sin(-rho + np.deg2rad(b * 5)) * radius) * scale)
                     painter.drawLine(point_0, point_1)
 
                     rho = rho + np.pi
                     point_0 = QtCore.QPointF(
                         (self.tracker.center[0] - self.mask_origin[0] +
-                         np.cos(-rho + np.deg2rad(a * 5)) * self.tracker.radius)
-                        * scale,
+                         np.cos(-rho + np.deg2rad(a * 5)) * radius) * scale,
                         (self.tracker.center[1] - self.mask_origin[1] +
-                         np.sin(-rho + np.deg2rad(a * 5)) * self.tracker.radius)
-                        * scale)
+                         np.sin(-rho + np.deg2rad(a * 5)) * radius) * scale)
                     point_1 = QtCore.QPointF(
                         (self.tracker.center[0] - self.mask_origin[0] +
-                         np.cos(-rho + np.deg2rad(b * 5)) * self.tracker.radius)
-                        * scale,
+                         np.cos(-rho + np.deg2rad(b * 5)) * radius) * scale,
                         (self.tracker.center[1] - self.mask_origin[1] +
-                         np.sin(-rho + np.deg2rad(b * 5)) * self.tracker.radius)
-                        * scale)
+                         np.sin(-rho + np.deg2rad(b * 5)) * radius) * scale)
                     painter.drawLine(point_0, point_1)
 
                 # Qt says full circle equals 5760 (16 * 360), but here *8
@@ -451,22 +440,22 @@ class CameraWidget(QtWidgets.QLabel):
                 # buggy first drawArc, not dependend on value of rho
                 # rho = int(np.rad2deg(rho))
                 # painter.drawArc((self.tracker.center[0] - self.mask_origin[0] -
-                #                  self.tracker.radius) * scale,
+                #                  radius) * scale,
                 #                 (self.tracker.center[1] - self.mask_origin[1] -
-                #                  self.tracker.radius) * scale,
+                #                  radius) * scale,
                 #                 (self.tracker.center[0] - self.mask_origin[0] +
-                #                  self.tracker.radius) * scale,
+                #                  radius) * scale,
                 #                 (self.tracker.center[1] - self.mask_origin[1] +
-                #                  self.tracker.radius) * scale, (rho - 5) * 8,
+                #                  radius) * scale, (rho - 5) * 8,
                 #                 (rho + 5) * 8)
                 # painter.drawArc((self.tracker.center[0] - self.mask_origin[0] -
-                #                  self.tracker.radius) * scale,
+                #                  radius) * scale,
                 #                 (self.tracker.center[1] - self.mask_origin[1] -
-                #                  self.tracker.radius) * scale,
+                #                  radius) * scale,
                 #                 (self.tracker.center[0] - self.mask_origin[0] +
-                #                  self.tracker.radius) * scale,
+                #                  radius) * scale,
                 #                 (self.tracker.center[1] - self.mask_origin[1] +
-                #                  self.tracker.radius) * scale,
+                #                  radius) * scale,
                 #                 (rho - 5 + 180) * 8, (rho + 5 + 180) * 8)
 
             for x, y, c in zip(self.plot_x, self.plot_y,
