@@ -24,6 +24,13 @@ python3 main.py
 
 ## TODO
 
+### BUGS
+
+- clean menu entries before adding after port camera change
+- pli entries only clickable if calculation is done
+
+### Improvements
+
 - improve 3d rendering
   - opengl: rotatable filters
   - opengl: RFC shaders
