@@ -283,6 +283,11 @@ class CameraWidget(QtWidgets.QLabel):
                 self.rho = 0
                 self.last_angle = 0
                 self.ui.statusBar().showMessage("Calibrated")
+                self.ui.action_transmittance.setEnabled(True)
+                self.ui.action_direction.setEnabled(True)
+                self.ui.action_retardation.setEnabled(True)
+                self.ui.action_inclination.setEnabled(True)
+                self.ui.action_fom.setEnabled(True)
 
         # get pli stack
         elif not self.pli_stack.full:
@@ -383,14 +388,18 @@ class CameraWidget(QtWidgets.QLabel):
 
             point_0 = QtCore.QPointF(
                 (self.tracker.center[0] - self.mask_origin[0] +
-                 np.cos(-self.rho+np.pi) * self.tracker.radius * 0.98) * scale,
+                 np.cos(-self.rho + np.pi) * self.tracker.radius * 0.98) *
+                scale,
                 (self.tracker.center[1] - self.mask_origin[1] +
-                 np.sin(-self.rho+np.pi) * self.tracker.radius * 0.98) * scale)
+                 np.sin(-self.rho + np.pi) * self.tracker.radius * 0.98) *
+                scale)
             point_1 = QtCore.QPointF(
                 (self.tracker.center[0] - self.mask_origin[0] +
-                 np.cos(-self.rho+np.pi) * self.tracker.radius * 1.02) * scale,
+                 np.cos(-self.rho + np.pi) * self.tracker.radius * 1.02) *
+                scale,
                 (self.tracker.center[1] - self.mask_origin[1] +
-                 np.sin(-self.rho+np.pi) * self.tracker.radius * 1.02) * scale)
+                 np.sin(-self.rho + np.pi) * self.tracker.radius * 1.02) *
+                scale)
             painter.drawLine(point_0, point_1)
 
             for rho in self.pli_stack.angles:

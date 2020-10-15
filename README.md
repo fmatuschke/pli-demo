@@ -27,7 +27,6 @@ python3 main.py
 ### BUGS
 
 - clean menu entries before adding after port camera change
-- pli entries only clickable if calculation is done
 
 ### Improvements
 

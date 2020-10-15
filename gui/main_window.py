@@ -155,18 +155,23 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pliMenu.addAction(self.action_live)
         #
         self.action_transmittance = QtWidgets.QAction("&transmittance", self)
+        self.action_transmittance.setEnabled(False)
         self.pliMenu.addAction(self.action_transmittance)
         #
         self.action_direction = QtWidgets.QAction("&direction", self)
+        self.action_direction.setEnabled(False)
         self.pliMenu.addAction(self.action_direction)
         #
         self.action_retardation = QtWidgets.QAction("&retardation", self)
+        self.action_retardation.setEnabled(False)
         self.pliMenu.addAction(self.action_retardation)
         #
         self.action_inclination = QtWidgets.QAction("&inclination", self)
+        self.action_inclination.setEnabled(False)
         self.pliMenu.addAction(self.action_inclination)
         #
         self.action_fom = QtWidgets.QAction("&fom", self)
+        self.action_fom.setEnabled(False)
         self.pliMenu.addAction(self.action_fom)
 
         # CAMERA
