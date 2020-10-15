@@ -24,6 +24,9 @@ python3 main.py
 
 ## TODO
 
+- visual current angle
+- visual inserted angles
+- zoomable central image?
 - status bar for infos?
 - only live view mode
 - improve pli mask
