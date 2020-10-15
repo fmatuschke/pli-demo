@@ -24,20 +24,14 @@ python3 main.py
 
 ## TODO
 
-- visual current angle
-- visual inserted angles
-- zoomable central image?
-- status bar for infos?
-- only live view mode
-- improve pli mask
-- right click mouse on image functions?
-- crop image top and bottom
-- visual feedback when resetting
-- visual feedback instead of QLabel text?, at least improving
-- visual feedback for captured angles
-- rho = 0
-- check qt camera viewfinder again
 - improve 3d rendering
-- resize event rendering
-- opengl: rotatable filters
-- opengl: RFC shaders
+  - opengl: rotatable filters
+  - opengl: RFC shaders
+  - resize event rendering
+- improve pli mask
+- only live view mode
+- crop image top and bottom
+- visual feedback when resetting / calculating
+- zoomable central image?
+- right click mouse on image functions?
+- check qt camera viewfinder again
