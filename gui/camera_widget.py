@@ -389,9 +389,9 @@ class CameraWidget(QtWidgets.QLabel):
             del painter
         self.setPixmap(pixmap)
 
-        # zoom widget
-        d = 42
-        x = max(d, min(image.shape[1] - d - 1, self.click_x))
-        y = max(d, min(image.shape[0] - d - 1, self.click_y))
-        image = np.array(image[y - d:y + d, x - d:x + d])
-        self.zoom_update.emit(image, last_color)
+        # # zoom widget
+        # d = 42
+        # x = max(d, min(image.shape[1] - d - 1, self.click_x))
+        # y = max(d, min(image.shape[0] - d - 1, self.click_y))
+        # image = np.array(image[y - d:y + d, x - d:x + d])
+        # self.zoom_update.emit(image, last_color)

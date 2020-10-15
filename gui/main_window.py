@@ -138,13 +138,11 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.layout.setSpacing(50)
         self.layout.setContentsMargins(50, 50, 50, 50)
-        self.statusBar().hide()
 
         self.centralWidget().setLayout(self.layout)
 
     def createMenu(self):
 
-        self.statusBar()
         self.mainMenu = self.menuBar()
 
         # PLI

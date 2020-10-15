@@ -24,10 +24,9 @@ python3 main.py
 
 ## TODO
 
-- improve pli mask
-- plot widget: stop maximal resizing
+- status bar for infos?
 - only live view mode
-- sufficient brain segmentation
+- improve pli mask
 - right click mouse on image functions?
 - crop image top and bottom
 - visual feedback when resetting
