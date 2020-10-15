@@ -157,7 +157,8 @@ class CameraWidget(QtWidgets.QLabel):
                              bytesPerLine, img_format)
         image = image.rgbSwapped()
         image = image.scaled(self.size().width(),
-                             self.size().height(), QtCore.Qt.KeepAspectRatio)
+                             self.size().height(), QtCore.Qt.KeepAspectRatio,
+                             QtCore.Qt.SmoothTransformation)
 
         # save parameter for coordinate transformation
         self.frame_height = frame.shape[0]

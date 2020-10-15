@@ -90,7 +90,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 QtGui.QImage(os.path.join(logo_path, "pli-logo.png"))).scaled(
                     self.logolabelpli.size().width(),
                     self.logolabelpli.size().height(),
-                    QtCore.Qt.KeepAspectRatio))
+                    QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation))
 
         self.logolabelfzj = QtWidgets.QLabel()
         self.logolabelfzj.setMaximumSize(QtCore.QSize(200, 100))
@@ -100,7 +100,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 QtGui.QImage(os.path.join(logo_path, "fzj-gray.png"))).scaled(
                     self.logolabelfzj.size().width(),
                     self.logolabelfzj.size().height(),
-                    QtCore.Qt.KeepAspectRatio))
+                    QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation))
 
         # layout
         self.layout = QtWidgets.QGridLayout()

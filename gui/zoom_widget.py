@@ -13,27 +13,30 @@ class ZoomWidget(QtWidgets.QLabel):
     def __init__(self, parent=None, *args, **kwargs):
         super(ZoomWidget, self).__init__(parent, *args, **kwargs)
 
-        self.image = helper.LOGO_IMG
         self.layout = QtWidgets.QVBoxLayout(self)
         self.setLayout(self.layout)
 
     def resizeEvent(self, event):
         super(ZoomWidget, self).resizeEvent(event)
-        self.update_image(self.image, (56, 173, 107, 255))
+        self.update_image(helper.LOGO_IMG, (56, 173, 107, 255))
 
     def update_image(self, frame, color):
-        self.image = frame.copy()
+        if not isinstance(frame, np.ndarray):
+            return
 
         if frame.ndim == 2:
             img_format = QtGui.QImage.Format_Grayscale8
         else:
             img_format = QtGui.QImage.Format_RGB888
 
+        totalBytes = frame.nbytes
+        bytesPerLine = int(totalBytes / frame.shape[0])
         image = QtGui.QImage(frame.data, frame.shape[1], frame.shape[0],
-                             img_format)
+                             bytesPerLine, img_format)
         image = image.rgbSwapped()
         image = image.scaled(self.size().width(),
-                             self.size().height(), QtCore.Qt.KeepAspectRatio)
+                             self.size().height(), QtCore.Qt.KeepAspectRatio,
+                             QtCore.Qt.SmoothTransformation)
         pixmap = QtGui.QPixmap.fromImage(image)
 
         # target indicator
