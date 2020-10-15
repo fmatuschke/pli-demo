@@ -54,19 +54,15 @@ class CameraWidget(QtWidgets.QLabel):
         #
         self.init_camera()
         self.tracker = Tracker()
-        self.pli_stack = PliStack()
+        self.pli_stack = PliStack(ui=parent)
 
         # DEBUG
         self.next_frame()  # first run for debug
         if self.camera.live:
             self.live.start(1000 // self.camera.fps)
 
-    def text(self, string):
-        self._string = string
-
     def toogleAddPlot(self):
         self.plot_add = not self.plot_add
-        self.text(f"plot_add: {self.plot_add}")
 
     def init_camera(self):
         self.camera = Camera(fps=30)
@@ -287,7 +283,7 @@ class CameraWidget(QtWidgets.QLabel):
                 self.rho = 0
                 self.last_angle = 0
                 self.pli_stack.insert(0, frame)
-                self.text("Calibrated")
+                self.ui.statusBar().showMessage("Calibrated")
 
         # get pli stack
         elif not self.pli_stack.full:
@@ -307,7 +303,8 @@ class CameraWidget(QtWidgets.QLabel):
                     else:
                         self.plot_update.emit(x, y, self.rho, True)
 
-                self.text(f"inserted: {np.rad2deg(self.rho):.0f}")
+                self.ui.statusBar().showMessage(
+                    f"inserted: {np.rad2deg(self.rho):.0f}", 2000)
 
         # get only angle
         else:
@@ -319,7 +316,7 @@ class CameraWidget(QtWidgets.QLabel):
         # print current angle
         if np.rad2deg(np.abs(helper.diff_orientation(self.last_angle,
                                                      self.rho))) > 1:
-            self.text(f"{np.rad2deg(self.rho):.0f}")
+            self.ui.statusBar().showMessage(f"{np.rad2deg(self.rho):.0f}")
             self.last_angle = self.rho
 
         if self.mode == "live":

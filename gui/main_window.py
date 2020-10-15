@@ -137,12 +137,15 @@ class MainWindow(QtWidgets.QMainWindow):
         self.layout.setRowStretch(1, 1)
 
         self.layout.setSpacing(50)
-        self.layout.setContentsMargins(50, 50, 50, 50)
+        self.layout.setContentsMargins(50, 50, 50, 50 - 30)
 
         self.centralWidget().setLayout(self.layout)
 
     def createMenu(self):
 
+        self.statusBar()
+        # self.statusBar().setStyleSheet("border :1px solid black;")
+        # print(self.statusBar().size()) # (100.30)
         self.mainMenu = self.menuBar()
 
         # PLI

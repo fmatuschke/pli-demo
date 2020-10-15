@@ -60,7 +60,8 @@ def fom_hsv_black(direction, inclination, mask=None):
 
 class Stack:
 
-    def __init__(self):
+    def __init__(self, ui=None):
+        self._ui = ui
         self._n_images = 18
         self._angle_threshold_to_insert = np.deg2rad(2.5)
         self._angles = np.linspace(0, np.pi, self._n_images, False)
@@ -130,6 +131,8 @@ class Stack:
                 is_inserted = True
 
         if self.full:
+            if self._ui is not None:
+                self._ui.statusBar().showMessage(f"analysing")
             print("calc_coeffs")
             self.calc_coeffs()
             print("calc_fom")
