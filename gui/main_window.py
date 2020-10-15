@@ -68,62 +68,77 @@ class MainWindow(QtWidgets.QMainWindow):
         self.camwidget = CameraWidget(self)
         self.camwidget.setMinimumSize(QtCore.QSize(600, 600))
         self.camwidget.setAlignment(QtCore.Qt.AlignCenter)
+        self.camwidget.setSizePolicy(QtWidgets.QSizePolicy.Preferred,
+                                     QtWidgets.QSizePolicy.Preferred)
 
         self.plotwidget = PlotWidget(self)
         self.plotwidget.setMinimumSize(QtCore.QSize(200, 200))
         # self.plotwidget.setMaximumSize(QtCore.QSize(500, 500))
+        self.plotwidget.setAlignment(QtCore.Qt.AlignCenter)
+        self.plotwidget.setSizePolicy(QtWidgets.QSizePolicy.Expanding,
+                                      QtWidgets.QSizePolicy.Expanding)
 
-        self.zoomwidget = ZoomWidget(self)
-        self.zoomwidget.setMinimumSize(QtCore.QSize(200, 200))
-        # self.zoomwidget.setMaximumSize(QtCore.QSize(500, 500))
-        self.zoomwidget.setAlignment(QtCore.Qt.AlignTop)
+        # self.zoomwidget = ZoomWidget(self)
+        # self.zoomwidget.setMinimumSize(QtCore.QSize(200, 200))
+        # # self.zoomwidget.setMaximumSize(QtCore.QSize(500, 500))
+        # self.zoomwidget.setAlignment(QtCore.Qt.AlignTop)
 
         self.setupwidget = SetupWidget(self)
-        self.setupwidget.setMinimumSize(QtCore.QSize(300, 500))
-        self.setupwidget.setMaximumSize(QtCore.QSize(300, 500))
+        self.setupwidget.setMinimumSize(QtCore.QSize(100, 300))
+        # self.setupwidget.setMaximumSize(QtCore.QSize(300, 500))
 
         self.logolabelpli = QtWidgets.QLabel()
-        self.logolabelpli.setMaximumSize(QtCore.QSize(200, 200))
-        self.logolabelpli.setMinimumSize(QtCore.QSize(200, 200))
+        self.logolabelpli.setMinimumWidth(200)
+        self.logolabelpli.setMaximumWidth(200)
         self.logolabelpli.setPixmap(
             QtGui.QPixmap.fromImage(
                 QtGui.QImage(os.path.join(logo_path, "pli-logo.png"))).scaled(
                     self.logolabelpli.size().width(),
                     self.logolabelpli.size().height(),
                     QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation))
+        self.logolabelpli.setAlignment(QtCore.Qt.AlignTop)
+        # p = self.logolabelpli.palette()
+        # p.setColor(self.logolabelpli.backgroundRole(),
+        #            QtGui.QColor(255, 0, 0, 0))
+        # self.logolabelpli.setAutoFillBackground(True)
+        # self.logolabelpli.setPalette(p)
 
         self.logolabelfzj = QtWidgets.QLabel()
-        self.logolabelfzj.setMaximumSize(QtCore.QSize(200, 100))
-        self.logolabelfzj.setMinimumSize(QtCore.QSize(200, 100))
+        self.logolabelfzj.setMinimumWidth(200)
+        self.logolabelfzj.setMaximumWidth(200)
         self.logolabelfzj.setPixmap(
             QtGui.QPixmap.fromImage(
                 QtGui.QImage(os.path.join(logo_path, "fzj-gray.png"))).scaled(
                     self.logolabelfzj.size().width(),
                     self.logolabelfzj.size().height(),
                     QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation))
+        self.logolabelfzj.setAlignment(QtCore.Qt.AlignBottom)
+        # p = self.logolabelfzj.palette()
+        # p.setColor(self.logolabelfzj.backgroundRole(), QtGui.QColor(255, 0, 0))
+        # self.logolabelfzj.setAutoFillBackground(True)
+        # self.logolabelfzj.setPalette(p)
 
-        # layout
+        #
+        ''' LAYOUT
+        '''
         self.layout = QtWidgets.QGridLayout()
-        self.layout_left = QtWidgets.QGridLayout()
-        self.layout_right = QtWidgets.QGridLayout()
-        self.layout.addLayout(self.layout_left, 0, 0, 1, 1)
-        self.layout.addWidget(self.camwidget, 0, 1, 1, 1)
-        self.layout.addLayout(self.layout_right, 0, 2, 1, 1)
 
-        self.layout_left.addWidget(self.logolabelpli, 0, 0, 1, 1)
-        self.layout_left.addWidget(self.logolabelfzj, 1, 0, 1, 1)
-        self.layout_left.addWidget(Color(QtGui.QColor(250, 0, 0, 0)), 2, 0, 1,
-                                   1)  # invisible stretchable widget
-        self.layout_left.addWidget(self.setupwidget, 3, 0, 1, 1)
+        self.layout.addWidget(self.camwidget, 0, 0, 2, 1)
+        self.layout.addWidget(self.setupwidget, 0, 1, 1, 1)
+        self.layout.addWidget(self.logolabelpli, 0, 2, 1, 1)
+        self.layout.addWidget(self.plotwidget, 1, 1, 1, 2)
+        self.layout.addWidget(self.logolabelfzj, 2, 2, 1, 1)
 
-        self.layout_right.addWidget(self.zoomwidget, 0, 0, 1, 1)
-        self.layout_right.addWidget(self.plotwidget, 1, 0, 1, 1)
-        self.layout_right.setRowStretch(0, 1)
-        self.layout_right.setRowStretch(1, 1)
+        self.layout.setColumnStretch(0, 3)
+        self.layout.setColumnStretch(1, 1)
+        self.layout.setColumnStretch(2, 1)
 
-        self.layout.setColumnStretch(0, 2)
-        self.layout.setColumnStretch(1, 4)
-        self.layout.setColumnStretch(2, 2)
+        self.layout.setRowStretch(0, 1)
+        self.layout.setRowStretch(1, 1)
+
+        self.layout.setSpacing(50)
+        self.layout.setContentsMargins(50, 50, 50, 50)
+        self.statusBar().hide()
 
         self.centralWidget().setLayout(self.layout)
 
@@ -192,7 +207,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.action_reset.triggered.connect(lambda: self.reset())
 
         self.camwidget.plot_update.connect(self.plotwidget.update_plot)
-        self.camwidget.zoom_update.connect(self.zoomwidget.update_image)
+        # self.camwidget.zoom_update.connect(self.zoomwidget.update_image)
 
         self.action_filter_none.triggered.connect(
             partial(self.camwidget.set_filter, "none"))
@@ -203,7 +218,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def reset(self):
         self.camwidget.setVisible(False)
-        self.zoomwidget.setVisible(False)
+        # self.zoomwidget.setVisible(False)
 
         self.camwidget.live.stop()
         self.camwidget.camera._video_capture.release()

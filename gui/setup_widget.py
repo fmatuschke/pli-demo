@@ -3,8 +3,7 @@ import numpy as np
 import moderngl
 from moderngl_window.opengl.projection import Projection3D
 
-from PyQt5 import QtOpenGL, QtWidgets
-from PyQt5.QtGui import QMatrix4x4
+from PyQt5 import QtOpenGL, QtWidgets, QtGui, QtCore
 
 
 class SetupWidget(QtOpenGL.QGLWidget):
@@ -13,14 +12,25 @@ class SetupWidget(QtOpenGL.QGLWidget):
     '''
 
     def __init__(self, parent=None, *args, **kwargs):
-        self.init_shaders()
-        self.tilt = 1
-        self.rotation = 0
         fmt = QtOpenGL.QGLFormat()
         fmt.setVersion(3, 3)
         fmt.setProfile(QtOpenGL.QGLFormat.CoreProfile)
         fmt.setSampleBuffers(True)
         super(SetupWidget, self).__init__(fmt, None)
+        self.init_shaders()
+        self.tilt = 1
+        self.rotation = 0
+
+    def resizeEvent(self, event):
+        # w = event.size().width()
+        # h = event.size().height()
+        # if w > 5 * h:
+        #     w = h // 5
+        # else:
+        #     h = w * 5
+        # self.setMaximumSize(w, h)
+        # event = QtGui.QResizeEvent(QtCore.QSize(w, h), event.oldSize())
+        super(SetupWidget, self).resizeEvent(event)
 
     def init_shaders(self):
         '''
@@ -85,24 +95,22 @@ class SetupWidget(QtOpenGL.QGLWidget):
             geometry_shader=self.geom_string,
             fragment_shader=self.frag_string,
         )
-
-        project = Projection3D(min(1,
-                                   self.width() / self.height()), 4.2, 0.1,
-                               1000.0)
+        project = Projection3D(2, 4.2, 0.1, 1000.0)
         project = tuple(np.array(project.matrix).flatten().T)
         self.prog['worldToCamera'].value = project
 
     def paintGL(self):
-        # always same vie aspect ratio
+        # always same via aspect ratio
         w = self.width()
         h = self.height()
-        if h > 3 * w:
-            h = w * 2
+        if h > 1 * w:
+            h = w * 1
         else:
-            w = h // 2
+            w = h // 1
 
         self.ctx.viewport = (0, 0, w, h)
-        self.ctx.clear(38 / 255, 65 / 255, 100 / 255)
+        self.ctx.clear(46 / 255, 48 / 255, 58 / 255)
+        # self.ctx.clear(38 / 255, 65 / 255, 100 / 255)
         self.create_data()
         vbo = self.ctx.buffer(self.data.astype('f4').tobytes())
         self.vao = self.ctx.simple_vertex_array(self.prog, vbo, 'v_position',

@@ -27,6 +27,13 @@ class PlotWidget(QtChart.QChartView):
         # self.setPalette(p)
 
     def resizeEvent(self, event):
+        # w = event.size().width()
+        # h = event.size().height()
+        # if w > h:
+        #     w = h
+        # else:
+        #     h = w
+        # self.setMaximumSize(w, h)
         super(PlotWidget, self).resizeEvent(event)
 
     def update_plot(self, x_data, y_data, rho, flag_add):
