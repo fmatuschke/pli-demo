@@ -14,6 +14,7 @@ class Tracker:
         self._frame = None
         self._rho = 0
         self._mask = None
+        self._tracker_0 = 10
 
     @property
     def radius(self):
@@ -110,6 +111,18 @@ class Tracker:
         self._radius = np.mean(np.linalg.norm(corners - self._center, axis=1),
                                axis=0) * 0.75
 
+        # get 0 angle
+        corners = np.array(self._cv_corners)
+        corners.shape = (-1, 4, 2)
+        i = np.argwhere(np.array(self._cal_ids) == self._tracker_0)
+        center_qr = np.mean(np.squeeze(corners[i, :, :]), axis=0)
+        ref = np.array((1, 0))
+        cur = center_qr - self._center
+        z = cur[0] * ref[1] - cur[1] * ref[0]
+        value = np.dot(ref, cur) / (np.linalg.norm(ref) * np.linalg.norm(cur))
+        value = max(-1.0, min(1.0, value))
+        self._phi_0 = (np.arccos(value) * np.sign(z))
+
         self._gen_mask()
 
         print("is calibrated")
@@ -155,7 +168,7 @@ class Tracker:
             value = max(-1.0, min(1.0, value))
             phi.append(np.arccos(value) * np.sign(z))
 
-        self._rho = scipy.stats.circmean(phi, np.pi, 0)
+        self._rho = scipy.stats.circmean(np.array(phi) - self._phi_0, np.pi, 0)
         return self._rho
 
     def show(self):

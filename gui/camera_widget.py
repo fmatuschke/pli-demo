@@ -282,7 +282,6 @@ class CameraWidget(QtWidgets.QLabel):
             if self.tracker.is_calibrated:
                 self.rho = 0
                 self.last_angle = 0
-                self.pli_stack.insert(0, frame)
                 self.ui.statusBar().showMessage("Calibrated")
 
         # get pli stack
