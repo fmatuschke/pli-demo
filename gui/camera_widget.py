@@ -355,17 +355,45 @@ class CameraWidget(QtWidgets.QLabel):
         if self.tracker.is_calibrated:
             painter = QtGui.QPainter(pixmap)
             pen = QtGui.QPen()
-            pen.setColor(QtCore.Qt.magenta)
-            pen.setWidth(3)
-            painter.setPen(pen)
             scale = pixmap.width() / image.shape[1]
-            # painter.setPen(QtCore.Qt.magenta)
 
+            pen.setColor(QtCore.Qt.red)
+            pen.setWidth(2)
+            painter.setPen(pen)
             painter.drawEllipse(
                 QtCore.QPointF(
                     (self.tracker.center[0] - self.mask_origin[0]) * scale,
                     (self.tracker.center[1] - self.mask_origin[1]) * scale),
                 self.tracker.radius * scale, self.tracker.radius * scale)
+
+            pen.setColor(QtCore.Qt.green)
+            pen.setWidth(3)
+            painter.setPen(pen)
+            for rho in self.pli_stack.angles:
+                rho = int(np.rad2deg(rho))
+                # Qt says full circle equals 5760 (16 * 360), but here *8
+                # Qt says Positive values for the angles mean counter-clockwise
+                #         while negative values mean the clockwise direction
+                #         Zero degrees is at the 3 o'clock position.
+                # buggy first drawArc, not dependend on value of rho
+                painter.drawArc((self.tracker.center[0] - self.mask_origin[0] -
+                                 self.tracker.radius) * scale,
+                                (self.tracker.center[1] - self.mask_origin[1] -
+                                 self.tracker.radius) * scale,
+                                (self.tracker.center[0] - self.mask_origin[0] +
+                                 self.tracker.radius) * scale,
+                                (self.tracker.center[1] - self.mask_origin[1] +
+                                 self.tracker.radius) * scale, (rho - 5) * 8,
+                                (rho + 5) * 8)
+                painter.drawArc((self.tracker.center[0] - self.mask_origin[0] -
+                                 self.tracker.radius) * scale,
+                                (self.tracker.center[1] - self.mask_origin[1] -
+                                 self.tracker.radius) * scale,
+                                (self.tracker.center[0] - self.mask_origin[0] +
+                                 self.tracker.radius) * scale,
+                                (self.tracker.center[1] - self.mask_origin[1] +
+                                 self.tracker.radius) * scale,
+                                (rho - 5 + 180) * 8, (rho + 5 + 180) * 8)
 
             # draw center
             # painter.drawEllipse(
