@@ -91,6 +91,9 @@ class Stack:
     def frames(self):
         return np.array([f for f in self._frames if f is not None])
 
+    def is_analysed(self):
+        return self._fom is None
+
     @property
     def transmittance(self):
         return self._transmittance.copy()

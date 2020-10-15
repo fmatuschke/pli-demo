@@ -19,8 +19,6 @@ from src import helper
 class CameraWidget(QtWidgets.QLabel):
 
     plot_update = QtCore.pyqtSignal(np.ndarray, np.ndarray, float, bool)
-    # click_update = QtCore.pyqtSignal(int, int)
-    zoom_update = QtCore.pyqtSignal(np.ndarray, np.ndarray)
 
     def __init__(self, parent=None, *args, **kwargs):
         super(CameraWidget, self).__init__(parent, *args, **kwargs)
@@ -74,7 +72,8 @@ class CameraWidget(QtWidgets.QLabel):
             self.camera.set_video(file)
             self.tracker = Tracker()
             self.pli_stack = PliStack()
-            self.live.start(1000 // self.camera.fps)
+            self.ui.set_pli(False)
+            self.live.start(30)
 
         for file in glob.glob(os.path.join("data", "*mp4")):
             print(file)
@@ -105,9 +104,11 @@ class CameraWidget(QtWidgets.QLabel):
             self.set_resolutions_to_menu()
             self.tracker = Tracker()
             self.pli_stack = PliStack()
+            self.ui.set_pli(False)
             if self.camera.live:
                 self.live.start(1000 // self.camera.fps)
 
+        self.ui.cameraPortMenu.clear()
         for port in self.camera.available_ports:
             self.ui.cameraPortMenu.addAction(
                 QtWidgets.QAction(f"{port}",
@@ -121,9 +122,11 @@ class CameraWidget(QtWidgets.QLabel):
             self.camera.set_prop(width, height, fps)
             self.tracker = Tracker()
             self.pli_stack = PliStack()
+            self.ui.set_pli(False)
             if self.camera.live:
                 self.live.start(1000 // self.camera.fps)
 
+        self.ui.cameraResolutionMenu.clear()
         for width, height in self.camera.available_resolutions:
             self.ui.cameraResolutionMenu.addAction(
                 QtWidgets.QAction(f"{width}x{height}",
@@ -192,7 +195,7 @@ class CameraWidget(QtWidgets.QLabel):
 
         self.click_x, self.click_y = self.widget2framecoordinates(
             event.x(), event.y())
-        self.set_mode(self.mode)
+        # self.set_mode(self.mode)
 
         # save click coordinates
         if self.plot_add:
@@ -220,6 +223,13 @@ class CameraWidget(QtWidgets.QLabel):
             return
         else:
             self.live.stop()
+
+        if self.pli_stack.is_analysed():
+            self.ui.set_pli(True)
+            self.mode = "live"
+            if self.camera.live:
+                self.live.start(1000 // self.camera.fps)
+            return
 
         if self.mode == "transmittance":
             frame = (self.pli_stack.transmittance /
@@ -283,11 +293,6 @@ class CameraWidget(QtWidgets.QLabel):
                 self.rho = 0
                 self.last_angle = 0
                 self.ui.statusBar().showMessage("Calibrated")
-                self.ui.action_transmittance.setEnabled(True)
-                self.ui.action_direction.setEnabled(True)
-                self.ui.action_retardation.setEnabled(True)
-                self.ui.action_inclination.setEnabled(True)
-                self.ui.action_fom.setEnabled(True)
 
         # get pli stack
         elif not self.pli_stack.full:

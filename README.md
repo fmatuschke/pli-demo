@@ -26,8 +26,6 @@ python3 main.py
 
 ### BUGS
 
-- clean menu entries before adding after port camera change
-
 ### Improvements
 
 - improve 3d rendering

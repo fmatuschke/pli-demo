@@ -196,6 +196,15 @@ class MainWindow(QtWidgets.QMainWindow):
         self.action_reset = QtWidgets.QAction("&reset", self)
         self.helpMenu.addAction(self.action_reset)
 
+    def set_pli(self, value):
+        value = bool(value)
+        print(f"set enable: {value}")
+        self.action_transmittance.setEnabled(value)
+        self.action_direction.setEnabled(value)
+        self.action_retardation.setEnabled(value)
+        self.action_inclination.setEnabled(value)
+        self.action_fom.setEnabled(value)
+
     def connect_widgets(self):
         self.action_live.triggered.connect(
             partial(self.camwidget.set_mode, "live"))
