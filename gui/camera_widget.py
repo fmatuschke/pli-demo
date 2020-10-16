@@ -362,6 +362,11 @@ class CameraWidget(QtWidgets.QLabel):
         last_color = colors[0]
 
         if self.tracker.is_calibrated:
+            self.ui.setupwidget.set_tilt(np.random.uniform(-180, 180),
+                                         np.random.uniform(0, 10))
+            self.ui.setupwidget.set_rotation(np.rad2deg(self.tracker.rho))
+            self.ui.setupwidget.update()
+
             painter = QtGui.QPainter(pixmap)
             pen = QtGui.QPen()
             scale = pixmap.width() / image.shape[1]
