@@ -213,7 +213,7 @@ class CameraWidget(QtWidgets.QLabel):
     def set_mode(self, mode):
         if mode != "live":
             if self.pli_stack.transmittance is None:
-                self.ui.setText("pli not ready yet")
+                self.ui.setText("WARNING: pli not ready yet")
                 return
 
         self.mode = mode
@@ -223,13 +223,6 @@ class CameraWidget(QtWidgets.QLabel):
             return
         else:
             self.live.stop()
-
-        if not self.pli_stack.is_analysed():
-            self.ui.set_pli_menu(False)
-            self.mode = "live"
-            if self.camera.live:
-                self.live.start(1000 // self.camera.fps)
-            return
 
         if self.mode == "transmittance":
             frame = (self.pli_stack.transmittance /
