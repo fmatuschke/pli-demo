@@ -68,8 +68,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.camwidget = CameraWidget(self)
         self.camwidget.setMinimumSize(QtCore.QSize(600, 600))
         self.camwidget.setAlignment(QtCore.Qt.AlignCenter)
-        self.camwidget.setSizePolicy(QtWidgets.QSizePolicy.Preferred,
-                                     QtWidgets.QSizePolicy.Preferred)
+        self.camwidget.setSizePolicy(QtWidgets.QSizePolicy.Minimum,
+                                     QtWidgets.QSizePolicy.Minimum)
 
         self.plotwidget = PlotWidget(self)
         self.plotwidget.setMinimumSize(QtCore.QSize(200, 200))
@@ -88,33 +88,36 @@ class MainWindow(QtWidgets.QMainWindow):
         # self.setupwidget.setMaximumSize(QtCore.QSize(300, 500))
 
         self.logolabelpli = QtWidgets.QLabel()
-        self.logolabelpli.setMinimumWidth(200)
-        self.logolabelpli.setMaximumWidth(200)
+        self.logolabelpli.setMinimumHeight(50)
+        self.logolabelpli.setMaximumHeight(50)
         self.logolabelpli.setPixmap(
             QtGui.QPixmap.fromImage(
                 QtGui.QImage(os.path.join(logo_path, "pli-logo.png"))).scaled(
                     self.logolabelpli.size().width(),
                     self.logolabelpli.size().height(),
                     QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation))
-        self.logolabelpli.setAlignment(QtCore.Qt.AlignTop)
+        self.logolabelpli.setAlignment(QtCore.Qt.AlignRight)
+        self.logolabelpli.setSizePolicy(QtWidgets.QSizePolicy.Minimum,
+                                        QtWidgets.QSizePolicy.Minimum)
         # p = self.logolabelpli.palette()
-        # p.setColor(self.logolabelpli.backgroundRole(),
-        #            QtGui.QColor(255, 0, 0, 0))
+        # p.setColor(self.logolabelpli.backgroundRole(), QtGui.QColor(255, 0, 0))
         # self.logolabelpli.setAutoFillBackground(True)
         # self.logolabelpli.setPalette(p)
 
         self.logolabelfzj = QtWidgets.QLabel()
-        self.logolabelfzj.setMinimumWidth(200)
-        self.logolabelfzj.setMaximumWidth(200)
+        self.logolabelfzj.setMinimumHeight(50)
+        self.logolabelfzj.setMaximumHeight(50)
         self.logolabelfzj.setPixmap(
             QtGui.QPixmap.fromImage(
                 QtGui.QImage(os.path.join(logo_path, "fzj-gray.png"))).scaled(
                     self.logolabelfzj.size().width(),
                     self.logolabelfzj.size().height(),
                     QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation))
-        self.logolabelfzj.setAlignment(QtCore.Qt.AlignBottom)
+        self.logolabelfzj.setAlignment(QtCore.Qt.AlignRight)
+        self.logolabelfzj.setSizePolicy(QtWidgets.QSizePolicy.Maximum,
+                                        QtWidgets.QSizePolicy.Maximum)
         # p = self.logolabelfzj.palette()
-        # p.setColor(self.logolabelfzj.backgroundRole(), QtGui.QColor(255, 0, 0))
+        # p.setColor(self.logolabelfzj.backgroundRole(), QtGui.QColor(0, 255, 0))
         # self.logolabelfzj.setAutoFillBackground(True)
         # self.logolabelfzj.setPalette(p)
 
@@ -122,21 +125,24 @@ class MainWindow(QtWidgets.QMainWindow):
         ''' LAYOUT
         '''
         self.layout = QtWidgets.QGridLayout()
+        self.layout_logos = QtWidgets.QGridLayout()
 
         self.layout.addWidget(self.camwidget, 0, 0, 2, 1)
         self.layout.addWidget(self.setupwidget, 0, 1, 1, 1)
-        self.layout.addWidget(self.logolabelpli, 0, 2, 1, 1)
-        self.layout.addWidget(self.plotwidget, 1, 1, 1, 2)
-        self.layout.addWidget(self.logolabelfzj, 2, 2, 1, 1)
+        self.layout.addWidget(self.plotwidget, 1, 1, 1, 1)
+        self.layout.addLayout(self.layout_logos, 2, 1, 1, 1)
+        self.layout_logos.addWidget(self.logolabelpli, 0, 0, 1, 1)
+        self.layout_logos.addWidget(self.logolabelfzj, 0, 1, 1, 1)
 
-        self.layout.setColumnStretch(0, 3)
+        self.layout.setColumnStretch(0, 2)
         self.layout.setColumnStretch(1, 1)
-        self.layout.setColumnStretch(2, 1)
+        # self.layout.setColumnStretch(2, 1)
 
         self.layout.setRowStretch(0, 1)
         self.layout.setRowStretch(1, 1)
 
         self.layout.setSpacing(50)
+        self.layout_logos.setSpacing(50)
         self.layout.setContentsMargins(50, 50, 50, 50 - 30)
 
         self.centralWidget().setLayout(self.layout)
