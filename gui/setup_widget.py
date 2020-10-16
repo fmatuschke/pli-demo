@@ -62,11 +62,17 @@ class SetupWidget(QtOpenGL.QGLWidget):
         else:
             raise ValueError("Wrong tilt")
 
+        dy = 1
+        h = 0.25
         z_pos = -50
-        positions = np.array([[0, -0.714, z_pos], [0, -0.571, z_pos],
-                              [0, -0.286, z_pos], [0, -0.143, z_pos],
-                              [0, 0.143, z_pos], [0, 0.286, z_pos],
-                              [0, 0.571, z_pos], [0, 0.741, z_pos]])
+        positions = np.array([[0, -1.5 * dy - h / 2, z_pos],
+                              [0, -1.5 * dy + h / 2, z_pos],
+                              [0, -0.5 * dy - h / 2, z_pos],
+                              [0, -0.5 * dy + h / 2, z_pos],
+                              [0, 0.5 * dy - h / 2, z_pos],
+                              [0, 0.5 * dy + h / 2, z_pos],
+                              [0, 1.5 * dy - h / 2, z_pos],
+                              [0, 1.5 * dy + h / 2, z_pos]])
         orientations = np.array([[0, 1, 0], [0, 1, 0], [0, 1, 0],
                                  tiltdirection, tiltdirection, [0, 1, 0],
                                  [0, 1, 0], [0, 1, 0]])
@@ -95,7 +101,7 @@ class SetupWidget(QtOpenGL.QGLWidget):
             geometry_shader=self.geom_string,
             fragment_shader=self.frag_string,
         )
-        project = Projection3D(2, 4.2, 0.1, 1000.0)
+        project = Projection3D(1, 4.2, 0.1, 1000.0)
         project = tuple(np.array(project.matrix).flatten().T)
         self.prog['worldToCamera'].value = project
 
@@ -103,10 +109,10 @@ class SetupWidget(QtOpenGL.QGLWidget):
         # always same via aspect ratio
         w = self.width()
         h = self.height()
-        if h > 1 * w:
-            h = w * 1
+        if w > 2 * h:
+            w = h * 2
         else:
-            w = h // 1
+            h = w // 2
 
         self.ctx.viewport = (0, 0, w, h)
         self.ctx.clear(46 / 255, 48 / 255, 58 / 255)
