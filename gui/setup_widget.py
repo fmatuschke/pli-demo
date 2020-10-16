@@ -1,5 +1,6 @@
 import numpy as np
 
+from PIL import Image as Image
 from OpenGL.GL import *
 from OpenGL.GLU import *
 
@@ -16,10 +17,10 @@ class SetupWidget(QtOpenGL.QGLWidget):
         self._tilt_angle = (0, 10)
         self._rotation = 0
 
-        p = self.palette()
-        p.setColor(self.backgroundRole(), QtGui.QColor(255, 0, 0))
-        self.setAutoFillBackground(True)
-        self.setPalette(p)
+        # p = self.palette()
+        # p.setColor(self.backgroundRole(), QtGui.QColor(255, 0, 0))
+        # self.setAutoFillBackground(True)
+        # self.setPalette(p)
 
     def resizeEvent(self, event):
         super(SetupWidget, self).resizeEvent(event)
@@ -64,12 +65,34 @@ class SetupWidget(QtOpenGL.QGLWidget):
     def set_tilt(self, theta, phi):
         self._tilt_angle = (float(theta), float(phi))
 
+    def read_texture(self, file_name):
+        img = Image.open(file_name)
+        img_data = np.array(list(img.getdata()), np.int8)
+        textID = glGenTextures(1)
+        glBindTexture(GL_TEXTURE_2D, textID)
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1)
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP)
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP)
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT)
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT)
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
+        glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL)
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, img.size[0], img.size[1], 0,
+                     GL_RGB, GL_UNSIGNED_BYTE, img_data)
+        return textID
+
     def drawOpticalElements(self):
         quadObj = gluNewQuadric()
+        if os.path.isfile("src/test.jpg"):
+            tex = self.read_texture("src/test.jpg")
+            gluQuadricTexture(quadObj, GL_TRUE)
+            glEnable(GL_TEXTURE_2D)
+            glBindTexture(GL_TEXTURE_2D, tex)
         h = 0.5
         dy = 3
         r = 5
-        NUM_POLYGON = 6
+        NUM_POLYGON = 42
         glColor3f(0.2, 0.6, 0.2)
         for i in range(4):
             glPushMatrix()
