@@ -1,3 +1,4 @@
+import os
 import numpy as np
 
 from PIL import Image as Image
@@ -16,6 +17,7 @@ class SetupWidget(QtOpenGL.QGLWidget):
         super(SetupWidget, self).__init__(parent)
         self._tilt_angle = (0, 10)
         self._rotation = 0
+        self._tex = [self.read_texture("src/test.jpg")]
 
         # p = self.palette()
         # p.setColor(self.backgroundRole(), QtGui.QColor(255, 0, 0))
@@ -66,8 +68,16 @@ class SetupWidget(QtOpenGL.QGLWidget):
         self._tilt_angle = (float(theta), float(phi))
 
     def read_texture(self, file_name):
-        img = Image.open(file_name)
-        img_data = np.array(list(img.getdata()), np.int8)
+        print("READ TEST")
+        if os.path.isfile(file_name):
+            img = Image.open(file_name)
+            return np.array(img, np.uint8)
+        print(f"WARNING: texture '{file_name}' not found")
+        return None
+
+    def bind_texture(self, quadObj, tex):
+        gluQuadricTexture(quadObj, GL_TRUE)
+        glEnable(GL_TEXTURE_2D)
         textID = glGenTextures(1)
         glBindTexture(GL_TEXTURE_2D, textID)
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1)
@@ -78,17 +88,15 @@ class SetupWidget(QtOpenGL.QGLWidget):
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
         glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL)
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, img.size[0], img.size[1], 0,
-                     GL_RGB, GL_UNSIGNED_BYTE, img_data)
-        return textID
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, tex.shape[1], tex.shape[0], 0,
+                     GL_RGB, GL_UNSIGNED_BYTE, tex.ravel())
+        glBindTexture(GL_TEXTURE_2D, textID)
 
     def drawOpticalElements(self):
         quadObj = gluNewQuadric()
-        if os.path.isfile("src/test.jpg"):
-            tex = self.read_texture("src/test.jpg")
-            gluQuadricTexture(quadObj, GL_TRUE)
-            glEnable(GL_TEXTURE_2D)
-            glBindTexture(GL_TEXTURE_2D, tex)
+        if self._tex[0] is not None:
+            self.bind_texture(quadObj, self._tex[0])
+
         h = 0.5
         dy = 3
         r = 5
