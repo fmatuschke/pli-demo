@@ -72,7 +72,7 @@ class CameraWidget(QtWidgets.QLabel):
             self.camera.set_video(file)
             self.tracker = Tracker()
             self.pli_stack = PliStack()
-            self.ui.set_pli(False)
+            self.ui.set_pli_menu(False)
             self.live.start(30)
 
         for i, file in enumerate(sorted(glob.glob(os.path.join("data",
@@ -104,7 +104,7 @@ class CameraWidget(QtWidgets.QLabel):
             self.set_resolutions_to_menu()
             self.tracker = Tracker()
             self.pli_stack = PliStack()
-            self.ui.set_pli(False)
+            self.ui.set_pli_menu(False)
             if self.camera.live:
                 self.live.start(1000 // self.camera.fps)
 
@@ -122,7 +122,7 @@ class CameraWidget(QtWidgets.QLabel):
             self.camera.set_prop(width, height, fps)
             self.tracker = Tracker()
             self.pli_stack = PliStack()
-            self.ui.set_pli(False)
+            self.ui.set_pli_menu(False)
             if self.camera.live:
                 self.live.start(1000 // self.camera.fps)
 
@@ -224,8 +224,8 @@ class CameraWidget(QtWidgets.QLabel):
         else:
             self.live.stop()
 
-        if self.pli_stack.is_analysed():
-            self.ui.set_pli(True)
+        if not self.pli_stack.is_analysed():
+            self.ui.set_pli_menu(False)
             self.mode = "live"
             if self.camera.live:
                 self.live.start(1000 // self.camera.fps)
@@ -315,6 +315,9 @@ class CameraWidget(QtWidgets.QLabel):
                 self.ui.statusBar().showMessage(
                     f"inserted: {np.rad2deg(self.rho):.0f}", 2000)
 
+            if self.pli_stack.full:
+                self.ui.set_pli_menu(True)
+
         # get only angle
         else:
             self.rho = self.tracker.track(frame)
@@ -362,10 +365,11 @@ class CameraWidget(QtWidgets.QLabel):
         last_color = colors[0]
 
         if self.tracker.is_calibrated:
-            self.ui.setupwidget.set_tilt(np.random.uniform(-180, 180),
-                                         np.random.uniform(0, 10))
-            self.ui.setupwidget.set_rotation(np.rad2deg(self.tracker.rho))
-            self.ui.setupwidget.update()
+            if hasattr(self.ui, "setupwidget"):
+                self.ui.setupwidget.set_tilt(np.random.uniform(-180, 180),
+                                             np.random.uniform(0, 10))
+                self.ui.setupwidget.set_rotation(np.rad2deg(self.tracker.rho))
+                self.ui.setupwidget.update()
 
             painter = QtGui.QPainter(pixmap)
             pen = QtGui.QPen()

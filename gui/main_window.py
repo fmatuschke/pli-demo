@@ -202,7 +202,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.action_reset = QtWidgets.QAction("&reset", self)
         self.helpMenu.addAction(self.action_reset)
 
-    def set_pli(self, value):
+    def set_pli_menu(self, value):
         value = bool(value)
         self.action_transmittance.setEnabled(value)
         self.action_direction.setEnabled(value)
