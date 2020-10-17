@@ -179,6 +179,30 @@ class MainWindow(QtWidgets.QMainWindow):
         self.action_fom = QtWidgets.QAction("&fom", self)
         self.action_fom.setEnabled(False)
         self.pliMenu.addAction(self.action_fom)
+        #
+        # Tilting
+        self.tiltingMenu = self.pliMenu.addMenu("&tilting")
+        self.tiltingMenu.setEnabled(False)
+        #
+        self.action_tilt_zero = QtWidgets.QAction("&zero", self)
+        self.action_tilt_zero.setEnabled(False)
+        self.tiltingMenu.addAction(self.action_tilt_zero)
+        #
+        self.action_tilt_north = QtWidgets.QAction("&north", self)
+        self.action_tilt_north.setEnabled(False)
+        self.tiltingMenu.addAction(self.action_tilt_north)
+        #
+        self.action_tilt_west = QtWidgets.QAction("&west", self)
+        self.action_tilt_west.setEnabled(False)
+        self.tiltingMenu.addAction(self.action_tilt_west)
+        #
+        self.action_tilt_south = QtWidgets.QAction("&south", self)
+        self.action_tilt_south.setEnabled(False)
+        self.tiltingMenu.addAction(self.action_tilt_south)
+        #
+        self.action_tilt_east = QtWidgets.QAction("&east", self)
+        self.action_tilt_east.setEnabled(False)
+        self.tiltingMenu.addAction(self.action_tilt_east)
 
         # CAMERA
         self.cameraMenu = self.mainMenu.addMenu('&camera')
@@ -209,6 +233,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.action_retardation.setEnabled(value)
         self.action_inclination.setEnabled(value)
         self.action_fom.setEnabled(value)
+        self.tiltingMenu.setEnabled(value)
+        self.action_tilt_zero.setEnabled(value)
+        self.action_tilt_north.setEnabled(value)
+        self.action_tilt_west.setEnabled(value)
+        self.action_tilt_south.setEnabled(value)
+        self.action_tilt_east.setEnabled(value)
 
     def connect_widgets(self):
         self.action_live.triggered.connect(
@@ -223,6 +253,18 @@ class MainWindow(QtWidgets.QMainWindow):
             partial(self.camwidget.set_mode, "inclination"))
         self.action_fom.triggered.connect(
             partial(self.camwidget.set_mode, "fom"))
+
+        #
+        def update_tilt(theta, phi):
+            self.setupwidget.set_tilt(theta, phi)
+            self.setupwidget.update()
+
+        self.action_tilt_zero.triggered.connect(partial(update_tilt, 0, 0))
+        self.action_tilt_north.triggered.connect(partial(update_tilt, 10, 270))
+        self.action_tilt_west.triggered.connect(partial(update_tilt, 10, 0))
+        self.action_tilt_south.triggered.connect(partial(update_tilt, 10, 90))
+        self.action_tilt_east.triggered.connect(partial(update_tilt, 10, 180))
+        #
         self.action_tracker.triggered.connect(self.camwidget.toogle_draw_helper)
         self.action_reset.triggered.connect(lambda: self.reset())
 

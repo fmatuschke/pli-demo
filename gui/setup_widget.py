@@ -203,9 +203,9 @@ class SetupWidget(QtOpenGL.QGLWidget):
             if i != 2:  # not tissue
                 glRotatef(self._rotation, 0.0, 0.0, 1.0)  # filter rho
             if i == 2:  # tissue
-                glRotatef(self._tilt_angle[0], 0.0, 0.0, 1.0)  # tilting
-                glRotatef(self._tilt_angle[1], 0.0, 1.0, 0.0)  # tilting
-                glRotatef(-self._tilt_angle[0], 0.0, 0.0, 1.0)  # tilting
+                glRotatef(self._tilt_angle[1], 0.0, 0.0, 1.0)  # tilting
+                glRotatef(self._tilt_angle[0], 0.0, 1.0, 0.0)  # tilting
+                glRotatef(-self._tilt_angle[1], 0.0, 0.0, 1.0)  # tilting
             # bottom
             if i == 0:
                 glBindTexture(GL_TEXTURE_2D, self._tex_dict["polfilter"])

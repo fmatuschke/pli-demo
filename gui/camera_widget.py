@@ -359,8 +359,8 @@ class CameraWidget(QtWidgets.QLabel):
 
         if self.tracker.is_calibrated:
             if hasattr(self.ui, "setupwidget"):
-                self.ui.setupwidget.set_tilt(np.random.uniform(-180, 180),
-                                             np.random.uniform(0, 10))
+                # self.ui.setupwidget.set_tilt(np.random.uniform(-180, 180),
+                #                              np.random.uniform(0, 10))
                 self.ui.setupwidget.set_rotation(np.rad2deg(self.tracker.rho))
                 self.ui.setupwidget.update()
 
