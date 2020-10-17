@@ -18,12 +18,17 @@ class SetupWidget(QtOpenGL.QGLWidget):
         self._tilt_angle = (0, 10)
         self._rotation = 0
         self._tex = {
-            "lines": self.get_pattern_lines(),
-            "cross": self.get_pattern_cross(),
-            "polfilter": self.get_pattern_polfilter(),
-            "section": self.read_texture("src/section.png"),
+            "lines":
+                self.get_pattern_lines(),
+            "cross":
+                self.get_pattern_cross(),
+            "polfilter":
+                self.get_pattern_polfilter(),
+            "section":
+                self.greening_texture(self.read_texture("src/section.png")),
             # "section_green": self.read_texture("src/section_green.png"),
-            "test": self.get_pattern_test()
+            "test":
+                self.get_pattern_test()
         }
 
         # p = self.palette()
@@ -108,6 +113,20 @@ class SetupWidget(QtOpenGL.QGLWidget):
             return img
         print(f"WARNING: texture '{file_name}' not found")
         return None
+
+    def greening_texture(self, tex):
+        if tex is None:
+            return None
+
+        shape = tex.shape
+        tex.shape = (-1, 4)
+        tex[:, 0] = tex[:, 0] * 0.25
+        tex[:, 2] = tex[:, 2] * 0.25
+        alpha = tex[:, 3]
+        tex[alpha != 0, 3] = 150
+        tex.shape = shape
+
+        return tex
 
     def get_pattern_test(self):
         texture = np.zeros((16, 16, 3), np.uint8)
