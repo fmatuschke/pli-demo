@@ -182,7 +182,8 @@ class Stack:
         x = int(x)
         y = int(y)
 
-        if self.size == 0:
+        if self.size == 0 or x >= self.frames.shape[
+                2] or y >= self.frames.shape[1]:
             return np.array([]), np.array([])
 
         return self.angles, self.frames[:, y, x]
