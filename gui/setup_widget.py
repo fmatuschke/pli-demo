@@ -19,11 +19,10 @@ class SetupWidget(QtOpenGL.QGLWidget):
         self._rotation = 0
         self._tex = {
             "lines": self.get_pattern_lines(),
-            "green": self.get_pattern_green(),
             "cross": self.get_pattern_cross(),
             "polfilter": self.get_pattern_polfilter(),
             "section": self.read_texture("src/section.png"),
-            "section_green": self.read_texture("src/section_green.png"),
+            # "section_green": self.read_texture("src/section_green.png"),
             "test": self.get_pattern_test()
         }
 
@@ -35,14 +34,15 @@ class SetupWidget(QtOpenGL.QGLWidget):
     def resizeEvent(self, event):
         super(SetupWidget, self).resizeEvent(event)
         w, h = max(1, self.size().width()), max(1, self.size().height())
-        gluPerspective(45.0, w / h, 0.1, 1000.0)
         glViewport(0, 0, w, h)
+        # gluPerspective(20.0, w / h, 0.1, 1000.0)
 
     def initializeGL(self):
         glClearDepth(1.0)
         glClearColor(0.2, 0.2, 0.2, 0.0)
         glDepthFunc(GL_LESS)
         glEnable(GL_DEPTH_TEST)
+        # glEnable(GL_CULL_FACE)
         glShadeModel(GL_SMOOTH)
         glMatrixMode(GL_PROJECTION)
 
@@ -70,9 +70,27 @@ class SetupWidget(QtOpenGL.QGLWidget):
     def paintGL(self):
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         glLoadIdentity()
-        glTranslatef(0, 0, -50)  # pos camera
-        glRotatef(10, 1, 0, 0)
+        glTranslatef(0, 0, -75)  # pos camera, ie move objects away
+        glRotatef(20, 1, 0, 0)
         glRotatef(-20, 0, 1, 0)
+
+        # coordinate system
+        glBegin(GL_LINES)
+        glColor3f(1.0, 0.0, 0.0)
+        glVertex3f(0, 0, 0)
+        glVertex3f(10, 0, 0)
+        glEnd()
+        glBegin(GL_LINES)
+        glColor3f(0.0, 1.0, 0.0)
+        glVertex3f(0, 0, 0)
+        glVertex3f(0, 10, 0)
+        glEnd()
+        glBegin(GL_LINES)
+        glColor3f(0.0, 0.0, 1.0)
+        glVertex3f(0, 0, 0)
+        glVertex3f(0, 0, 10)
+        glEnd()
+
         self.drawOpticalElements()
         self.drawOtherElements()
         glFlush()
@@ -108,13 +126,8 @@ class SetupWidget(QtOpenGL.QGLWidget):
             texture[:, i, 3] = 125
         return texture
 
-    def get_pattern_green(self):
-        texture = np.zeros((180, 180, 4), np.uint8)
-        texture[None, None, :] = [180, 180, 180, 25]
-        return texture
-
     def get_pattern_cross(self):
-        texture = self.get_pattern_green()
+        texture = np.zeros((180, 180, 4), np.uint8)
         texture[:, texture.shape[1] // 2 - 5:texture.shape[1] // 2 +
                 5, :] = [0, 0, 0, 125]
         texture[texture.shape[0] // 2 - 5:texture.shape[0] // 2 +
@@ -122,7 +135,7 @@ class SetupWidget(QtOpenGL.QGLWidget):
         return texture
 
     def get_pattern_polfilter(self):
-        texture = self.get_pattern_green()
+        texture = np.zeros((180, 180, 4), np.uint8)
         texture[None, texture.shape[1] // 2 - 5:texture.shape[1] // 2 +
                 5, :] = [0, 0, 0, 125]
         return texture
@@ -154,16 +167,20 @@ class SetupWidget(QtOpenGL.QGLWidget):
         return tex_dict
 
     def drawOpticalElements(self):
+        glPushMatrix()
+
+        # glucylinder are orientatet along z axis, -> rotate to y axis
+        glRotatef(-90, 1.0, 0.0, 0.0)
+
         h = 0.5
-        dy = 3
+        dy = 4
         r = 5
         NUM_POLYGON = 42
         glColor3f(0.7, 0.7, 0.7)
         for i in range(4):
             glPushMatrix()
             y = -1.5 * dy - h // 2 + i * dy
-            glTranslatef(0, y, 0)
-            glRotatef(-90, 1.0, 0.0, 0.0)  # along y axis
+            glTranslatef(0, 0, y)
             if i != 2:  # not tissue
                 glRotatef(self._rotation, 0.0, 0.0, 1.0)  # filter rho
             if i == 2:  # tissue
@@ -176,7 +193,7 @@ class SetupWidget(QtOpenGL.QGLWidget):
             if i == 1:
                 glBindTexture(GL_TEXTURE_2D, self._tex_dict["cross"])
             if i == 2:
-                glBindTexture(GL_TEXTURE_2D, self._tex_dict["section_green"])
+                glBindTexture(GL_TEXTURE_2D, self._tex_dict["section"])
             if i == 3:
                 glRotatef(90, 0.0, 0.0, 1.0)  # filter rho
                 glBindTexture(GL_TEXTURE_2D, self._tex_dict["polfilter"])
@@ -192,32 +209,39 @@ class SetupWidget(QtOpenGL.QGLWidget):
                 glBindTexture(GL_TEXTURE_2D, self._tex_dict["cross"])
             if i == 2:
                 glRotatef(180, 0.0, 0.0, 1.0)  # filter rho
-                glBindTexture(GL_TEXTURE_2D, self._tex_dict["section_green"])
+                glBindTexture(GL_TEXTURE_2D, self._tex_dict["section"])
             if i == 3:
                 glRotatef(90, 0.0, 0.0, 1.0)  # filter rho
                 glBindTexture(GL_TEXTURE_2D, self._tex_dict["polfilter"])
             gluDisk(self._quadObj, 0, r, NUM_POLYGON, 1)
 
             glPopMatrix()
+        glPopMatrix()
 
     def drawOtherElements(self):
+        # LED
+        glPushMatrix()
         glColor3f(0.2, 0.8, 0.2)
         glBegin(GL_POLYGON)
         # glNormal3f(0.0, 1.0, 0.0)
-        glVertex3f(-5, -8, 5)
-        glVertex3f(-5, -8, -5)
-        glVertex3f(5, -8, -5)
-        glVertex3f(5, -8, 5)
+        z = -12.5
+        glVertex3f(5, z, 5)
+        glVertex3f(-5, z, 5)
+        glVertex3f(-5, z, -5)
+        glVertex3f(5, z, -5)
         glEnd()
+        glPopMatrix()
 
-        glTranslatef(0, 10, 0)
+        # CAMERA
+        glPushMatrix()
+        glTranslatef(0, 13, 0)
         glColor3f(0.3, 0.3, 0.3)
-        h = 2
+        h = 0.5
         wy = 2
         wx = 2
         glBegin(GL_QUADS)
         for z in [-1.0, 1.0]:
-            # glNormal3f(0.0, -z, 0.0)
+            glNormal3f(0.0, -z, 0.0)
             glVertex3f(wx, z * h, -wy)
             glVertex3f(wx, z * h, wy)
             glVertex3f(-wx, z * h, wy)
@@ -238,7 +262,9 @@ class SetupWidget(QtOpenGL.QGLWidget):
             glVertex3f(wx, h, y * wy)
         glEnd()
 
+        # LENSE
         gobj = gluNewQuadric()
         glTranslatef(0, -h, 0)
         glRotatef(90, 1, 0, 0)
-        gluCylinder(self._quadObj, 0.9, 1, 0.5, 42, 1)
+        gluCylinder(gobj, 1.5, 1.5, 0.75, 42, 1)
+        glPopMatrix()
