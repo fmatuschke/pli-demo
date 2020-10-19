@@ -18,7 +18,7 @@ from src import helper
 
 class CameraWidget(QtWidgets.QLabel):
 
-    plot_update = QtCore.pyqtSignal(np.ndarray, np.ndarray, float, bool)
+    plot_update = QtCore.pyqtSignal(list, list, float)
 
     def __init__(self, parent=None, *args, **kwargs):
         super(CameraWidget, self).__init__(parent, *args, **kwargs)
@@ -205,10 +205,16 @@ class CameraWidget(QtWidgets.QLabel):
             self.plot_x = [self.click_x]
             self.plot_y = [self.click_y]
 
-        # emit last clicked data
-        x, y = self.pli_stack.get(self.click_x + self.mask_origin[0],
-                                  self.click_y + self.mask_origin[1])
-        self.plot_update.emit(x, y, self.rho, self.plot_add)
+        # emit all clicked data
+        x_data = []
+        y_data = []
+        for i, (x, y) in enumerate(zip(self.plot_x, self.plot_y)):
+            x, y = self.pli_stack.get(x + self.mask_origin[0],
+                                      y + self.mask_origin[1])
+            x_data.append(x)
+            y_data.append(y)
+
+        self.plot_update.emit(x_data, y_data, self.rho)
 
     def set_mode(self, mode):
         if mode != "live":
@@ -296,15 +302,6 @@ class CameraWidget(QtWidgets.QLabel):
             value = self.pli_stack.insert(self.rho, frame)
 
             if value:
-                for i, (x, y) in enumerate(zip(self.plot_x, self.plot_y)):
-                    x, y = self.pli_stack.get(x + self.mask_origin[0],
-                                              y + self.mask_origin[1])
-
-                    if i == 0:
-                        self.plot_update.emit(x, y, self.rho, False)
-                    else:
-                        self.plot_update.emit(x, y, self.rho, True)
-
                 self.ui.statusBar().showMessage(
                     f"inserted: {np.rad2deg(self.rho):.0f}", 2000)
 
@@ -346,6 +343,17 @@ class CameraWidget(QtWidgets.QLabel):
                     frame = self.tracker.crop(frame)
                     self.mask_origin = self.tracker.mask_origin
 
+            # plot
+            x_data = []
+            y_data = []
+            for i, (x, y) in enumerate(zip(self.plot_x, self.plot_y)):
+                x, y = self.pli_stack.get(x + self.mask_origin[0],
+                                          y + self.mask_origin[1])
+                x_data.append(x)
+                y_data.append(y)
+
+            self.plot_update.emit(x_data, y_data, self.rho)
+            # image
             self.update_image(frame)
 
     def update_image(self, image):
@@ -355,7 +363,7 @@ class CameraWidget(QtWidgets.QLabel):
         colors = np.array([(56, 173, 107, 255), (60, 132, 167, 255),
                            (235, 136, 23, 255), (123, 127, 140, 255),
                            (191, 89, 62, 255)], np.uint8)  # ChartThemeDark
-        last_color = colors[0]
+        last_color = colors[0] 
 
         if self.tracker.is_calibrated:
             if hasattr(self.ui, "setupwidget"):
