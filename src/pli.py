@@ -43,6 +43,24 @@ def _orientation_to_hsv(directionValue, inclinationValue):
     return _hsv_black_to_rgb_space(h, s, v)
 
 
+def rot_x(phi):
+    """ 3d rotation around x-axis: float -> (3,3)-array """
+    return np.array(((1, 0, 0), (0, np.cos(phi), -np.sin(phi)),
+                     (0, np.sin(phi), np.cos(phi))), float)
+
+
+def rot_y(phi):
+    """ 3d rotation around y-axis: float -> (3,3)-array """
+    return np.array(((np.cos(phi), 0, np.sin(phi)), (0, 1, 0),
+                     (-np.sin(phi), 0, np.cos(phi))), float)
+
+
+def rot_z(phi):
+    """ 3d rotation around z-axis: float -> (3,3)-array """
+    return np.array(((np.cos(phi), -np.sin(phi), 0),
+                     (np.sin(phi), np.cos(phi), 0), (0, 0, 1)), float)
+
+
 def fom_hsv_black(direction, inclination, mask=None):
     if mask is None:
         mask = np.ones_like(direction, dtype=np.bool)
@@ -56,6 +74,41 @@ def fom_hsv_black(direction, inclination, mask=None):
             hsv[x, y, :] = _orientation_to_hsv(direction[x, y], inclination[x,
                                                                             y])
     return hsv
+
+
+def _epa(data):
+    data = np.array(data, copy=False)
+
+    n = data.shape[-1]
+    rho_2 = 2 * np.linspace(0, np.pi, n, False, dtype=data.dtype)
+
+    a0 = np.sum(data, -1) / n
+    a1 = 2 * np.sum(data * np.sin(rho_2), -1) / n
+    b1 = 2 * np.sum(data * np.cos(rho_2), -1) / n
+
+    t = 2 * a0
+    d = 0.5 * np.arctan2(-b1, a1) + np.pi
+    r = np.sqrt(a1 * a1 + b1 * b1) / (a0 + 1e-16)
+
+    d = d % np.pi
+
+    return t, d, r
+
+
+@numba.njit(cache=True)
+def _calc_tilt(x, y, z, rho, rot, mask):
+    data = np.zeros((x.shape[0], x.shape[1], rho.size))
+    for i in range(x.shape[0]):
+        for j in range(x.shape[1]):
+            if not mask[i, j]:
+                continue
+            v = np.dot(rot, np.array([x[i, j], y[i, j], z[i, j]]))
+            a = np.pi / 2 - np.arccos(v[2])
+            p = np.arctan2(v[1], v[0])
+
+            delta = 0.2 * np.cos(a)**2
+            data[i, j, :] = (1 + np.sin(2 * (rho - p)) * np.sin(delta))
+    return data
 
 
 class Stack:
@@ -72,6 +125,12 @@ class Stack:
         self._inclination = None
         self._fom = None
         self._mask = None
+
+        self._tilt = None
+        self._tilt_transmittance = None
+        self._tilt_direction = None
+        self._tilt_retardation = None
+        self._tilt_inclination = None
 
     @property
     def size(self):
@@ -140,6 +199,8 @@ class Stack:
             self.calc_coeffs()
             print("calc_fom")
             self.calc_fom()
+            print("calc_tilt")
+            self.calc_tilt()
 
         return is_inserted
 
@@ -148,26 +209,44 @@ class Stack:
 
     def calc_coeffs(self):
         if len(self._frames) == self._n_images:
-
-            data = np.array(self._frames, np.float32)
-            n = data.shape[0]
-
-            rho_2 = 2 * np.linspace(0, np.pi, n, False, dtype=data.dtype)
-
-            a0 = np.sum(data, 0) / n
-            a1 = 2 * np.sum(data * np.sin(rho_2)[:, None, None], 0) / n
-            b1 = 2 * np.sum(data * np.cos(rho_2)[:, None, None], 0) / n
-
-            self._transmittance = 2 * a0
-            self._direction = 0.5 * np.arctan2(-b1, a1) + np.pi
-            self._retardation = np.sqrt(a1 * a1 + b1 * b1) / (a0 + 1e-16)
+            self._transmittance, self._direction, self._retardation = _epa(
+                np.array(self._frames, np.float32))
         else:
-            print(f"Error, no {self._n_images} mesuered images")
+            print(f"Error, no {self._n_images} measured images")
 
     def calc_fom(self):
         self._inclination = self._retardation / np.amax(self._retardation)
         self._fom = fom_hsv_black(self._direction, self._inclination)
         self._mask = self.retardation > 0.05
+
+    def calc_tilt(self):
+        # TODO: speedup
+        self._tilt = []
+        x = np.cos(self.inclination) * np.cos(self.direction)
+        y = np.cos(self.inclination) * np.sin(self.direction)
+        z = np.sin(self.inclination)
+
+        # rho = np.linspace(0, np.pi, 18, endpoint=False)
+        theta = np.deg2rad(20)
+
+        self._tilt = [
+            np.zeros((self._transmittance.shape[0],
+                      self._transmittance.shape[1], 18))
+        ] * 4
+
+        rho = np.linspace(0, np.pi, 18, endpoint=False, dtype=x.dtype)
+        for r, phi in enumerate([0, 90, 180, 270]):
+            rot = np.dot(rot_z(-phi), np.dot(rot_x(theta),
+                                             rot_z(phi))).astype(x.dtype)
+            self._tilt[r] = np.array(
+                _calc_tilt(x, y, z, rho, rot, self._mask) * 255, np.uint8)
+
+        self._tilt_transmittance = [None] * 4
+        self._tilt_direction = [None] * 4
+        self._tilt_retardation = [None] * 4
+        for i, data in enumerate(self._tilt):
+            self._tilt_transmittance[i], self._tilt_direction[
+                i], self._tilt_retardation[i] = _epa(data)
 
     def clear(self):
         self._angles = np.linspace(0, np.pi, self._n_images, False)
@@ -177,8 +256,14 @@ class Stack:
         self._retardation = None
         self._inclination = None
         self._fom = None
+        self._mask = None
 
-    def get(self, x, y):
+        self._tilt = None
+        self._tilt_transmittance = None
+        self._tilt_direction = None
+        self._tilt_retardation = None
+
+    def get(self, x, y, i=0):
         x = int(x)
         y = int(y)
 
@@ -186,4 +271,7 @@ class Stack:
                 2] or y >= self.frames.shape[1]:
             return np.array([]), np.array([])
 
-        return self.angles, self.frames[:, y, x]
+        if i == 0:
+            return self.angles, self.frames[:, y, x]
+        if i > 0:
+            return self.angles, self._tilt[i - 1][y, x, :]
