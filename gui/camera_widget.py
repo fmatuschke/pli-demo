@@ -206,8 +206,8 @@ class CameraWidget(QtWidgets.QLabel):
             self.plot_y = [self.click_y]
 
         # emit last clicked data
-        x, y = self.pli_stack.get(self.click_x + self.mask_origin[1],
-                                  self.click_y + self.mask_origin[0])
+        x, y = self.pli_stack.get(self.click_x + self.mask_origin[0],
+                                  self.click_y + self.mask_origin[1])
         self.plot_update.emit(x, y, self.rho, self.plot_add)
 
     def set_mode(self, mode):
