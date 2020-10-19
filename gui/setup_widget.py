@@ -206,31 +206,32 @@ class SetupWidget(QtOpenGL.QGLWidget):
                 glRotatef(self._tilt_angle[1], 0.0, 0.0, 1.0)  # tilting
                 glRotatef(self._tilt_angle[0], 0.0, 1.0, 0.0)  # tilting
                 glRotatef(-self._tilt_angle[1], 0.0, 0.0, 1.0)  # tilting
-            # bottom
+            # bottom texture
             if i == 0:
                 glBindTexture(GL_TEXTURE_2D, self._tex_dict["polfilter"])
             if i == 1:
+                glRotatef(45, 0.0, 0.0, 1.0)
                 glBindTexture(GL_TEXTURE_2D, self._tex_dict["cross"])
             if i == 2:
+                glRotatef(180, 0.0, 0.0, 1.0)
                 glBindTexture(GL_TEXTURE_2D, self._tex_dict["section"])
             if i == 3:
-                glRotatef(90, 0.0, 0.0, 1.0)  # filter rho
+                glRotatef(90, 0.0, 0.0, 1.0)
                 glBindTexture(GL_TEXTURE_2D, self._tex_dict["polfilter"])
+
             gluDisk(self._quadObj, 0, r, NUM_POLYGON, 1)
-            # cylinder
             glBindTexture(GL_TEXTURE_2D, self._tex_dict["lines"])
             gluCylinder(self._quadObj, r, r, h, NUM_POLYGON, 1)
-            # top
+
+            # top texture
             glTranslatef(0, 0, h)
             if i == 0:
                 glBindTexture(GL_TEXTURE_2D, self._tex_dict["polfilter"])
             if i == 1:
                 glBindTexture(GL_TEXTURE_2D, self._tex_dict["cross"])
             if i == 2:
-                glRotatef(180, 0.0, 0.0, 1.0)  # filter rho
                 glBindTexture(GL_TEXTURE_2D, self._tex_dict["section"])
             if i == 3:
-                glRotatef(90, 0.0, 0.0, 1.0)  # filter rho
                 glBindTexture(GL_TEXTURE_2D, self._tex_dict["polfilter"])
             gluDisk(self._quadObj, 0, r, NUM_POLYGON, 1)
 
