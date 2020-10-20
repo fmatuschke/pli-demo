@@ -80,8 +80,6 @@ class PlotWidget(QtChart.QChartView):
             # self.chart.axes()[1].applyNiceNumbers()
 
         if len(x_data) > 0:
-            print(self.chart.axes()[1].min())
-            print(self.chart.axes()[1].max())
             series = QtChart.QLineSeries()
             series.append(np.rad2deg(rho), self.chart.axes()[1].min())
             series.append(np.rad2deg(rho), self.chart.axes()[1].max())
