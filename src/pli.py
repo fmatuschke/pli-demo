@@ -43,6 +43,24 @@ def _orientation_to_hsv(directionValue, inclinationValue):
     return _hsv_black_to_rgb_space(h, s, v)
 
 
+def rot_x(phi):
+    """ 3d rotation around x-axis: float -> (3,3)-array """
+    return np.array(((1, 0, 0), (0, np.cos(phi), -np.sin(phi)),
+                     (0, np.sin(phi), np.cos(phi))), float)
+
+
+def rot_y(phi):
+    """ 3d rotation around y-axis: float -> (3,3)-array """
+    return np.array(((np.cos(phi), 0, np.sin(phi)), (0, 1, 0),
+                     (-np.sin(phi), 0, np.cos(phi))), float)
+
+
+def rot_z(phi):
+    """ 3d rotation around z-axis: float -> (3,3)-array """
+    return np.array(((np.cos(phi), -np.sin(phi), 0),
+                     (np.sin(phi), np.cos(phi), 0), (0, 0, 1)), float)
+
+
 def fom_hsv_black(direction, inclination, mask=None):
     if mask is None:
         mask = np.ones_like(direction, dtype=np.bool)
@@ -77,6 +95,22 @@ def _epa(data):
     return t, d, r
 
 
+@numba.njit(cache=True)
+def _calc_tilt(x, y, z, rho, rot, mask):
+    data = np.zeros((rho.size, x.shape[0], x.shape[1]))
+    for i in range(x.shape[0]):
+        for j in range(x.shape[1]):
+            if not mask[i, j]:
+                continue
+            v = np.dot(rot, np.array([x[i, j], y[i, j], z[i, j]]))
+            a = np.pi / 2 - np.arccos(v[2])
+            p = np.arctan2(v[1], v[0])
+
+            delta = 0.2 * np.cos(a)**2
+            data[:, i, j] = (1 + np.sin(2 * (rho - p)) * np.sin(delta))
+    return data
+
+
 class Stack:
 
     def __init__(self, ui=None):
@@ -91,6 +125,16 @@ class Stack:
         self._inclination = None
         self._fom = None
         self._mask = None
+
+        self._tilt_mode = 0
+        self._tilt_frames = None
+        self._tilt_transmittance = None
+        self._tilt_direction = None
+        self._tilt_retardation = None
+        self._tilt_inclination = None
+
+    def set_tilt_mode(self, mode):
+        self._tilt_mode = int(mode)
 
     @property
     def size(self):
@@ -115,15 +159,24 @@ class Stack:
 
     @property
     def transmittance(self):
-        return self._transmittance.copy()
+        if self._tilt_mode == 0:
+            return self._transmittance.copy()
+        else:
+            return self._tilt_transmittance[self._tilt_mode - 1].copy()
 
     @property
     def direction(self):
-        return self._direction.copy()
+        if self._tilt_mode == 0:
+            return self._direction.copy()
+        else:
+            return self._tilt_direction[self._tilt_mode - 1].copy()
 
     @property
     def retardation(self):
-        return self._retardation.copy()
+        if self._tilt_mode == 0:
+            return self._retardation.copy()
+        else:
+            return self._tilt_retardation[self._tilt_mode - 1].copy()
 
     @property
     def inclination(self):
@@ -159,6 +212,8 @@ class Stack:
             self.calc_coeffs()
             print("calc_fom")
             self.calc_fom()
+            print("calc_tilt")
+            self.calc_tilt()
 
         return is_inserted
 
@@ -177,6 +232,36 @@ class Stack:
         self._fom = fom_hsv_black(self._direction, self._inclination)
         self._mask = self.retardation > 0.05
 
+    def calc_tilt(self):
+        # TODO: speedup
+        self._tilt_frames = []
+        x = np.cos(self.inclination) * np.cos(self.direction)
+        y = np.cos(self.inclination) * np.sin(self.direction)
+        z = np.sin(self.inclination)
+
+        # rho = np.linspace(0, np.pi, 18, endpoint=False)
+        theta = np.deg2rad(20)
+
+        self._tilt_frames = [
+            np.zeros((18, self._transmittance.shape[0],
+                      self._transmittance.shape[1]))
+        ] * 4
+
+        rho = np.linspace(0, np.pi, 18, endpoint=False, dtype=x.dtype)
+        for r, phi in enumerate([0, 90, 180, 270]):
+            rot = np.dot(rot_z(-phi), np.dot(rot_x(theta),
+                                             rot_z(phi))).astype(x.dtype)
+            self._tilt_frames[r] = (_calc_tilt(x, y, z, rho, rot, self._mask) *
+                                    self._transmittance[None, :, :]).astype(
+                                        np.uint8)
+
+        self._tilt_transmittance = [None] * 4
+        self._tilt_direction = [None] * 4
+        self._tilt_retardation = [None] * 4
+        for i, data in enumerate(self._tilt_frames):
+            self._tilt_transmittance[i], self._tilt_direction[
+                i], self._tilt_retardation[i] = _epa(data)
+
     def clear(self):
         self._angles = np.linspace(0, np.pi, self._n_images, False)
         self._frames = [None] * self._n_images
@@ -187,6 +272,11 @@ class Stack:
         self._fom = None
         self._mask = None
 
+        self._tilt_frames = None
+        self._tilt_transmittance = None
+        self._tilt_direction = None
+        self._tilt_retardation = None
+
     def get(self, x, y):
         x = int(x)
         y = int(y)
@@ -195,4 +285,7 @@ class Stack:
                 2] or y >= self.frames.shape[1]:
             return np.array([]), np.array([])
 
-        return self.angles, self.frames[:, y, x]
+        if self._tilt_mode == 0:
+            return self.angles, self.frames[:, y, x]
+        if self._tilt_mode > 0:
+            return self.angles, self._tilt_frames[self._tilt_mode - 1][y, x, :]

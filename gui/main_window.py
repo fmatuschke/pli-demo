@@ -255,15 +255,20 @@ class MainWindow(QtWidgets.QMainWindow):
             partial(self.camwidget.set_mode, "fom"))
 
         #
-        def update_tilt(theta, phi):
+        def update_tilt(theta, phi, mode):
             self.setupwidget.set_tilt(theta, phi)
+            self.camwidget.pli_stack.set_tilt_mode(mode)
+            self.camwidget.set_mode(self.camwidget.mode)  # update frame
             self.setupwidget.update()
 
-        self.action_tilt_zero.triggered.connect(partial(update_tilt, 0, 0))
-        self.action_tilt_north.triggered.connect(partial(update_tilt, 10, 270))
-        self.action_tilt_west.triggered.connect(partial(update_tilt, 10, 0))
-        self.action_tilt_south.triggered.connect(partial(update_tilt, 10, 90))
-        self.action_tilt_east.triggered.connect(partial(update_tilt, 10, 180))
+        self.action_tilt_zero.triggered.connect(partial(update_tilt, 0, 0, 0))
+        self.action_tilt_north.triggered.connect(
+            partial(update_tilt, 10, 270, 1))
+        self.action_tilt_west.triggered.connect(partial(update_tilt, 10, 0, 2))
+        self.action_tilt_south.triggered.connect(partial(
+            update_tilt, 10, 90, 3))
+        self.action_tilt_east.triggered.connect(partial(update_tilt, 10, 180,
+                                                        4))
         #
         self.action_tracker.triggered.connect(self.camwidget.toogle_draw_helper)
         self.action_reset.triggered.connect(lambda: self.reset())

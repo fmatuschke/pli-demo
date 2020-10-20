@@ -39,7 +39,7 @@ class CameraWidget(QtWidgets.QLabel):
         self.show_tracker = False
         self.mode = "live"
         self.filter_image = "nlmd"
-        self._string = ""
+        self.tilt = 0
 
         # plot variables
         self.plot_add = False
@@ -363,7 +363,7 @@ class CameraWidget(QtWidgets.QLabel):
         colors = np.array([(56, 173, 107, 255), (60, 132, 167, 255),
                            (235, 136, 23, 255), (123, 127, 140, 255),
                            (191, 89, 62, 255)], np.uint8)  # ChartThemeDark
-        last_color = colors[0] 
+        last_color = colors[0]
 
         if self.tracker.is_calibrated:
             if hasattr(self.ui, "setupwidget"):
