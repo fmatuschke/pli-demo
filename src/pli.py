@@ -58,6 +58,25 @@ def fom_hsv_black(direction, inclination, mask=None):
     return hsv
 
 
+def _epa(data):
+    data = np.array(data, copy=False)
+
+    n = data.shape[0]
+    rho_2 = 2 * np.linspace(0, np.pi, n, False, dtype=data.dtype)
+
+    a0 = np.sum(data, 0) / n
+    a1 = 2 * np.sum(data * np.sin(rho_2)[:, None, None], 0) / n
+    b1 = 2 * np.sum(data * np.cos(rho_2)[:, None, None], 0) / n
+
+    t = 2 * a0
+    d = 0.5 * np.arctan2(-b1, a1) + np.pi
+    r = np.sqrt(a1 * a1 + b1 * b1) / (a0 + 1e-16)
+
+    d = d % np.pi
+
+    return t, d, r
+
+
 class Stack:
 
     def __init__(self, ui=None):
@@ -148,21 +167,10 @@ class Stack:
 
     def calc_coeffs(self):
         if len(self._frames) == self._n_images:
-
-            data = np.array(self._frames, np.float32)
-            n = data.shape[0]
-
-            rho_2 = 2 * np.linspace(0, np.pi, n, False, dtype=data.dtype)
-
-            a0 = np.sum(data, 0) / n
-            a1 = 2 * np.sum(data * np.sin(rho_2)[:, None, None], 0) / n
-            b1 = 2 * np.sum(data * np.cos(rho_2)[:, None, None], 0) / n
-
-            self._transmittance = 2 * a0
-            self._direction = 0.5 * np.arctan2(-b1, a1) + np.pi
-            self._retardation = np.sqrt(a1 * a1 + b1 * b1) / (a0 + 1e-16)
+            self._transmittance, self._direction, self._retardation = _epa(
+                self.frames.astype(np.float32))
         else:
-            print(f"Error, no {self._n_images} mesuered images")
+            print(f"Error, no {self._n_images} measured images")
 
     def calc_fom(self):
         self._inclination = self._retardation / np.amax(self._retardation)
@@ -177,6 +185,7 @@ class Stack:
         self._retardation = None
         self._inclination = None
         self._fom = None
+        self._mask = None
 
     def get(self, x, y):
         x = int(x)
