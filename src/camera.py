@@ -193,13 +193,18 @@ class Camera:
                 print(f"camera disconnected")
                 self._mode = CamMode.NONE
         elif self._mode == CamMode.VIDEO:
+            if self._video_capture.get(
+                    cv2.CAP_PROP_FRAME_COUNT) == self._video_capture.get(
+                        cv2.CAP_PROP_POS_FRAMES):
+                self._video_capture.set(cv2.CAP_PROP_POS_FRAMES, 0)
             self._success, frame = self._video_capture.read()
+
+            # if not self._success:
+            # self._video_capture.set(cv2.CAP_PROP_POS_FRAMES, 0)
+            # self._success, frame = self._video_capture.read()
             if not self._success:
-                print(self._video_capture.set(cv2.CAP_PROP_POS_FRAMES, 0))
-                self._success, frame = self._video_capture.read()
-                if not self._success:
-                    print("video file corrupted")
-                    self._mode = CamMode.NONE
+                print("video file corrupted")
+                self._mode = CamMode.NONE
         else:
             frame = None
 

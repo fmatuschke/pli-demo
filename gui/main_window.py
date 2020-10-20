@@ -11,6 +11,9 @@ from gui.camera_widget import CameraWidget
 from gui.plot_widget import PlotWidget
 from gui.setup_widget import SetupWidget
 from gui.zoom_widget import ZoomWidget
+from src.camera import CamMode
+
+import cv2
 
 logo_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..",
                          "data")
@@ -282,6 +285,29 @@ class MainWindow(QtWidgets.QMainWindow):
             partial(self.camwidget.set_filter, "gaus"))
         self.action_filter_nlmd.triggered.connect(
             partial(self.camwidget.set_filter, "nlmd"))
+
+    def keyPressEvent(self, event):
+        if self.camwidget.camera._mode == CamMode.VIDEO:
+            if event.key() == QtCore.Qt.Key_Comma:
+                if self.camwidget.live.isActive():
+                    self.camwidget.live.stop()
+                next_frame = self.camwidget.camera._video_capture.get(
+                    cv2.CAP_PROP_POS_FRAMES) - 2
+                if next_frame < 0:
+                    next_frame = self.camwidget.camera._video_capture.get(
+                        cv2.CAP_PROP_FRAME_COUNT) - 1
+                self.camwidget.camera._video_capture.set(
+                    cv2.CAP_PROP_POS_FRAMES, next_frame)
+                self.camwidget.next_frame()
+            if event.key() == QtCore.Qt.Key_Period:
+                if self.camwidget.live.isActive():
+                    self.camwidget.live.stop()
+                self.camwidget.next_frame()
+            if event.key() == QtCore.Qt.Key_Space:
+                if self.camwidget.live.isActive():
+                    self.camwidget.live.stop()
+                else:
+                    self.camwidget.live.start(30)
 
     def reset(self):
         self.camwidget.setVisible(False)
