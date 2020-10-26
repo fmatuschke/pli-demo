@@ -14,12 +14,25 @@ python3 main.py
 
 ### windows
 
+in power shell:
+```sh
+.\run_windows.ps1
+```
+
+or
+
 ``` sh
-python3 -m venv env
+python.exe -m venv env
 .\env\Scripts\activate
-pip install pip --upgrade
-pip install -r requirements.txt
-python3 main.py
+pip.exe install pip --upgrade
+pip.exe install -r requirements.txt
+python.exe main.py
+```
+
+#### exe
+
+```
+pyinstaller .\main.py --onefile
 ```
 
 ## TODO
@@ -29,12 +42,8 @@ python3 main.py
 ### Improvements
 
 - improve 3d rendering
-  - opengl: rotatable filters
-  - opengl: RFC shaders
-  - resize event rendering
 - improve pli mask
 - only live view mode
-- crop image top and bottom
 - visual feedback when resetting / calculating
 - zoomable central image?
 - right click mouse on image functions?
