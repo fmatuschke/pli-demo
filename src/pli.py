@@ -288,4 +288,4 @@ class Stack:
         if self._tilt_mode == 0:
             return self.angles, self.frames[:, y, x]
         if self._tilt_mode > 0:
-            return self.angles, self._tilt_frames[self._tilt_mode - 1][y, x, :]
+            return self.angles, self._tilt_frames[self._tilt_mode - 1][:, y, x]
