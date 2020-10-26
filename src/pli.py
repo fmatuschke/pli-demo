@@ -230,7 +230,7 @@ class Stack:
     def calc_fom(self):
         self._inclination = self._retardation / np.amax(self._retardation)
         self._fom = fom_hsv_black(self._direction, self._inclination)
-        self._mask = self.retardation > 0.05
+        self._mask = self.retardation > 0.080
 
     def calc_tilt(self):
         # TODO: speedup
