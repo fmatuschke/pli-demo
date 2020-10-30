@@ -202,6 +202,8 @@ class Stack:
             if self._frames[idx] is None:
                 if frame.ndim == 3:
                     frame = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
+
+                frame = cv2.fastNlMeansDenoising(frame, None, 5, 5, 9)
                 self._frames[idx] = frame
                 is_inserted = True
 

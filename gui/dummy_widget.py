@@ -3,8 +3,8 @@ from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 
-pli_logo_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..",
-                             "data", "pli-logo.png")
+LOGO_PATH = os.path.join("data", "pli-logo.png")
+LOGO_IMG = cv2.imread(LOGO_PATH, cv2.IMREAD_COLOR)
 
 
 class ImageWidget(QtWidgets.QLabel):

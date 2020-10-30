@@ -25,8 +25,8 @@ class SetupWidget(QtOpenGL.QGLWidget):
             "polfilter":
                 self.get_pattern_polfilter(),
             "section":
-                self.greening_texture(self.read_texture("src/section.png")),
-            # "section_green": self.read_texture("src/section_green.png"),
+                self.greening_texture(
+                    self.read_texture(os.path.join("data", "section.png"))),
             "test":
                 self.get_pattern_test()
         }

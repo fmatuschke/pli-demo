@@ -15,6 +15,9 @@ from src.tracker import Tracker
 from src.pli import Stack as PliStack
 from src import helper
 
+LOGO_PATH = os.path.join("data", "pli-logo.png")
+LOGO_IMG = cv2.imread(LOGO_PATH, cv2.IMREAD_COLOR)
+
 
 class CameraWidget(QtWidgets.QLabel):
 
@@ -265,12 +268,12 @@ class CameraWidget(QtWidgets.QLabel):
         # get frame, quadratic -> less data to analyse
         frame = self.camera.frame(quadratic=True)
         if frame is None:
-            frame = helper.LOGO_IMG
+            frame = LOGO_IMG
             return
 
         # pre filter images
         if self.filter_image == "nlmd":
-            denoise = lambda x: cv2.fastNlMeansDenoising(frame, x, 5, 5, 9)
+            denoise = lambda x: cv2.fastNlMeansDenoising(x, None, 5, 5, 9)
         elif self.filter_image == "none":
             denoise = lambda x: x
         elif self.filter_image == "gaus":
