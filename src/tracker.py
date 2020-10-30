@@ -179,8 +179,9 @@ class Tracker:
         return self._rho
 
     def show(self):
-        frame = cv2.aruco.drawDetectedMarkers(self._frame, self._cv_corners,
-                                              self._cv_ids)
+        if self._cal_corners.size > 0:
+            frame = cv2.aruco.drawDetectedMarkers(self._frame, self._cv_corners,
+                                                  self._cv_ids)
         if self._center is not None:
             frame = cv2.circle(frame, (self._center[0], self._center[1]), 4,
                                (0, 255, 0), 4)
