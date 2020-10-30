@@ -15,8 +15,7 @@ from src.camera import CamMode
 
 import cv2
 
-logo_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..",
-                         "data")
+logo_path = "data"
 
 
 class Color(QtWidgets.QWidget):
