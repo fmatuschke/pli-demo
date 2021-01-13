@@ -211,7 +211,13 @@ class MainWindow(QtWidgets.QMainWindow):
         self.cameraPortMenu = self.cameraMenu.addMenu('&port')
         self.cameraResolutionMenu = self.cameraMenu.addMenu('&resolution')
         self.cameraFilterMenu = self.cameraMenu.addMenu('&filter')
+        self.cameraColorMenu = self.cameraMenu.addMenu('&color')
         self.cameraDemoMenu = self.cameraMenu.addMenu('&demo')
+        #
+        self.action_color_gray = QtWidgets.QAction("&gray", self)
+        self.cameraColorMenu.addAction(self.action_color_gray)
+        self.action_color_rgb = QtWidgets.QAction("&rgb", self)
+        self.cameraColorMenu.addAction(self.action_color_rgb)
         #
         self.action_filter_nlmd = QtWidgets.QAction("&nlmd")
         self.cameraFilterMenu.addAction(self.action_filter_nlmd)
@@ -277,6 +283,11 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.camwidget.plot_update.connect(self.plotwidget.update_plot)
         # self.camwidget.zoom_update.connect(self.zoomwidget.update_image)
+
+        self.action_color_gray.triggered.connect(
+            partial(self.camwidget.set_color, "gray"))
+        self.action_color_rgb.triggered.connect(
+            partial(self.camwidget.set_color, "rgb"))
 
         self.action_filter_none.triggered.connect(
             partial(self.camwidget.set_filter, "none"))

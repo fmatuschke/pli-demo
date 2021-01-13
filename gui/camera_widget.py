@@ -219,6 +219,12 @@ class CameraWidget(QtWidgets.QLabel):
 
         self.plot_update.emit(x_data, y_data, self.rho)
 
+    def set_color(self, color):
+        if color == "gray":
+            self.camera._gray_image = True
+        else:
+            self.camera._gray_image = False
+
     def set_mode(self, mode):
         if mode != "live":
             if self.pli_stack.transmittance is None:
@@ -273,7 +279,11 @@ class CameraWidget(QtWidgets.QLabel):
 
         # pre filter images
         if self.filter_image == "nlmd":
-            denoise = lambda x: cv2.fastNlMeansDenoising(x, None, 5, 5, 9)
+            if frame.ndim == 2:
+                denoise = lambda x: cv2.fastNlMeansDenoising(frame, x, 5, 5, 9)
+            if frame.ndim == 3:
+                denoise = lambda x: cv2.fastNlMeansDenoisingColored(
+                    frame, x, 5, 5, 9)
         elif self.filter_image == "none":
             denoise = lambda x: x
         elif self.filter_image == "gaus":
@@ -281,11 +291,7 @@ class CameraWidget(QtWidgets.QLabel):
         else:
             raise ValueError("wrong input")
 
-        if frame.ndim == 2:
-            frame = denoise(frame)
-        else:
-            for i in range(frame.shape[2]):
-                frame[:, :, i] = denoise(frame[:, :, i])
+        frame = denoise(frame)
 
         # RUN TRACKER
         # calibrate tracker
