@@ -212,10 +212,10 @@ class CameraWidget(QtWidgets.QLabel):
         x_data = []
         y_data = []
         for i, (x, y) in enumerate(zip(self.plot_x, self.plot_y)):
-            x, y = self.pli_stack.get(x + self.mask_origin[0],
-                                      y + self.mask_origin[1])
-            x_data.append(x)
-            y_data.append(y)
+            angle, intensity = self.pli_stack.get(x + self.mask_origin[0],
+                                                  y + self.mask_origin[1])
+            x_data.append(angle)
+            y_data.append(intensity)
 
         self.plot_update.emit(x_data, y_data, self.rho)
 
