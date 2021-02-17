@@ -230,9 +230,35 @@ class Stack:
             print(f"Error, no {self._n_images} measured images")
 
     def calc_fom(self):
-        self._inclination = self._retardation / np.amax(self._retardation)
+        # ret>1 detected, probably hand movement in front of the camera
+        hist, edges = np.histogram(self.retardation[self.retardation <= 1], 42)
+        hist[hist <= 1] = 0
+        # erfahrungswert. Ich will die einzelenen rauschpixel raus haben
+
+        threshold = edges[np.argwhere(hist > 0)[-1] + 1]
+        # print(hist)
+        # print(edges)
+        # print(threshold)
+        self._mask = np.logical_and(self.retardation > 0.080,
+                                    self.retardation <= threshold)
+
+        # print(np.amax(self._retardation[self._mask]))
+        self._inclination = np.pi / 2 * (1 - self._retardation / threshold)
         self._fom = fom_hsv_black(self._direction, self._inclination)
-        self._mask = self.retardation > 0.080
+
+        from PIL import Image
+        im = Image.fromarray(self.retardation)
+        im.save('retardation.tif')
+        im = Image.fromarray(self._inclination)
+        im.save('inclination.tif')
+        im = Image.fromarray(self._direction)
+        im.save('direction.tif')
+        im = Image.fromarray(self._transmittance)
+        im.save('transmittance.tif')
+        im = Image.fromarray(self._mask)
+        im.save('mask.tif')
+        im = Image.fromarray(self._fom)
+        im.save('fom.tif')
 
     def calc_tilt(self):
         # TODO: speedup
