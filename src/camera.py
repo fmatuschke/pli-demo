@@ -11,6 +11,14 @@ class CamMode(enum.Enum):
     VIDEO = 2
 
 
+class CamColor(enum.Enum):
+    GRAY = 0
+    RGB = 1
+    RED = 2
+    GREEN = 3
+    BLUE = 4
+
+
 class Camera:
 
     def __init__(self,
@@ -35,7 +43,7 @@ class Camera:
                           _working_ports[0])
         self._check_resolutions()
         self.set_prop(width, height, fps)
-        self._gray_image = gray_image
+        self._color_mode = CamColor.GRAY
         self.check_readout()
 
     @property
@@ -80,7 +88,7 @@ class Camera:
         self._working_ports = []
         self._working_resolutions = []
 
-    def set_video(self, file_name="data/medium.webm"):
+    def set_video(self, file_name):
         self._video_capture = cv2.VideoCapture(file_name)
         self._mode = CamMode.VIDEO
 
@@ -209,8 +217,27 @@ class Camera:
             frame = None
 
         if self._success:
-            if self._gray_image:
+            if self._color_mode is CamColor.GRAY:
                 frame = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
+            elif self._color_mode is CamColor.RGB:
+                pass
+            elif self._color_mode is CamColor.RED:
+                frame = np.stack([
+                    np.zeros(frame.shape[:2], frame.dtype),
+                    np.zeros(frame.shape[:2], frame.dtype), frame[:, :, 2]
+                ], 2)
+            elif self._color_mode is CamColor.GREEN:
+                frame = np.stack([
+                    np.zeros(frame.shape[:2], frame.dtype), frame[:, :, 1],
+                    np.zeros(frame.shape[:2], frame.dtype)
+                ], 2)
+            elif self._color_mode is CamColor.BLUE:
+                frame = np.stack([
+                    frame[:, :, 0],
+                    np.zeros(frame.shape[:2], frame.dtype),
+                    np.zeros(frame.shape[:2], frame.dtype)
+                ], 2)
+
             if quadratic:
                 height, width = frame.shape[0], frame.shape[1]
                 l = min(height, width)

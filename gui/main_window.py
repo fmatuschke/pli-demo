@@ -11,7 +11,7 @@ from gui.camera_widget import CameraWidget
 from gui.plot_widget import PlotWidget
 from gui.setup_widget import SetupWidget
 from gui.zoom_widget import ZoomWidget
-from src.camera import CamMode
+from src.camera import CamMode, CamColor
 
 import cv2
 
@@ -218,6 +218,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.cameraColorMenu.addAction(self.action_color_gray)
         self.action_color_rgb = QtWidgets.QAction("&rgb", self)
         self.cameraColorMenu.addAction(self.action_color_rgb)
+        self.action_color_r = QtWidgets.QAction("&r", self)
+        self.cameraColorMenu.addAction(self.action_color_r)
+        self.action_color_g = QtWidgets.QAction("&g", self)
+        self.cameraColorMenu.addAction(self.action_color_g)
+        self.action_color_b = QtWidgets.QAction("&b", self)
+        self.cameraColorMenu.addAction(self.action_color_b)
         #
         self.action_filter_nlmd = QtWidgets.QAction("&nlmd")
         self.cameraFilterMenu.addAction(self.action_filter_nlmd)
@@ -285,9 +291,15 @@ class MainWindow(QtWidgets.QMainWindow):
         # self.camwidget.zoom_update.connect(self.zoomwidget.update_image)
 
         self.action_color_gray.triggered.connect(
-            partial(self.camwidget.set_color, "gray"))
+            partial(self.camwidget.set_color, CamColor.GRAY))
         self.action_color_rgb.triggered.connect(
-            partial(self.camwidget.set_color, "rgb"))
+            partial(self.camwidget.set_color, CamColor.RGB))
+        self.action_color_r.triggered.connect(
+            partial(self.camwidget.set_color, CamColor.RED))
+        self.action_color_g.triggered.connect(
+            partial(self.camwidget.set_color, CamColor.GREEN))
+        self.action_color_b.triggered.connect(
+            partial(self.camwidget.set_color, CamColor.BLUE))
 
         self.action_filter_none.triggered.connect(
             partial(self.camwidget.set_filter, "none"))

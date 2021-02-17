@@ -10,7 +10,7 @@ from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 
-from src.camera import Camera
+from src.camera import Camera, CamColor
 from src.tracker import Tracker
 from src.pli import Stack as PliStack
 from src import helper
@@ -220,10 +220,7 @@ class CameraWidget(QtWidgets.QLabel):
         self.plot_update.emit(x_data, y_data, self.rho)
 
     def set_color(self, color):
-        if color == "gray":
-            self.camera._gray_image = True
-        else:
-            self.camera._gray_image = False
+        self.camera._color_mode = color
 
     def set_mode(self, mode):
         if mode != "live":
