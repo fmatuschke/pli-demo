@@ -305,7 +305,9 @@ class CameraWidget(QtWidgets.QLabel):
             if self.rho is None:
                 self.update_image(frame)
                 return
-            value = self.pli_stack.insert(self.rho, frame)
+
+            frame_ = self.tracker.mask(frame)
+            value = self.pli_stack.insert(self.rho, frame_)
 
             if value:
                 self.ui.statusBar().showMessage(

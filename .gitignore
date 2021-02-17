@@ -1,7 +1,12 @@
 env-*/
+*.tif
+*.png
+*.txt
 
 # Created by https://www.toptal.com/developers/gitignore/api/python,vscode
 # Edit at https://www.toptal.com/developers/gitignore?templates=python,vscode
+
+.idea/
 
 ### Python ###
 # Byte-compiled / optimized / DLL files
