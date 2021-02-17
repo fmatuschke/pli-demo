@@ -118,10 +118,19 @@ class MainWindow(QtWidgets.QMainWindow):
         self.logolabelfzj.setAlignment(QtCore.Qt.AlignRight)
         self.logolabelfzj.setSizePolicy(QtWidgets.QSizePolicy.Maximum,
                                         QtWidgets.QSizePolicy.Maximum)
-        # p = self.logolabelfzj.palette()
-        # p.setColor(self.logolabelfzj.backgroundRole(), QtGui.QColor(0, 255, 0))
-        # self.logolabelfzj.setAutoFillBackground(True)
-        # self.logolabelfzj.setPalette(p)
+
+        self.color_sphere = QtWidgets.QLabel()
+        self.color_sphere.setMinimumHeight(50)
+        self.color_sphere.setMaximumHeight(50)
+        self.color_sphere.setPixmap(
+            QtGui.QPixmap.fromImage(
+                QtGui.QImage(os.path.join(logo_path,
+                                          "color_sphere.png"))).scaled(
+                                              self.color_sphere.size().width(),
+                                              self.color_sphere.size().height(),
+                                              QtCore.Qt.KeepAspectRatio,
+                                              QtCore.Qt.SmoothTransformation))
+        self.color_sphere.setAlignment(QtCore.Qt.AlignRight)
 
         #
         ''' LAYOUT
@@ -130,6 +139,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.layout_logos = QtWidgets.QGridLayout()
 
         self.layout.addWidget(self.camwidget, 0, 0, 2, 1)
+        self.layout.addWidget(self.color_sphere, 0, 0, 2, 1)
         self.layout.addWidget(self.setupwidget, 0, 1, 1, 1)
         self.layout.addWidget(self.plotwidget, 1, 1, 1, 1)
         self.layout.addLayout(self.layout_logos, 2, 1, 1, 1)
