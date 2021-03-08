@@ -249,7 +249,9 @@ class CameraWidget(QtWidgets.QLabel):
                 np.uint8)
         elif self.mode == "fom":
             frame = self.pli_stack.fom
-            frame = np.multiply(frame, self.pli_stack.mask[:, :, None])
+            # QT needs BGR, not RGB
+            frame = np.multiply(np.flip(frame, -1), self.pli_stack.mask[:, :,
+                                                                        None])
 
         frame = self.tracker.mask(frame)
         frame = self.tracker.crop(frame)
