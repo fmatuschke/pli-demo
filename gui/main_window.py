@@ -131,6 +131,7 @@ class MainWindow(QtWidgets.QMainWindow):
                                               QtCore.Qt.KeepAspectRatio,
                                               QtCore.Qt.SmoothTransformation))
         self.color_sphere.setAlignment(QtCore.Qt.AlignRight)
+        self.color_sphere.hide()
 
         #
         ''' LAYOUT
@@ -267,16 +268,30 @@ class MainWindow(QtWidgets.QMainWindow):
     def connect_widgets(self):
         self.action_live.triggered.connect(
             partial(self.camwidget.set_mode, "live"))
+        self.action_live.triggered.connect(partial(self.color_sphere.hide))
+
         self.action_transmittance.triggered.connect(
             partial(self.camwidget.set_mode, "transmittance"))
+        self.action_transmittance.triggered.connect(
+            partial(self.color_sphere.hide))
+
         self.action_direction.triggered.connect(
             partial(self.camwidget.set_mode, "direction"))
+        self.action_direction.triggered.connect(partial(self.color_sphere.hide))
+
         self.action_retardation.triggered.connect(
             partial(self.camwidget.set_mode, "retardation"))
+        self.action_retardation.triggered.connect(
+            partial(self.color_sphere.hide))
+
         self.action_inclination.triggered.connect(
             partial(self.camwidget.set_mode, "inclination"))
+        self.action_inclination.triggered.connect(
+            partial(self.color_sphere.hide))
+
         self.action_fom.triggered.connect(
             partial(self.camwidget.set_mode, "fom"))
+        self.action_fom.triggered.connect(partial(self.color_sphere.show))
 
         #
         def update_tilt(theta, phi, mode):
