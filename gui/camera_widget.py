@@ -48,6 +48,13 @@ class CameraWidget(QtWidgets.QLabel):
         self.plot_add = False
         self.plot_x = []
         self.plot_y = []
+
+        #self.xkoor = 0
+        #self.ykoor = 0
+
+        self.plot_val = []
+        self.plot_valtext = []
+
         QtWidgets.QShortcut(QtGui.QKeySequence(QtCore.Qt.Key_A),
                             self,
                             activated=partial(self.toogleAddPlot))
@@ -165,7 +172,9 @@ class CameraWidget(QtWidgets.QLabel):
         # save parameter for coordinate transformation
         self.frame_height = frame.shape[0]
         self.frame_width = frame.shape[1]
-
+        #print(self.frame_width, self.frame_height)
+        # =
+        #print(frame.shape)
         return image
 
     def widget2framecoordinates(self, click_x, click_y):
@@ -174,9 +183,11 @@ class CameraWidget(QtWidgets.QLabel):
         '''
         pixmap_width = self.pixmap().size().width()
         pixmap_height = self.pixmap().size().height()
+        #print(pixmap_height, pixmap_width)
 
         widget_width = self.size().width()
         widget_height = self.size().height()
+        #print(widget_height, widget_width)
 
         # For centered alignment:
         offset_x = (widget_width - pixmap_width) / 2
@@ -186,7 +197,7 @@ class CameraWidget(QtWidgets.QLabel):
                       0.5)
         frame_y = int((click_y - offset_y) / pixmap_height * self.frame_height +
                       0.5)
-
+        # print(frame_x, frame_y)
         return frame_x, frame_y
 
     def mousePressEvent(self, event):
@@ -207,6 +218,44 @@ class CameraWidget(QtWidgets.QLabel):
         else:
             self.plot_x = [self.click_x]
             self.plot_y = [self.click_y]
+
+            #self.xkoor = self.click_x
+            #self.ykoor = self.click_y
+
+            inc = self.pli_stack.inclination  #inclination in rad [0,pi/2]
+            inc = self.tracker.mask(inc)
+            inc = self.tracker.crop(inc)
+
+            ret = self.pli_stack.retardation #[0,1]
+            ret = self.tracker.mask(ret)
+            ret = self.tracker.crop(ret)
+
+            dire = self.pli_stack.direction #direction in rad [0,pi]
+            #dire = (self.pli_stack.direction/np.pi * 255).astype(np.uint8) # / np.pi
+            dire = self.tracker.mask(dire)
+            dire = self.tracker.crop(dire)
+
+            trans = self.pli_stack.transmittance
+            trans = self.tracker.mask(trans)
+            trans = self.tracker.crop(trans)
+
+            # relative Transmittance
+            rel_trans = self.pli_stack.transmittance / np.amax(self.pli_stack.transmittance)
+            rel_trans = self.tracker.mask(rel_trans)
+            rel_trans = self.tracker.crop(rel_trans)
+
+
+            self.plot_val = (inc[self.plot_y, self.plot_x], ret[self.plot_y, self.plot_x],
+                             dire[self.plot_y, self.plot_x], trans[self.plot_y, self.plot_x],
+                             rel_trans[self.plot_y, self.plot_x])
+
+
+        #print(self.plot_x, self.plot_y)
+        #print("Inclination at point:", inc[self.plot_x, self.plot_y])
+        #print("Retardation at point:", ret[self.plot_x, self.plot_y])
+        #print("Direction at point:", dire[self.plot_x, self.plot_y])
+        #print("Transmittance at point:", trans[self.plot_x, self.plot_y])
+        #print(self.plot_val)
 
         # emit all clicked data
         x_data = []
@@ -240,19 +289,39 @@ class CameraWidget(QtWidgets.QLabel):
             frame = (self.pli_stack.transmittance /
                      np.amax(self.pli_stack.transmittance) * 255).astype(
                          np.uint8)
+            frame = self.tracker.mask(frame)
+            frame = self.tracker.crop(frame)
+            cv2.imwrite("trans.png", frame)
         elif self.mode == "direction":
-            frame = (self.pli_stack.direction / np.pi * 255).astype(np.uint8)
+            frame = (self.pli_stack.direction / np.pi * 255).astype(np.uint8) # / np.pi
+            frame = self.tracker.mask(frame)
+            frame = self.tracker.crop(frame)
+            cv2.imwrite("dir.png", frame)
+            #np.savetxt("direc.txt", frame, fmt="%1.0f")
         elif self.mode == "retardation":
             frame = (self.pli_stack.retardation * 255).astype(np.uint8)
+            frame = self.tracker.mask(frame)
+            frame = self.tracker.crop(frame)
+            cv2.imwrite("ret.png", frame)
         elif self.mode == "inclination":
             frame = (self.pli_stack.inclination * 2 / np.pi * 255).astype(
                 np.uint8)
+            frame = self.tracker.mask(frame)
+            frame = self.tracker.crop(frame)
+            cv2.imwrite("inc.png", frame)
+            #print(frame[self.xkoor, self.ykoor])
+            #np.savetxt("incli.txt", frame, fmt="%1.0f")
         elif self.mode == "fom":
             frame = self.pli_stack.fom
-            frame = np.multiply(frame, self.pli_stack.mask[:, :, None])
+            # QT needs BGR, not RGB
+            frame = np.multiply(np.flip(frame, -1), self.pli_stack.mask[:, :,
+                                                                        None])
+            frame = self.tracker.mask(frame)
+            frame = self.tracker.crop(frame)
+            cv2.imwrite("fom.png", frame)
 
-        frame = self.tracker.mask(frame)
-        frame = self.tracker.crop(frame)
+        #frame = self.tracker.mask(frame)
+        #frame = self.tracker.crop(frame)
         self.mask_origin = self.tracker.mask_origin
         self.update_image(frame)
 

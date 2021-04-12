@@ -21,6 +21,10 @@ class PlotWidget(QtChart.QChartView):
         self.chart.setBackgroundRoundness(0)
         self.setChart(self.chart)
 
+        #variables for saving data
+        self.x_save = []
+        self.y_save = []
+
         # p = self.palette()
         # p.setColor(self.backgroundRole(), QtGui.QColor(255, 0, 0))
         # self.setAutoFillBackground(True)
@@ -51,6 +55,11 @@ class PlotWidget(QtChart.QChartView):
             if 0 in x:
                 x = np.append(x, [np.pi])
                 y = np.append(y, [y[0]])
+                self.x_save = np.pi - x
+                self.y_save = y
+
+                # print(x, y)
+                # np.savetxt("test1.txt", np.column_stack([x, y]), fmt="%1.3f")
 
             series = QtChart.QScatterSeries()
             for x_val, y_val in zip(x, y):

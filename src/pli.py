@@ -216,6 +216,8 @@ class Stack:
             self.calc_fom()
             print("calc_tilt")
             self.calc_tilt()
+            #
+            print("Camera shape:", frame.shape)
 
         return is_inserted
 
@@ -236,15 +238,20 @@ class Stack:
         # erfahrungswert. Ich will die einzelenen rauschpixel raus haben
 
         threshold = edges[np.argwhere(hist > 0)[-1] + 1]
-        # print(hist)
-        # print(edges)
-        # print(threshold)
+        #print(hist)
+        #print(edges)
+        #print(threshold)
         self._mask = np.logical_and(self.retardation > 0.080,
                                     self.retardation <= threshold)
 
-        # print(np.amax(self._retardation[self._mask]))
+        print("Maximal retardation:", np.amax(self._retardation[self._mask]))
+        print("Maximal transmittance:", np.amax(self._transmittance))
         self._inclination = np.pi / 2 * (1 - self._retardation / threshold)
         self._fom = fom_hsv_black(self._direction, self._inclination)
+        #print(np.shape(self._inclination))
+        #print(self._inclination.ndim)
+        #print(self._inclination[12][130])
+        #np.savetxt("inclinat.txt", self.inclination, fmt="%1.3f")
 
         from PIL import Image
         im = Image.fromarray(self.retardation)

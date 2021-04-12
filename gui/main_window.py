@@ -1,17 +1,21 @@
 import sys
 import os
+import numpy as np
 
 from functools import partial
 
 from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
+from PyQt5.QtWidgets import QLabel, QSpinBox, QVBoxLayout, QPushButton
 
 from gui.camera_widget import CameraWidget
 from gui.plot_widget import PlotWidget
 from gui.setup_widget import SetupWidget
 from gui.zoom_widget import ZoomWidget
 from src.camera import CamMode, CamColor
+from src.tracker import Tracker
+
 
 import cv2
 
@@ -34,6 +38,8 @@ class MainWindow(QtWidgets.QMainWindow):
     MainWindow of the application, which contains all widgets and sort them in a layout
     '''
 
+    switch_window = QtCore.pyqtSignal(str)
+
     def __init__(self, *args, **kwargs):
         super(MainWindow, self).__init__(*args, **kwargs)
         self.__initUI__()
@@ -46,6 +52,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.createCentralWidget()
         self.connect_widgets()
         self.setBackground()
+
 
     def resizeEvent(self, event):
         super(MainWindow, self).resizeEvent(event)
@@ -63,12 +70,22 @@ class MainWindow(QtWidgets.QMainWindow):
         # self.setupwidget.setMinimumSize(QtCore.QSize(w, h))
         # self.setupwidget.setMaximumSize(QtCore.QSize(w, h))
 
+    #def switch(self):
+    #    self.switch_window.emit(self.line_edit.text)
+
     def createCentralWidget(self):
+        # get Pixel of Mouse
+        x = 0
+        y = 0
+
+        self.pixtext = f'x: {x},  y: {y}'
+        self.pix = QLabel(self.pixtext, self)
+        self.setMouseTracking(False)
 
         self.setCentralWidget(QtWidgets.QWidget(self))
 
         self.camwidget = CameraWidget(self)
-        self.camwidget.setMinimumSize(QtCore.QSize(600, 600))
+        self.camwidget.setMinimumSize(QtCore.QSize(545, 545)) #(600,600)
         self.camwidget.setAlignment(QtCore.Qt.AlignCenter)
         self.camwidget.setSizePolicy(QtWidgets.QSizePolicy.Minimum,
                                      QtWidgets.QSizePolicy.Minimum)
@@ -86,7 +103,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # self.zoomwidget.setAlignment(QtCore.Qt.AlignTop)
 
         self.setupwidget = SetupWidget(self)
-        self.setupwidget.setMinimumSize(QtCore.QSize(100, 300))
+        self.setupwidget.setMinimumSize(QtCore.QSize(100, 200)) #QSize(100,300)
         # self.setupwidget.setMaximumSize(QtCore.QSize(300, 500))
 
         self.logolabelpli = QtWidgets.QLabel()
@@ -124,27 +141,29 @@ class MainWindow(QtWidgets.QMainWindow):
         self.color_sphere.setMaximumHeight(50)
         self.color_sphere.setPixmap(
             QtGui.QPixmap.fromImage(
-                QtGui.QImage(os.path.join(logo_path,
-                                          "color_sphere.png"))).scaled(
-                                              self.color_sphere.size().width(),
-                                              self.color_sphere.size().height(),
-                                              QtCore.Qt.KeepAspectRatio,
-                                              QtCore.Qt.SmoothTransformation))
+                QtGui.QImage(os.path.join(logo_path, "color_sphere.png"))).scaled(
+                    self.color_sphere.size().width(),
+                    self.color_sphere.size().height(),
+                    QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation))
         self.color_sphere.setAlignment(QtCore.Qt.AlignRight)
+        #self.color_sphere.setSizePolicy(QtWidgets.QSizePolicy.Maximum,
+        #                               QtWidgets.QSizePolicy.Maximum)
 
-        #
+
+
         ''' LAYOUT
         '''
         self.layout = QtWidgets.QGridLayout()
         self.layout_logos = QtWidgets.QGridLayout()
 
         self.layout.addWidget(self.camwidget, 0, 0, 2, 1)
-        self.layout.addWidget(self.color_sphere, 0, 0, 2, 1)
+        self.layout.addWidget(self.color_sphere, 1, 0, 2, 1) #(0,0,2,1)
         self.layout.addWidget(self.setupwidget, 0, 1, 1, 1)
         self.layout.addWidget(self.plotwidget, 1, 1, 1, 1)
         self.layout.addLayout(self.layout_logos, 2, 1, 1, 1)
         self.layout_logos.addWidget(self.logolabelpli, 0, 0, 1, 1)
         self.layout_logos.addWidget(self.logolabelfzj, 0, 1, 1, 1)
+        self.layout.addWidget(self.pix, 2, 0, 1, 1)
 
         self.layout.setColumnStretch(0, 2)
         self.layout.setColumnStretch(1, 1)
@@ -158,6 +177,47 @@ class MainWindow(QtWidgets.QMainWindow):
         self.layout.setContentsMargins(50, 50, 50, 50 - 30)
 
         self.centralWidget().setLayout(self.layout)
+
+    # Mousemovement
+    def mouseMoveEvent(self, event):
+        x = event.x()
+        y = event.y()
+
+        pixtext = f'x: {x},  y: {y}'
+        self.pix.setText(pixtext)
+
+    # Def for saving data
+    def savedata(self):
+        np.savetxt("saved_data.txt", np.column_stack([self.plotwidget.x_save, self.plotwidget.y_save]), fmt="%1.3f")
+        np.savetxt('saved_values.txt', self.camwidget.plot_val, fmt="%1.3f", header='Values of Inclination, Retardation, Direction, Transmittance and relative Transmittance')
+
+
+
+
+    #def colorsphereon(self):
+    #    self.color_sphere.setEnabled(True)
+
+    #def colorsphereoff(self):
+    #    self.color_sphere.setEnabled(False)
+
+    #def colorsphere(self):
+    #    self.color_sphere = QtWidgets.QLabel()
+    #    self.color_sphere.setMinimumHeight(50)
+    #    self.color_sphere.setMaximumHeight(50)
+    #    self.color_sphere.setPixmap(
+    #        QtGui.QPixmap.fromImage(
+    #            QtGui.QImage(os.path.join(logo_path,
+    #                                      "color_sphere.png"))).scaled(
+    #            self.color_sphere.size().width(),
+    #            self.color_sphere.size().height(),
+    #            QtCore.Qt.KeepAspectRatio,
+    #            QtCore.Qt.SmoothTransformation))
+    #    self.color_sphere.setAlignment(QtCore.Qt.AlignRight)
+
+    #    self.layout.addWidget(self.color_sphere, 1, 0, 2, 1)
+
+    #def nocolorsphere(self):
+     #       self.color_sphere.hide()
 
     def createMenu(self):
 
@@ -250,6 +310,13 @@ class MainWindow(QtWidgets.QMainWindow):
         self.action_reset = QtWidgets.QAction("&reset", self)
         self.helpMenu.addAction(self.action_reset)
 
+        # SAVE DATA
+        self.saveMenu = self.mainMenu.addMenu('&Save')
+
+        self.save_data = QtWidgets.QAction("&Save data", self)
+        self.saveMenu.addAction(self.save_data)
+
+
     def set_pli_menu(self, value):
         value = bool(value)
         self.action_transmittance.setEnabled(value)
@@ -264,19 +331,51 @@ class MainWindow(QtWidgets.QMainWindow):
         self.action_tilt_south.setEnabled(value)
         self.action_tilt_east.setEnabled(value)
 
+
+
     def connect_widgets(self):
         self.action_live.triggered.connect(
             partial(self.camwidget.set_mode, "live"))
+        self.action_live.triggered.connect(
+            partial(self.color_sphere.hide))
+        #self.action_live.triggered.connect(
+        #    partial(self.colorsphereoff))
+
         self.action_transmittance.triggered.connect(
             partial(self.camwidget.set_mode, "transmittance"))
+        self.action_transmittance.triggered.connect(
+           partial(self.color_sphere.hide))
+        #self.action_transmittance.triggered.connect(
+         #   partial(self.colorsphereoff))
+
         self.action_direction.triggered.connect(
             partial(self.camwidget.set_mode, "direction"))
+        self.action_direction.triggered.connect(
+            partial(self.color_sphere.hide))
+        #self.action_direction.triggered.connect(
+        #    partial(self.colorsphereoff))
+
         self.action_retardation.triggered.connect(
             partial(self.camwidget.set_mode, "retardation"))
+        self.action_retardation.triggered.connect(
+           partial(self.color_sphere.hide))
+        #self.action_retardation.triggered.connect(
+         #   partial(self.colorsphereoff))
+
         self.action_inclination.triggered.connect(
             partial(self.camwidget.set_mode, "inclination"))
+        self.action_inclination.triggered.connect(
+           partial(self.color_sphere.hide))
+        #self.action_inclination.triggered.connect(
+         #   partial(self.colorsphereoff))
+
         self.action_fom.triggered.connect(
             partial(self.camwidget.set_mode, "fom"))
+        self.action_fom.triggered.connect(
+           partial(self.color_sphere.show))
+        #self.action_fom.triggered.connect(
+         #   partial(self.colorsphereon))
+
 
         #
         def update_tilt(theta, phi, mode):
@@ -297,6 +396,14 @@ class MainWindow(QtWidgets.QMainWindow):
         self.action_tracker.triggered.connect(self.camwidget.toogle_draw_helper)
         self.action_reset.triggered.connect(lambda: self.reset())
 
+        #
+        self.save_data.triggered.connect(self.savedata)
+
+
+
+
+
+        #
         self.camwidget.plot_update.connect(self.plotwidget.update_plot)
         # self.camwidget.zoom_update.connect(self.zoomwidget.update_image)
 
@@ -366,3 +473,54 @@ class MainWindow(QtWidgets.QMainWindow):
     def closeEvent(self, event):
         self.closeWidgets()
         event.accept()
+
+#window for offset
+
+class Offset(QtWidgets.QWidget):
+
+    switch_window = QtCore.pyqtSignal()
+
+    def __init__(self):
+        QtWidgets.QWidget.__init__(self)
+        self.setWindowTitle('Set Offset')
+
+        layout = QtWidgets.QGridLayout()
+
+
+        self.offsetvalue = QSpinBox(self)
+        self.offsetvalue.setRange(-180, 180)
+
+        self.button = QtWidgets.QPushButton('Confirm')
+        self.button.clicked.connect(self.offset)
+
+        layout.addWidget(self.offsetvalue)
+        layout.addWidget(self.button)
+
+        self.setLayout(layout)
+
+    def offset(self):
+        #print(self.offsetvalue.value())
+        self.switch_window.emit()
+
+
+#switch windows
+
+class Controller:
+
+    def __init__(self):
+        pass
+
+    def show_offset(self):
+        self.offset = Offset()
+        self.offset.switch_window.connect(self.show_main)
+        self.offset.show()
+
+    def show_main(self):
+        self.window = MainWindow()
+        self.window.camwidget.tracker._phi_0 = self.offset.offsetvalue.value()
+        self.offset.close()
+        self.window.show()
+
+
+
+

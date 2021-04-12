@@ -26,7 +26,7 @@ class Camera:
                  height=960,
                  fps=30,
                  port=None,
-                 port_start=0,
+                 port_start=1, #0
                  port_end=5,
                  gray_image=True):
 
@@ -215,6 +215,9 @@ class Camera:
                 self._mode = CamMode.NONE
         else:
             frame = None
+
+        #if frame is not None:
+        #    frame = np.stack([frame[:, :, 1], frame[:, :, 1], frame[:, :, 1]], 2)
 
         if self._success:
             if self._color_mode is CamColor.GRAY:

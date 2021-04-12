@@ -15,6 +15,7 @@ class Tracker:
         self._rho = 0
         self._mask = None
         self._tracker_0 = 10
+        self._phi_0 = None
 
     @property
     def radius(self):
@@ -128,7 +129,13 @@ class Tracker:
         z = cur[0] * ref[1] - cur[1] * ref[0]
         value = np.dot(ref, cur) / (np.linalg.norm(ref) * np.linalg.norm(cur))
         value = max(-1.0, min(1.0, value))
-        self._phi_0 = (np.arccos(value) * np.sign(z))
+
+        if self._phi_0 is None:
+            self._phi_0 = (np.arccos(value) * np.sign(z))
+        #self._phi_0 = ((np.arccos(value) * np.sign(z)) + np.deg2rad(self.value)) % np.deg2rad(180)
+        #self._phi_0 = (np.arccos(value) * np.sign(z)) - np.deg2rad(42)
+
+        print(self._phi_0)
 
         self._gen_mask()
 
