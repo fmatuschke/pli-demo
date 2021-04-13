@@ -504,20 +504,19 @@ class Offset(QtWidgets.QWidget):
 
 
 #switch windows
-
 class Controller:
 
     def __init__(self):
-        pass
+        self.window = MainWindow()
+        self.offset = Offset()
 
     def show_offset(self):
-        self.offset = Offset()
         self.offset.switch_window.connect(self.show_main)
         self.offset.show()
 
     def show_main(self):
-        self.window = MainWindow()
-        self.window.camwidget.tracker._phi_0 = self.offset.offsetvalue.value()
+        self.window.camwidget.polfilter_offset = np.deg2rad(
+            self.offset.offsetvalue.value())
         self.offset.close()
         self.window.show()
 

@@ -6,7 +6,7 @@ import scipy.stats
 
 class Tracker:
 
-    def __init__(self, num_sticker=10):
+    def __init__(self, num_sticker=10, polfilter_offset=None):
         self._is_calibrated = False
         self._num_sticker = num_sticker
         self._center = None
@@ -15,7 +15,7 @@ class Tracker:
         self._rho = 0
         self._mask = None
         self._tracker_0 = 10
-        self._phi_0 = None
+        self._phi_0 = polfilter_offset
 
     @property
     def radius(self):

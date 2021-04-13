@@ -38,6 +38,7 @@ class CameraWidget(QtWidgets.QLabel):
         # variables
         self.rho = 0
         self.last_angle = 0
+        self.polfilter_offset = None
         self.show_angle = False
         self.show_tracker = False
         self.mode = "live"
@@ -61,7 +62,7 @@ class CameraWidget(QtWidgets.QLabel):
 
         #
         self.init_camera()
-        self.tracker = Tracker()
+        self.tracker = Tracker(polfilter_offset=self.polfilter_offset)
         self.pli_stack = PliStack(ui=parent)
 
         # DEBUG
@@ -80,7 +81,7 @@ class CameraWidget(QtWidgets.QLabel):
         def video(self, file):
             self.live.stop()
             self.camera.set_video(file)
-            self.tracker = Tracker()
+            self.tracker = Tracker(polfilter_offset=self.polfilter_offset)
             self.pli_stack = PliStack()
             self.ui.set_pli_menu(False)
             self.live.start(30)
@@ -112,7 +113,7 @@ class CameraWidget(QtWidgets.QLabel):
             self.live.stop()
             self.camera.set_port(port)
             self.set_resolutions_to_menu()
-            self.tracker = Tracker()
+            self.tracker = Tracker(polfilter_offset=self.polfilter_offset)
             self.pli_stack = PliStack()
             self.ui.set_pli_menu(False)
             if self.camera.live:
@@ -130,7 +131,7 @@ class CameraWidget(QtWidgets.QLabel):
         def set_res(self, width, height, fps):
             self.live.stop()
             self.camera.set_prop(width, height, fps)
-            self.tracker = Tracker()
+            self.tracker = Tracker(polfilter_offset=self.polfilter_offset)
             self.pli_stack = PliStack()
             self.ui.set_pli_menu(False)
             if self.camera.live:
