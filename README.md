@@ -4,7 +4,7 @@
 
 ### unix
 
-``` sh
+```sh
 python3 -m venv env
 source env/bin/activate
 pip install pip --upgrade
@@ -15,13 +15,21 @@ python3 main.py
 ### windows
 
 in power shell:
+
 ```sh
+#mainwindow = MainWindow()
+# mainwindow.resize(1600, 1600 // 1.618)
+# mainwindow.show()
+#mainwindow.showMaximized()
+#app.exec_()
+
+controller.show_offset()
 .\run_windows.ps1
 ```
 
 or
 
-``` sh
+```sh
 python.exe -m venv env
 .\env\Scripts\activate
 pip.exe install pip --upgrade
