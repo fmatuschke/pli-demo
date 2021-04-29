@@ -1,10 +1,9 @@
 import sys
 
+import pretty_errors  # type: ignore
 from PyQt5.QtWidgets import QApplication, QWidget
 
 import widgets.application
-
-import pretty_errors
 
 
 def main():
