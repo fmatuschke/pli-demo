@@ -14,3 +14,8 @@ scipy
 ### opengl
 pyopengl
 Pillow
+
+### developer
+pretty_errors
+yapf
+mypy
