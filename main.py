@@ -5,6 +5,8 @@ from PyQt5.QtWidgets import QApplication, QWidget
 
 import widgets.application
 
+#TODO: arguments like camera_port or video_file
+
 
 def main():
     app = QApplication(sys.argv)
