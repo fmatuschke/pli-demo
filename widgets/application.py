@@ -38,11 +38,11 @@ class Application(QtWidgets.QMainWindow):
     def createWidgets(self):
         self.setCentralWidget(QtWidgets.QWidget(self))
 
-        self.camwidget = display.Display()
-        self.camwidget.setMinimumSize(QtCore.QSize(545, 545))
-        self.camwidget.setAlignment(QtCore.Qt.AlignCenter)
-        self.camwidget.setSizePolicy(QtWidgets.QSizePolicy.Minimum,
-                                     QtWidgets.QSizePolicy.Minimum)
+        self.main_display = display.Display()
+        self.main_display.setMinimumSize(QtCore.QSize(545, 545))
+        self.main_display.setAlignment(QtCore.Qt.AlignCenter)
+        self.main_display.setSizePolicy(QtWidgets.QSizePolicy.Minimum,
+                                        QtWidgets.QSizePolicy.Minimum)
 
         self.plotwidget = dummy.Label()
         self.plotwidget.setMinimumSize(QtCore.QSize(200, 200))
@@ -83,7 +83,7 @@ class Application(QtWidgets.QMainWindow):
         self.layout = QtWidgets.QGridLayout()
         self.layout_logos = QtWidgets.QGridLayout()
 
-        self.layout.addWidget(self.camwidget, 0, 0, 2, 1)
+        self.layout.addWidget(self.main_display, 0, 0, 2, 1)
         self.layout.addWidget(self.setupwidget, 0, 1, 1, 1)
         self.layout.addWidget(self.plotwidget, 1, 1, 1, 1)
         self.layout.addLayout(self.layout_logos, 2, 1, 1, 1)
