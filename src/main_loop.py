@@ -1,10 +1,9 @@
 import enum
 
-from PyQt5 import QtGui
+import numpy as np
+from PyQt5 import QtCore, QtGui
 
-from . import camera
-from . import tracker
-from . import pli
+from . import camera, pli, tracker
 
 
 class MainThread():
@@ -60,6 +59,23 @@ class MainThread():
         """ switch between camera and video """
         pass
 
+    def convertImage2QImage(self, frame):
+        frame = np.ascontiguousarray(frame)
+        bytesPerLine = int(frame.nbytes / frame.shape[0])
+        qimage = QtGui.QImage(frame.data, frame.shape[1], frame.shape[0],
+                              bytesPerLine, QtGui.QImage.Format_Grayscale8)
+        # qimage = qimage.rgbSwapped()
+        qimage = qimage.scaled(self.display.size().width(),
+                               self.display.size().height(),
+                               QtCore.Qt.KeepAspectRatio,
+                               QtCore.Qt.SmoothTransformation)
+
+        #TODO: save parameter for coordinate transformation
+        # self.frame_height = frame.shape[0]
+        # self.frame_width = frame.shape[1]
+
+        return qimage
+
     def next(self):
         """ process next iteration """
 
@@ -75,8 +91,14 @@ class MainThread():
             raise ValueError('Undefined State')
 
     def next_live(self):
-        frame = self.camera.frame()
-        pixmap = QtGui.QPixmap.fromImage(self.convertFrame2Image(frame))
+        frame = self.camera.get_frame()
+
+        if frame is None:
+            print("Error: camera returns none")
+            return
+
+        qimage = self.convertImage2QImage(frame)
+        pixmap = QtGui.QPixmap.fromImage(qimage)
         self.display.setPixmap(pixmap)
 
     def next_measurement(self):
