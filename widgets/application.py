@@ -5,6 +5,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 from . import dummy
 from . import display
+from src import main_loop
 
 PATH = os.path.join(pathlib.Path().absolute(), 'data')
 
@@ -17,6 +18,13 @@ class Application(QtWidgets.QMainWindow):
     def __init__(self, *args, **kwargs):
         super(Application, self).__init__(*args, **kwargs)
         self.__initUI__()
+
+        # run application loop
+        self.app = main_loop.MainThread(self)
+        self.worker = QtCore.QTimer(self)
+        self.app.next()  # first execute to look for python errors
+        self.worker.timeout.connect(self.app.next)
+        self.worker.start(1000 // 25)  # TODO: min(camera.fps, 25)
 
     def __initUI__(self):
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)

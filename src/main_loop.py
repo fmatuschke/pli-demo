@@ -25,7 +25,7 @@ class MainThread():
     def __freeze(self):
         self.__is_frozen = True
 
-    def __init__(self, parent, *args, **kwargs):
+    def __init__(self, parent):
         self.parent = parent
         self.display = self.parent.main_display
 
@@ -34,7 +34,7 @@ class MainThread():
         self.pli = pli.PLI()
 
         self.input_mode = None
-        self.state = State.LIVE
+        self.state = self.State.LIVE
 
         # freeze class
         self.__freeze()
@@ -78,7 +78,6 @@ class MainThread():
         frame = self.camera.frame()
         pixmap = QtGui.QPixmap.fromImage(self.convertFrame2Image(frame))
         self.display.setPixmap(pixmap)
-        pass
 
     def next_measurement(self):
         pass
