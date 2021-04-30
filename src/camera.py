@@ -110,4 +110,14 @@ class Camera:
         elif self._color_mode is Color.BLUE:
             frame = frame[:, :, 0]
 
+        if quadratic:
+            height, width = frame.shape[0], frame.shape[1]
+            l = min(height, width)
+            delta = np.abs((width - height) // 2)
+
+            if width > height:
+                frame = np.array(frame[:, delta:delta + l])
+            else:
+                frame = np.array(frame[delta:delta + l, :])
+
         return frame
