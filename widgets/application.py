@@ -53,31 +53,31 @@ class Application(QtWidgets.QMainWindow):
         self.setupwidget = dummy.Label()
         self.setupwidget.setMinimumSize(QtCore.QSize(100, 200))
 
-        self.logolabelpli = QtWidgets.QLabel()
-        self.logolabelpli.setMinimumHeight(50)
-        self.logolabelpli.setMaximumHeight(50)
-        self.logolabelpli.setPixmap(
+        self.logo_pli = QtWidgets.QLabel()
+        self.logo_pli.setMinimumHeight(50)
+        self.logo_pli.setMaximumHeight(50)
+        self.logo_pli.setPixmap(
             QtGui.QPixmap.fromImage(
                 QtGui.QImage(os.path.join(PATH, "pli-logo.png"))).scaled(
-                    self.logolabelpli.size().width(),
-                    self.logolabelpli.size().height(),
-                    QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation))
-        self.logolabelpli.setAlignment(QtCore.Qt.AlignRight)
-        self.logolabelpli.setSizePolicy(QtWidgets.QSizePolicy.Minimum,
-                                        QtWidgets.QSizePolicy.Minimum)
+                    self.logo_pli.size().width(),
+                    self.logo_pli.size().height(), QtCore.Qt.KeepAspectRatio,
+                    QtCore.Qt.SmoothTransformation))
+        self.logo_pli.setAlignment(QtCore.Qt.AlignRight)
+        self.logo_pli.setSizePolicy(QtWidgets.QSizePolicy.Minimum,
+                                    QtWidgets.QSizePolicy.Minimum)
 
-        self.logolabelfzj = QtWidgets.QLabel()
-        self.logolabelfzj.setMinimumHeight(50)
-        self.logolabelfzj.setMaximumHeight(50)
-        self.logolabelfzj.setPixmap(
+        self.logo_fzj = QtWidgets.QLabel()
+        self.logo_fzj.setMinimumHeight(50)
+        self.logo_fzj.setMaximumHeight(50)
+        self.logo_fzj.setPixmap(
             QtGui.QPixmap.fromImage(
                 QtGui.QImage(os.path.join(PATH, "fzj-gray.png"))).scaled(
-                    self.logolabelfzj.size().width(),
-                    self.logolabelfzj.size().height(),
-                    QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation))
-        self.logolabelfzj.setAlignment(QtCore.Qt.AlignRight)
-        self.logolabelfzj.setSizePolicy(QtWidgets.QSizePolicy.Maximum,
-                                        QtWidgets.QSizePolicy.Maximum)
+                    self.logo_fzj.size().width(),
+                    self.logo_fzj.size().height(), QtCore.Qt.KeepAspectRatio,
+                    QtCore.Qt.SmoothTransformation))
+        self.logo_fzj.setAlignment(QtCore.Qt.AlignRight)
+        self.logo_fzj.setSizePolicy(QtWidgets.QSizePolicy.Maximum,
+                                    QtWidgets.QSizePolicy.Maximum)
 
     def createLayout(self):
         self.layout = QtWidgets.QGridLayout()
@@ -87,8 +87,8 @@ class Application(QtWidgets.QMainWindow):
         self.layout.addWidget(self.setupwidget, 0, 1, 1, 1)
         self.layout.addWidget(self.plotwidget, 1, 1, 1, 1)
         self.layout.addLayout(self.layout_logos, 2, 1, 1, 1)
-        self.layout_logos.addWidget(self.logolabelpli, 0, 0, 1, 1)
-        self.layout_logos.addWidget(self.logolabelfzj, 0, 1, 1, 1)
+        self.layout_logos.addWidget(self.logo_pli, 0, 0, 1, 1)
+        self.layout_logos.addWidget(self.logo_fzj, 0, 1, 1, 1)
 
         self.layout.setColumnStretch(0, 2)
         self.layout.setColumnStretch(1, 1)
