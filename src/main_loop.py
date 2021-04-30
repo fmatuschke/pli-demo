@@ -3,7 +3,7 @@ import enum
 import numpy as np
 from PyQt5 import QtCore, QtGui
 
-from . import camera, pli, tracker
+from . import capture_device, pli, tracker
 
 
 class MainThread():
@@ -28,7 +28,7 @@ class MainThread():
         self.parent = parent
         self.display = self.parent.main_display
 
-        self.camera = camera.Camera()
+        self.device = capture_device.CapDev()
         self.tracker = tracker.Tracker()
         self.pli = pli.PLI()
 
@@ -40,7 +40,7 @@ class MainThread():
 
     def reset(self):
         self.reset_measurements()
-        self.reset_camera()
+        self.reset_device()
         self.reset_tracker()
 
     def reset_measurements(self):
@@ -49,14 +49,14 @@ class MainThread():
     def reset_tracker(self):
         self.tracker = tracker.Tracker()
 
-    def reset_camera(self):
-        self.camera = camera.Camera()
+    def reset_device(self):
+        self.device = capture_device.CapDev()
 
     def switch_camera_port(self):
         pass
 
     def switch_input_mode(self):
-        """ switch between camera and video """
+        """ switch between device and video """
         pass
 
     def convertArray2QImage(self, frame):
@@ -91,10 +91,10 @@ class MainThread():
             raise ValueError('Undefined State')
 
     def next_live(self):
-        frame = self.camera.get_frame()
+        frame = self.device.get_frame()
 
         if frame is None:
-            print("Error: camera returns none")
+            print("Error: device returns none")
             return
 
         qimage = self.convertArray2QImage(frame)

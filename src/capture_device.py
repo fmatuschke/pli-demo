@@ -20,7 +20,7 @@ class Color(enum.Enum):
     BLUE = enum.auto()
 
 
-class Camera:
+class CapDev:
     __is_frozen = False
 
     def __setattr__(self, key, value):
