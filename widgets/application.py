@@ -4,6 +4,7 @@ import pathlib
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 from . import dummy
+from . import display
 
 PATH = os.path.join(pathlib.Path().absolute(), 'data')
 
@@ -37,7 +38,7 @@ class Application(QtWidgets.QMainWindow):
     def createWidgets(self):
         self.setCentralWidget(QtWidgets.QWidget(self))
 
-        self.camwidget = dummy.Label()
+        self.camwidget = display.Display()
         self.camwidget.setMinimumSize(QtCore.QSize(545, 545))
         self.camwidget.setAlignment(QtCore.Qt.AlignCenter)
         self.camwidget.setSizePolicy(QtWidgets.QSizePolicy.Minimum,
