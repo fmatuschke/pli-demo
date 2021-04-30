@@ -59,7 +59,7 @@ class MainThread():
         """ switch between camera and video """
         pass
 
-    def convertImage2QImage(self, frame):
+    def convertArray2QImage(self, frame):
         frame = np.ascontiguousarray(frame)
         bytesPerLine = int(frame.nbytes / frame.shape[0])
         qimage = QtGui.QImage(frame.data, frame.shape[1], frame.shape[0],
@@ -97,7 +97,7 @@ class MainThread():
             print("Error: camera returns none")
             return
 
-        qimage = self.convertImage2QImage(frame)
+        qimage = self.convertArray2QImage(frame)
         pixmap = QtGui.QPixmap.fromImage(qimage)
         self.display.setPixmap(pixmap)
 
