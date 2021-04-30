@@ -49,10 +49,6 @@ class Camera:
 
         # run init member functions
         self._ports = self._check_ports(port_list, n_times=5)
-
-        print(self._port)
-        print(self._ports)
-
         if self._port not in self._ports:
             self._device = None
             self._port = None
