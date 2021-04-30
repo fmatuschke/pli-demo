@@ -15,11 +15,13 @@ class Application(QtWidgets.QMainWindow):
     MainWindow of the application, which contains all widgets and sort them in a layout
     """
 
-    def __init__(self, *args, **kwargs):
-        super(Application, self).__init__(*args, **kwargs)
+    def __init__(self, args, *qt_args, **qt_kwargs):
+
+        super(Application, self).__init__(*qt_args, **qt_kwargs)
         self.__initUI__()
 
         # run application loop
+        self.args = args
         self.app = main_loop.MainThread(self)
         self.app.next()  # first execution to look for python errors
         self.worker = QtCore.QTimer(self)

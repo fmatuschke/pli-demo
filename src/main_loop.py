@@ -28,7 +28,8 @@ class MainThread():
         self.parent = parent
         self.display = self.parent.main_display
 
-        self.device = capture_device.CapDev()
+        self.device = capture_device.CapDev(port=self.parent.args.port,
+                                            file_name=self.parent.args.video)
         self.tracker = tracker.Tracker()
         self.pli = pli.PLI()
 
