@@ -25,18 +25,12 @@ class Images:
     def apply_offset(self, offset: float) -> None:
         self.rotations[:] = np.linspace(0, np.pi, self.N, False) + offset
 
-    def insert(self, image: np.ndarray, angle: float) -> None:
-        if angle not in self.rotations:
-            raise ValueError(
-                f'angle not in rotations: {angle} not in {self.rotations}')
-
-        index = np.where(self.rotations == angle)
-
-        if self.valid[index]:
+    def insert(self, image: np.ndarray, idx: int) -> None:
+        if self.valid[idx]:
             warnings.warn('Already image present')
 
-        self.images[:, :, index] = image
-        self.valid[index] == True
+        self.images[:, :, idx] = image
+        self.valid[idx] = True
 
     @property
     def offset(self) -> float:
@@ -115,7 +109,7 @@ class PLI():
 
     def __init__(self, threshold):
         self.reset()
-        self._angle_threshold = np.deg2rad(threshold)
+        self._angle_threshold = threshold
         self.__freeze()
 
     def reset(self):
@@ -166,9 +160,13 @@ class PLI():
         condition = np.abs(self._images.rotations -
                            angle) < self._angle_threshold
         if np.any(condition):
-            angle = self._images.rotations[np.argmax(condition)]
-            self._images.insert(image, angle)
-            print(f'inserted {np.deg2rad(angle):.2f}')
+            angle_ = self._images.rotations[np.argmax(condition)]
+            index = int(np.argwhere(self._images.rotations == angle_))
+            if not self._images.valid[index]:
+                self._images.insert(image, index)
+                print(
+                    f'inserted {np.rad2deg(angle):.1f} -> {np.rad2deg(angle_):.0f}'
+                )
 
     def apply_offset(self, offset: float):
         self._modalities.direction[:] += offset
