@@ -99,12 +99,16 @@ class Tracker:
             image = image
 
         if self._illumination_center is not None:
+            # center
             image = cv2.circle(
                 image,
                 (self._illumination_center[0], self._illumination_center[1]), 4,
-                (0, 255, 0), 4)
-
-            image = cv2.circle(image, (0, 0), 10, (0, 255, 0), 4)
+                (0, 255, 255), 4)
+            # center view
+            image = cv2.circle(
+                image,
+                (self._illumination_center[0], self._illumination_center[1]),
+                int(self._illumination_radius), (0, 255, 255), 4)
 
         return image
 
