@@ -19,7 +19,6 @@ def process_cl_args():
 
 
 def main():
-
     parsed_args, unparsed_args = process_cl_args()
     qt_args = sys.argv[:1] + unparsed_args
 

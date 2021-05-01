@@ -27,31 +27,19 @@ class MainThread():
     def __init__(self, parent):
         self.parent = parent
         self.display = self.parent.main_display
-
-        self.device = capture_device.CapDev(port=self.parent.args.port,
-                                            file_name=self.parent.args.video)
-        self.tracker = tracker.Tracker()
-        self.pli = pli.PLI(threshold=np.deg2rad(2))
-
-        self.input_mode = None
-        self.state = self.State.LIVE
+        self.reset()
 
         # freeze class
         self.__freeze()
 
-    def reset(self):
-        self.reset_measurements()
-        self.reset_device()
-        self.reset_tracker()
+    def reset(self, pli_threshold=np.deg2rad(2)):
+        self.input_mode = None
+        self.state = self.State.TRACKING
 
-    def reset_measurements(self):
-        self.pli = pli.PLI()
-
-    def reset_tracker(self):
-        self.tracker = tracker.Tracker()
-
-    def reset_device(self):
-        self.device = capture_device.CapDev()
+        self.pli = pli.PLI(pli_threshold)
+        self.tracker = tracker.Tracker(10, 10)
+        self.device = capture_device.CapDev(port=self.parent.args.port,
+                                            file_name=self.parent.args.video)
 
     def switch_camera_port(self):
         pass
@@ -93,32 +81,27 @@ class MainThread():
 
     def next_live(self):
         frame = self.device.get_frame()
-
-        if frame is None:
-            print("Error: device returns none")
-            return
-
-        qimage = self.convertArray2QImage(frame)
-        pixmap = QtGui.QPixmap.fromImage(qimage)
-        self.display.setPixmap(pixmap)
+        self.show_image(frame)
 
     def next_measurement(self):
         if self.pli.measument_done:
             raise ValueError('measurment already done')
 
-        self.pli.insert(self.device.get_frame(),
-                        self.tracker.get_rotation_angle())
+        frame = self.device.get_frame()
+        self.pli.insert(frame, self.tracker.get_rotation_angle())
         if self.pli.measurment_done:
             self.stat = self.State.LIVE
 
+        self.show_image(frame)
+
     def next_tracking(self):
         frame = self.device.get_frame()
+        self.tracker.calibrate(frame)
+        self.show_image(frame)
+        if self.tracker.calibrated():
+            self.stat = self.State.LIVE
 
-        if frame is None:
-            print("Error: device returns none")
-            return
-
-        # TODO: show tracker information on frame
-        qimage = self.convertArray2QImage(frame)
+    def show_image(self, image):
+        qimage = self.convertArray2QImage(image)
         pixmap = QtGui.QPixmap.fromImage(qimage)
         self.display.setPixmap(pixmap)
