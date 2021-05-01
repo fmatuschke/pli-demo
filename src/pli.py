@@ -12,6 +12,7 @@ from . import epa
 
 @dc.dataclass(frozen=True)
 class Images:
+    # TODO:rfc???
     shape: tuple
     N = 18
     images = np.empty((0, 0, N))
@@ -31,6 +32,10 @@ class Images:
 
         self.images[:, :, idx] = image
         self.valid[idx] = True
+
+    @property
+    def stack(self):
+        return self.rotations[self.valid], self.images[:, :, self.valid]
 
     @property
     def offset(self) -> float:
@@ -113,6 +118,7 @@ class PLI():
         self.__freeze()
 
     def reset(self):
+        # TODO:rfc names???
         self._images = None
         self._modalities = None
         self._inclination = None
