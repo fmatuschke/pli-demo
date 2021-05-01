@@ -101,7 +101,7 @@ class Incl:
             raise ValueError('inclination shape and fom shape differs')
 
 
-class PLI(object):
+class PLI():
 
     __is_frozen = False
 
