@@ -173,11 +173,13 @@ class CapDev:
         if self._device is None:
             return self.empty_frame()
 
-        success, frame = self._device.read()
+        # if video frame count > 0
+        video_frame_count = self._device.get(cv2.CAP_PROP_FRAME_COUNT)
+        if video_frame_count:
+            if video_frame_count == self._device.get(cv2.CAP_PROP_POS_FRAMES):
+                self._device.set(cv2.CAP_PROP_POS_FRAMES, 0)
 
-        if not success:  # can be end of video, try to reset frame to pos=0
-            self._device.set(cv2.CAP_PROP_POS_FRAMES, 0)
-            success, frame = self._device.read()
+        success, frame = self._device.read()
 
         if not success:
             print('Error: camera disconnected')
