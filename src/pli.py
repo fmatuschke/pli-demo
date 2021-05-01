@@ -130,10 +130,9 @@ class PLI():
             raise ValueError('no images measured yet')
         return self._images.copy()
 
-    @property
     def measurment_done(self):
         if self._images is None:
-            raise ValueError('no images measured yet')
+            return False
         return np.all(self._images.valid)
 
     @property
@@ -167,8 +166,9 @@ class PLI():
         condition = np.abs(self._images.rotations -
                            angle) < self._angle_threshold
         if np.any(condition):
-            self._images.insert(image,
-                                self._images.rotations[np.argmax(condition)])
+            angle = self._images.rotations[np.argmax(condition)]
+            self._images.insert(image, angle)
+            print(f'inserted {np.deg2rad(angle):.2f}')
 
     def apply_offset(self, offset: float):
         self._modalities.direction[:] += offset

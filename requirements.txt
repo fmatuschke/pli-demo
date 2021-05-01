@@ -4,7 +4,7 @@ PyQtChart==5.15.4 #5.14.0
 
 ### camera and video
 opencv-python==4.5.1.48
-# opencv-contrib-python
+opencv-contrib-python==4.5.1.48
 
 ### math
 numpy

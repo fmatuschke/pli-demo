@@ -35,6 +35,7 @@ class MainThread():
     def reset(self, pli_threshold=np.deg2rad(2)):
         self.input_mode = None
         self.state = self.State.TRACKING
+        self._debug = True
 
         self.pli = pli.PLI(pli_threshold)
         self.tracker = tracker.Tracker(10, 10)
@@ -68,38 +69,44 @@ class MainThread():
     def next(self):
         """ process next iteration """
 
+        frame = self.device.get_frame()
+
         if self.state == self.State.LIVE:
-            self.next_live()
+            self.next_live(frame)
         elif self.state == self.State.TRACKING:
-            self.next_tracking()
+            self.next_tracking(frame)
         elif self.state == self.State.MEASUREMENT:
-            self.next_measurement()
+            self.next_measurement(frame)
         elif self.state in self.State:
             raise ValueError('Not implemented yet')
         else:
             raise ValueError('Undefined State')
 
-    def next_live(self):
-        frame = self.device.get_frame()
+        if self._debug:
+            frame = self.tracker._tracker_view
         self.show_image(frame)
 
-    def next_measurement(self):
-        if self.pli.measument_done:
+    def next_live(self, frame: np.ndarray):
+        pass
+
+    def next_measurement(self, frame: np.ndarray):
+        if self.pli.measurment_done():
             raise ValueError('measurment already done')
 
-        frame = self.device.get_frame()
-        self.pli.insert(frame, self.tracker.get_rotation_angle())
-        if self.pli.measurment_done:
-            self.stat = self.State.LIVE
+        angle = self.tracker.current_angle(frame)
+        if angle is None:
+            raise ValueError('angel is None')
 
-        self.show_image(frame)
+        self.pli.insert(frame, angle)
 
-    def next_tracking(self):
-        frame = self.device.get_frame()
-        self.tracker.calibrate(frame)
+        print(np.rad2deg(angle))
+        if self.pli.measurment_done():
+            self.state = self.State.LIVE
+
+    def next_tracking(self, frame: np.ndarray):
         self.show_image(frame)
-        if self.tracker.calibrated():
-            self.stat = self.State.LIVE
+        if self.tracker.calibrate(frame):
+            self.state = self.State.MEASUREMENT
 
     def show_image(self, image):
         qimage = self.convertArray2QImage(image)

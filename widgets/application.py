@@ -23,7 +23,8 @@ class Application(QtWidgets.QMainWindow):
         # run application loop
         self.args = args
         self.app = main_loop.MainThread(self)
-        self.app.next()  # first execution to look for python errors
+        for _ in range(100):
+            self.app.next()  # first execution to look for python errors
         self.worker = QtCore.QTimer(self)
         self.worker.timeout.connect(self.app.next)
         self.worker.start(1000 // 25)  # TODO: min(camera.fps, 25)
