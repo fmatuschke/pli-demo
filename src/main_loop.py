@@ -31,7 +31,7 @@ class MainThread():
         self.device = capture_device.CapDev(port=self.parent.args.port,
                                             file_name=self.parent.args.video)
         self.tracker = tracker.Tracker()
-        self.pli = pli.PLI()
+        self.pli = pli.PLI(threshold=np.deg2rad(2))
 
         self.input_mode = None
         self.state = self.State.LIVE
@@ -103,7 +103,22 @@ class MainThread():
         self.display.setPixmap(pixmap)
 
     def next_measurement(self):
-        pass
+        if self.pli.measument_done:
+            raise ValueError('measurment already done')
+
+        self.pli.insert(self.device.get_frame(),
+                        self.tracker.get_rotation_angle())
+        if self.pli.measurment_done:
+            self.stat = self.State.LIVE
 
     def next_tracking(self):
-        pass
+        frame = self.device.get_frame()
+
+        if frame is None:
+            print("Error: device returns none")
+            return
+
+        # TODO: show tracker information on frame
+        qimage = self.convertArray2QImage(frame)
+        pixmap = QtGui.QPixmap.fromImage(qimage)
+        self.display.setPixmap(pixmap)

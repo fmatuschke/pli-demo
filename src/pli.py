@@ -3,6 +3,7 @@ from __future__ import annotations
 # import dataclasses
 import dataclasses as dc
 import typing
+import warnings
 
 import numpy as np
 
@@ -15,6 +16,7 @@ class Images:
     N = 18
     images = np.empty((0, 0, N))
     rotations = np.linspace(0, np.pi, N, False)
+    valid = np.zeros_like(rotations, np.bool8)
 
     def __post_init__(self,):
         object.__setattr__(self, 'images',
@@ -28,7 +30,13 @@ class Images:
             raise ValueError(
                 f'angle not in rotations: {angle} not in {self.rotations}')
 
-        self.images[:, :, np.where(self.rotations == angle)] = image
+        index = np.where(self.rotations == angle)
+
+        if self.valid[index]:
+            warnings.warn('Already image present')
+
+        self.images[:, :, index] = image
+        self.valid[index] == True
 
     @property
     def offset(self) -> float:
@@ -121,6 +129,12 @@ class PLI(object):
         if self._images is None:
             raise ValueError('no images measured yet')
         return self._images.copy()
+
+    @property
+    def measurment_done(self):
+        if self._images is None:
+            raise ValueError('no images measured yet')
+        return np.all(self._images.valid)
 
     @property
     def modalities(self):
