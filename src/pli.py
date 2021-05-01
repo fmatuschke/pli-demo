@@ -6,6 +6,8 @@ import typing
 
 import numpy as np
 
+from . import epa
+
 
 @dc.dataclass(frozen=True)
 class Images:
@@ -21,8 +23,16 @@ class Images:
     def apply_offset(self, offset: float) -> None:
         self.rotations[:] = np.linspace(0, np.pi, self.N, False) + offset
 
-    def insert(self, image: np.ndarray, angle: float):
-        pass
+    def insert(self, image: np.ndarray, angle: float) -> None:
+        if angle not in self.rotations:
+            raise ValueError(
+                f'angle not in rotations: {angle} not in {self.rotations}')
+
+        self.images[:, :, np.where(self.rotations == angle)] = image
+
+    @property
+    def offset(self) -> float:
+        return self.rotations[0]
 
 
 @dc.dataclass(frozen=True)
@@ -95,20 +105,61 @@ class PLI(object):
     def __freeze(self):
         self.__is_frozen = True
 
-    def __init__(self):
+    def __init__(self, threshold):
         self.reset()
+        self._angle_threshold = np.deg2rad(threshold)
         self.__freeze()
 
     def reset(self):
         self._images = None
         self._modalities = None
+        self._inclination = None
         self._tilting = None
 
-    def insert(self, image: np.ndarray, angle: float):
-        pass
+    @property
+    def images(self):
+        if self._images is None:
+            raise ValueError('no images measured yet')
+        return self._images.copy()
 
-    def change_dir_offset(self, offset: float):
-        pass
+    @property
+    def modalities(self):
+        if self._modalities is None:
+            raise ValueError('modalities could not be calculated yet')
+        return self._modalities
+
+    @property
+    def inclination(self):
+        if self._inclination is None:
+            raise ValueError('inclination could not be calculated yet')
+        return self._inclination.inclination
+
+    @property
+    def fom(self):
+        if self._inclination is None:
+            raise ValueError('fom could not be calculated yet')
+        return self._inclination.fom
+
+    @property
+    def tilting(self):
+        if self._tilting is None:
+            raise ValueError('tilting could not be calculated yet')
+        return self._tilting
+
+    def insert(self, image: np.ndarray, angle: float):
+        if self._images is None:
+            self._images = Images(image.shape)
+
+        condition = np.abs(self._images.rotations -
+                           angle) < self._angle_threshold
+        if np.any(condition):
+            self._images.insert(image,
+                                self._images.rotations[np.argmax(condition)])
+
+    def apply_offset(self, offset: float):
+        self._modalities.direction[:] += offset
+        self._modalities.direction[:] %= np.pi
+        # TODO: apply to tilting and fom
 
     def _run_analysis(self):
         self._run_epa()
@@ -119,7 +170,9 @@ class PLI(object):
         pass
 
     def _run_epa(self):
-        pass
+        t, d, r = epa.epa(self._images.data)
+        self._modalities = Modalities(t, d, r)
+        self.apply_offset(self._images.offset)
 
     def _run_calc_incl(self):
         pass
