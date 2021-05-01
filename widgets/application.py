@@ -90,6 +90,9 @@ class Application(QtWidgets.QMainWindow):
         self.logo_fzj.setSizePolicy(QtWidgets.QSizePolicy.Maximum,
                                     QtWidgets.QSizePolicy.Maximum)
 
+        # adding label to status bar
+        self.statusBar().showMessage('')
+
     def createLayout(self):
         self.layout = QtWidgets.QGridLayout()
         self.layout_logos = QtWidgets.QGridLayout()
@@ -109,6 +112,8 @@ class Application(QtWidgets.QMainWindow):
 
         self.layout.setSpacing(50)
         self.layout_logos.setSpacing(50)
-        self.layout.setContentsMargins(50, 50, 50, 50)
+
+        status_bar_height = self.statusBar().frameGeometry().height()
+        self.layout.setContentsMargins(50, 50, 50, 50 - status_bar_height)
 
         self.centralWidget().setLayout(self.layout)

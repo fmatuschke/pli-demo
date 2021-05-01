@@ -103,7 +103,7 @@ class MainThread():
 
         self.pli.insert(frame, angle)
 
-        print(np.rad2deg(angle))
+        self.parent.statusBar().showMessage(f'{np.rad2deg(angle):.1f}')
         if self.pli.measurment_done():
             self.state = self.State.LIVE
 
