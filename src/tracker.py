@@ -32,7 +32,8 @@ class Tracker:
         self._sticker_pos = []
         self._cal_corners = None
         self._cal_ids = None
-        self._tracker_view = None
+        self._cur_corners = None
+        self._cur_ids = None
         self._radius = None
         self._illumination_center = None
         self._illumination_radius = None
@@ -72,7 +73,7 @@ class Tracker:
         return image
 
     def _process_image(self,
-                       image: np.ndarray) -> tuple(typeing.Any, typeing.Any):
+                       image: np.ndarray) -> tuple[typeing.Any, typeing.Any]:
         image = self._filter_image(image)
         cv2.aruco_dict = cv2.aruco.Dictionary_get(cv2.aruco.DICT_6X6_250)
         parameters = cv2.aruco.DetectorParameters_create()
@@ -80,12 +81,22 @@ class Tracker:
                                                         cv2.aruco_dict,
                                                         parameters=parameters)
 
-        cv_corners_array = np.array(cv_corners)
-        cv_ids_array = np.array(cv_ids)
-        if cv_corners_array.size > 0:
-            image = cv2.aruco.drawDetectedMarkers(image, cv_corners_array,
-                                                  cv_ids_array)
-            self._tracker_view = image
+        self._cur_corners = np.array(cv_corners)
+        self._cur_ids = np.array(cv_ids)
+
+        return cv_corners, cv_ids
+
+    def add_info_view(self, image):
+        image = self._filter_image(image)
+        image = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
+        cv2.aruco_dict = cv2.aruco.Dictionary_get(cv2.aruco.DICT_6X6_250)
+        parameters = cv2.aruco.DetectorParameters_create()
+        cv_corners, cv_ids, _ = cv2.aruco.detectMarkers(image,
+                                                        cv2.aruco_dict,
+                                                        parameters=parameters)
+        if len(cv_corners) > 0:
+            image = cv2.aruco.drawDetectedMarkers(image, cv_corners, cv_ids)
+            image = image
 
         if self._illumination_center is not None:
             image = cv2.circle(
@@ -93,9 +104,9 @@ class Tracker:
                 (self._illumination_center[0], self._illumination_center[1]), 4,
                 (0, 255, 0), 4)
 
-            self._tracker_view = cv2.circle(image, (0, 0), 10, (0, 255, 0), 4)
+            image = cv2.circle(image, (0, 0), 10, (0, 255, 0), 4)
 
-        return cv_corners, cv_ids
+        return image
 
     def calibrate(self, image: np.ndarray) -> bool:
 

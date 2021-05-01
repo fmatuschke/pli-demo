@@ -23,7 +23,7 @@ class Application(QtWidgets.QMainWindow):
         # run application loop
         self.args = args
         self.app = main_loop.MainThread(self)
-        for _ in range(100):
+        for _ in range(10):
             self.app.next()  # first execution to look for python errors
         self.worker = QtCore.QTimer(self)
         self.worker.timeout.connect(self.app.next)

@@ -52,9 +52,13 @@ class MainThread():
     def convertArray2QImage(self, frame):
         frame = np.ascontiguousarray(frame)
         bytesPerLine = int(frame.nbytes / frame.shape[0])
+        if frame.ndim == 2:
+            img_format = QtGui.QImage.Format_Grayscale8
+        else:
+            img_format = QtGui.QImage.Format_RGB888
+
         qimage = QtGui.QImage(frame.data, frame.shape[1], frame.shape[0],
-                              bytesPerLine, QtGui.QImage.Format_Grayscale8)
-        # qimage = qimage.rgbSwapped()
+                              bytesPerLine, img_format)
         qimage = qimage.scaled(self.display.size().width(),
                                self.display.size().height(),
                                QtCore.Qt.KeepAspectRatio,
@@ -83,7 +87,7 @@ class MainThread():
             raise ValueError('Undefined State')
 
         if self._debug:
-            frame = self.tracker._tracker_view
+            frame = self.tracker.add_info_view(frame)
         self.show_image(frame)
 
     def next_live(self, frame: np.ndarray):
