@@ -42,7 +42,7 @@ class Tracker:
     def calibrated(self):
         return len(self._sticker_pos) == self._num_sticker
 
-    def current_angle(self, image: np.ndarray) -> typing.Optinal[float, None]:
+    def current_angle(self, image: np.ndarray) -> typing.Optional[float]:
         cv_corners, cv_ids = self._process_image(image)
 
         corners = np.array(cv_corners)
@@ -73,7 +73,7 @@ class Tracker:
         return image
 
     def _process_image(self,
-                       image: np.ndarray) -> tuple[typeing.Any, typeing.Any]:
+                       image: np.ndarray) -> tuple[typing.Any, typing.Any]:
         image = self._filter_image(image)
         cv2.aruco_dict = cv2.aruco.Dictionary_get(cv2.aruco.DICT_6X6_250)
         parameters = cv2.aruco.DetectorParameters_create()
@@ -152,6 +152,6 @@ class Tracker:
     def _calc_illumination_circle_radius(self) -> float:
         corners = self._cal_corners.copy()
         corners.shape = (-1, 2)
-        return np.mean(np.linalg.norm(corners - self._illumination_center,
-                                      axis=1),
-                       axis=0) * 0.75
+        return float(
+            np.mean(np.linalg.norm(corners - self._illumination_center, axis=1),
+                    axis=0)) * 0.75
