@@ -153,8 +153,8 @@ class Application(QtWidgets.QMainWindow):
                 if name in self._menu_dict:
                     raise ValueError(
                         f'entry "{name}" already exists in "{qt_menu}"')
-                self._menu_dict[name] = self._qt_obj.addAction(
-                    ActionWrapper(f'&{name}'))
+                self._menu_dict[name] = ActionWrapper(f'{name}')
+                self._qt_obj.addAction(self._menu_dict[name])
 
             def __getitem__(self, key):
                 return self._menu_dict[key]
@@ -188,7 +188,7 @@ class Application(QtWidgets.QMainWindow):
 
         # INFO:
         """
-        actions will be mostly specifieded at the functions scr code
+        actions will be mostly specified at the functions scr code
         containeing the methods
 
         examples:
@@ -211,4 +211,3 @@ class Application(QtWidgets.QMainWindow):
         self.main_menu['camera'].add_menu('filter')
         self.main_menu['camera'].add_menu('color')
         self.main_menu['camera'].add_menu('demo')
-        self.main_menu['camera'].add_action('asdasd')
