@@ -29,18 +29,53 @@ class Tracker:
         self.__freeze()
 
     def reset(self):
-        self._sticker_pos = []
         self._cal_corners = None
         self._cal_ids = None
         self._cur_corners = None
         self._cur_ids = None
         self._radius = None
+        self._mask = None
+        self._input_shape = None
         self._illumination_center = None
         self._illumination_radius = None
         self._sticker_zero_angle = None
 
     def calibrated(self):
-        return len(self._sticker_pos) == self._num_sticker
+        return self._cal_corners.shape[0] == self._num_sticker
+
+    def mask(self, image: np.ndarray) -> np.ndarray:
+        if not self.calibrated():
+            raise ValueError(' tracker not calibrated yet')
+
+        if self._mask is None:
+            x = np.arange(0, self._input_shape[0], dtype=np.float64)
+            y = np.arange(0, self._input_shape[1], dtype=np.float64)
+            X = np.repeat(x[:, None], self._input_shape[1], axis=1)
+            Y = np.repeat(y[None, :], self._input_shape[0], axis=0)
+            X -= self._illumination_center[1]
+            Y -= self._illumination_center[0]
+            self._mask = X**2 + Y**2 < self._illumination_radius**2
+            self._mask = self.crop(self._mask)
+
+        return np.multiply(self._mask, image)
+
+    def crop(self, image: np.ndarray) -> np.ndarray:
+        if not self.calibrated():
+            raise ValueError(' tracker not calibrated yet')
+
+        x = np.arange(0, self._input_shape[0], dtype=np.float64)
+        y = np.arange(0, self._input_shape[1], dtype=np.float64)
+        x -= self._illumination_center[0]
+        y -= self._illumination_center[1]
+
+        x_start = int(np.argmax(x < self._illumination_radius))
+        x_end = x.size - int(np.argmax(x[::-1] < self._illumination_radius)) - 1
+        y_start = int(np.argmax(y < self._illumination_radius))
+        y_end = y.size - int(np.argmax(y[::-1] < self._illumination_radius)) - 1
+
+        print(x_start, x_end, y_start, y_end)
+
+        return np.ascontiguousarray(image[y_start:y_end, x_start:x_end])
 
     def current_angle(self, image: np.ndarray) -> typing.Optional[float]:
         cv_corners, cv_ids = self._process_image(image)
@@ -121,6 +156,8 @@ class Tracker:
         if len(cv_corners) != self._num_sticker:
             # did not find all stickers
             return False
+
+        self._input_shape = image.shape
 
         # all stickers found -> save position of stickers
         self._cal_ids = np.array(cv_ids).ravel()
