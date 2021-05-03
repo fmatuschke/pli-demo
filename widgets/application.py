@@ -4,7 +4,7 @@ import pathlib
 from PyQt5 import QtCore, QtGui, QtWidgets
 from src import main_loop
 
-from . import display, dummy, plot
+from . import display, dummy, plot, animation
 
 PATH = os.path.join(pathlib.Path().absolute(), 'data')
 
@@ -68,7 +68,7 @@ class Application(QtWidgets.QMainWindow):
         self.plotwidget.setSizePolicy(QtWidgets.QSizePolicy.Expanding,
                                       QtWidgets.QSizePolicy.Expanding)
 
-        self.setupwidget = dummy.Label()
+        self.setupwidget = animation.SetupWidget()
         self.setupwidget.setMinimumSize(QtCore.QSize(100, 200))
 
         self.logo_pli = QtWidgets.QLabel()
@@ -102,7 +102,8 @@ class Application(QtWidgets.QMainWindow):
 
     def connectSignals(self):
         self.main_display.xy_signal.connect(self.app.update_plot)
-        # self.main_display.plot_update.connect(self.plot.update_plot)
+        # self.main_display.rho_signal.connect(self.app.update_plot_rho)
+        # self.app.rho_signal.connect(self.setupwidget.set_rotation)
 
     def createLayout(self):
         self.layout = QtWidgets.QGridLayout()

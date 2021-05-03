@@ -32,6 +32,8 @@ class MainThread():
         MEASUREMENT = enum.auto()
         LIVE = enum.auto()
 
+    # rho_signal = QtCore.pyqtSignal(float)
+
     __is_frozen = False
 
     def __setattr__(self, key, value):
@@ -149,8 +151,9 @@ class MainThread():
             frame = self.tracker.mask(frame)
         self.show_image(frame)
 
-        # TODO: update plot
         self.parent.plotwidget.update(self._plot[0], self._plot[1], self._angle)
+        self.parent.setupwidget.set_rotation(self._angle)
+        self.parent.setupwidget.update()
 
     def update_plot(self, x, y):
 
