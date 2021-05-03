@@ -34,9 +34,9 @@ class Application(QtWidgets.QMainWindow):
         self.setWindowTitle("3D-PLI Demo")
         self.setWindowIcon(QtGui.QIcon(os.path.join(PATH, 'pli-logo.png')))
         self.setBackground()
+        self.createMenu()
         self.createWidgets()
         self.createLayout()
-        self.createMenu()
 
     def resizeEvent(self, event):
         super(Application, self).resizeEvent(event)
@@ -149,11 +149,12 @@ class Application(QtWidgets.QMainWindow):
                 self._menu_dict[name] = Wrapper(
                     self._qt_obj.addMenu(f'&{name}'))
 
-            def add_action(self, name):
+            def add_action(self, name, triggered):
                 if name in self._menu_dict:
                     raise ValueError(
                         f'entry "{name}" already exists in "{qt_menu}"')
-                self._menu_dict[name] = ActionWrapper(f'{name}')
+                self._menu_dict[name] = ActionWrapper(f'{name}',
+                                                      triggered=triggered)
                 self._qt_obj.addAction(self._menu_dict[name])
 
             def __getitem__(self, key):

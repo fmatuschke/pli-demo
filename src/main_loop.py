@@ -1,4 +1,5 @@
 import enum
+import functools
 
 import numpy as np
 from PyQt5 import QtCore, QtGui
@@ -42,9 +43,19 @@ class MainThread():
 
         self.tracker = tracker.Tracker(10, 10)
 
-        # TODO: self.parent.main_menu['camera']['ports'].reset() ...
+        self.parent.main_menu['camera']['port'].clear()
         self.device = capture_device.CapDev(port=self.parent.args.port,
                                             file_name=self.parent.args.video)
+        for port in self.device.ports():
+            self.parent.main_menu['camera']['port'].add_action(
+                f'{port}',
+                triggered=functools.partial(self.device.activate_camera, port))
+
+        for video in self.device.videos():
+            print(video)
+            self.parent.main_menu['camera']['demo'].add_action(
+                f'{video}',
+                triggered=functools.partial(self.device.activate_video, video))
 
     def switch_camera_port(self):
         pass

@@ -1,9 +1,12 @@
 import enum
 import os
+import pathlib
 
 import cv2
 import numpy as np
 import time
+
+PATH = os.path.join(pathlib.Path().absolute(), 'data')
 
 # cv2 workaround
 # https://forum.qt.io/topic/119109/using-pyqt5-with-opencv-python-cv2-causes-error-could-not-load-qt-platform-plugin-xcb-even-though-it-was-found/23
@@ -42,6 +45,7 @@ class CapDev:
         self._device = None
         self._port = port
         self._ports = []
+        self._videos = []
         self._resolutions = []
         self._color_mode = color_mode
 
@@ -50,6 +54,7 @@ class CapDev:
 
         # run init member functions
         self._ports = self._check_ports(port_list, n_times=5)
+        self._search_videos()
 
         if file_name is not None:
             self.activate_video(file_name)
@@ -59,6 +64,21 @@ class CapDev:
             self._device = None
             self._port = None
             self.release_device()
+
+    def ports(self):
+        return self._ports
+
+    def videos(self):
+        return self._videos
+
+    def _search_videos(self):
+        print("searching for videos")
+        for file in os.listdir(PATH):
+            if not os.path.isfile(os.path.join(PATH, file)):
+                continue
+            if not file.endswith('.mp4'):
+                continue
+            self._videos.append(os.path.join(PATH, file))
 
     def release_device(self):
         if self._device is not None:
