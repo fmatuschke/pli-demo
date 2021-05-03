@@ -67,13 +67,12 @@ class Tracker:
         y = np.arange(0, self._input_shape[1], dtype=np.float64)
         x -= self._illumination_center[0]
         y -= self._illumination_center[1]
-
+        x = np.abs(x)
+        y = np.abs(y)
         x_start = int(np.argmax(x < self._illumination_radius))
         x_end = x.size - int(np.argmax(x[::-1] < self._illumination_radius)) - 1
         y_start = int(np.argmax(y < self._illumination_radius))
         y_end = y.size - int(np.argmax(y[::-1] < self._illumination_radius)) - 1
-
-        print(x_start, x_end, y_start, y_end)
 
         return np.ascontiguousarray(image[y_start:y_end, x_start:x_end])
 

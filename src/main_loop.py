@@ -6,6 +6,21 @@ from PyQt5 import QtCore, QtGui
 
 from . import capture_device, pli, tracker
 
+# from functools import wraps
+# from time import time
+
+# def timing(f):
+
+#     @wraps(f)
+#     def wrap(*args, **kw):
+#         ts = time()
+#         result = f(*args, **kw)
+#         te = time()
+#         print(f'func:{f.__name__} took: {te - ts:.2f}sec')
+#         return result
+
+#     return wrap
+
 
 class MainThread():
 
