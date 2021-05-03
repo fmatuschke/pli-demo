@@ -48,6 +48,9 @@ class MainThread():
                                             file_name=self.parent.args.video)
 
         def switch_port(port):
+            # TODO: RFC reset
+            self.parent.main_menu['pli'].set_enabled(False)
+            self.state = self.State.TRACKING
             self.pli.reset()
             self.tracker.reset()
             self.device.activate_camera(port)
@@ -57,11 +60,18 @@ class MainThread():
             self.parent.main_menu['camera']['port'].add_action(
                 f'{port}', triggered=functools.partial(switch_port, port))
 
+        def switch_video(video):
+            # TODO: RFC reset
+            self.parent.main_menu['pli'].set_enabled(False)
+            self.state = self.State.TRACKING
+            self.pli.reset()
+            self.tracker.reset()
+            self.device.activate_video(video)
+
         for video in self.device.videos():
             print(video)
             self.parent.main_menu['camera']['demo'].add_action(
-                f'{video}',
-                triggered=functools.partial(self.device.activate_video, video))
+                f'{video}', triggered=functools.partial(switch_video, video))
 
     def switch_camera_port(self):
         pass

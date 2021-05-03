@@ -12,16 +12,22 @@ from . import epa
 
 @dc.dataclass(frozen=True)
 class Images:
-    # TODO:rfc???
+    # TODO: RFC, variables are instances and shared for all Images
     shape: tuple
-    N = 18
-    images = np.empty((0, 0, N))
-    rotations = np.linspace(0, np.pi, N, False)
-    valid = np.zeros_like(rotations, np.bool8)
+    N: int = 18
 
-    def __post_init__(self,):
+    images: np.ndarray = dc.field(init=False)
+    rotations: np.ndarray = dc.field(init=False)
+    valid: np.ndarray = dc.field(init=False)
+
+    def __post_init__(self):
+        # resetting np arrays with __setattr__ because of frozen
         object.__setattr__(self, 'images',
                            np.empty((self.shape[0], self.shape[1], self.N)))
+        object.__setattr__(self, 'rotations',
+                           np.linspace(0, np.pi, self.N, False))
+        object.__setattr__(self, 'valid', np.zeros_like(self.rotations,
+                                                        np.bool8))
 
     def apply_offset(self, offset: float) -> None:
         self.rotations[:] = np.linspace(0, np.pi, self.N, False) + offset
