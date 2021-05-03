@@ -125,36 +125,58 @@ class Application(QtWidgets.QMainWindow):
         class Wrapper:
 
             def __init__(self, qt_menu):
-                self._qt_menu = qt_menu
-                self._qt_menu_dict = {}
+                self._qt_obj = qt_menu
                 self._menu_dict = {}
 
             def add_menu(self, name):
-                self._qt_menu_dict[name] = self._qt_menu.addMenu(f'&{name}')
+                if name in self._menu_dict:
+                    raise ValueError(
+                        f'entry "{name}" already exists in "{qt_menu}"')
+                self._menu_dict[name] = (True,
+                                         Wrapper(
+                                             self._qt_obj.addMenu(f'&{name}')))
 
-                # dict behavior
-                self._menu_dict[name] = Wrapper(self._qt_menu_dict[name])
-
-                # member property like behavior
-                # self.__setattr__(name, Wrapper(self._qt_menu_dict[name]))
-
-            def add_action(self, action):
-                self._qt_menu_dict[f'{action}'] = QtWidgets.QAction(
-                    f'&{action}')
-                self._qt_menu.addAction(self._qt_menu_dict[f'{action}'])
+            def add_action(self, name):
+                if name in self._menu_dict:
+                    raise ValueError(
+                        f'entry "{name}" already exists in "{qt_menu}"')
+                self._menu_dict[name] = (False, QtWidgets.QAction(f'&{name}'))
 
             def __getitem__(self, key):
                 # needed for dict behavior
-                return self._menu_dict[key]
+                return self._menu_dict[key][1]  # only return object
+
+            def set_enabled(self, value):
+                self._qt_obj.setEnabled(value)
+
+            def clear(self):
+                self._qt_obj.clear()
+                self._menu_dict = {}
 
         self.main_menu = Wrapper(self.menuBar())
 
+        # INFO:
+        """
+        actions will be mostly specifieded at the functions scr code
+        containeing the methods
+
+        examples:
+        self.main_menu['camera'].add_menu('resolution')
+        self.main_menu['camera']['resolution'].add_action('640x480')
+        self.main_menu['help'].add_action('reset')
+        self.main_menu['camera'].clear()
+        self.main_menu['camera'].set_enabled(False)
+        """
+
         # main structure
         self.main_menu.add_menu('pli')
+        self.main_menu['pli'].set_enabled(False)
         self.main_menu.add_menu('camera')
         self.main_menu.add_menu('help')
 
-        # examples
-        # self.main_menu['camera'].add_menu('resolution')
-        # self.main_menu['camera']['resolution'].add_action('640x480')
-        # self.main_menu['help'].add_action('reset')
+        # CAMERA
+        self.main_menu['camera'].add_menu('port')
+        self.main_menu['camera'].add_menu('resolution')
+        self.main_menu['camera'].add_menu('filter')
+        self.main_menu['camera'].add_menu('color')
+        self.main_menu['camera'].add_menu('demo')
