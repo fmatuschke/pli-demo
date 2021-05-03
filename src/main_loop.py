@@ -37,8 +37,12 @@ class MainThread():
         self.state = self.State.TRACKING
         self._debug = True
 
+        self.parent.main_menu['pli'].set_enabled(False)
         self.pli = pli.PLI(pli_threshold)
+
         self.tracker = tracker.Tracker(10, 10)
+
+        # TODO: self.parent.main_menu['camera']['ports'].reset() ...
         self.device = capture_device.CapDev(port=self.parent.args.port,
                                             file_name=self.parent.args.video)
 
