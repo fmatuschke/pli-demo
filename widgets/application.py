@@ -27,7 +27,8 @@ class Application(QtWidgets.QMainWindow):
             self.app.next()  # first execution to look for python errors
         self.worker = QtCore.QTimer(self)
         self.worker.timeout.connect(self.app.next)
-        self.worker.start(1000 // 25)  # TODO: min(camera.fps, 25)
+        # self.worker.start(1000 // 25)  # TODO: min(camera.fps, 25)
+        self.worker.start(1000 // 60)  # TODO: min(camera.fps, 25)
 
     def __initUI__(self):
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)

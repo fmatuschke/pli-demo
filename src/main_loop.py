@@ -33,7 +33,7 @@ class MainThread():
         # freeze class
         self.__freeze()
 
-    def reset(self, pli_threshold=np.deg2rad(2)):
+    def reset(self, pli_threshold=np.deg2rad(4.2)):
         self.input_mode = None
         self.state = self.State.TRACKING
         self._debug = True
@@ -41,7 +41,7 @@ class MainThread():
         self.parent.main_menu['pli'].set_enabled(False)
         self.pli = pli.PLI(pli_threshold)
 
-        self.tracker = tracker.Tracker(10, 10)
+        self.tracker = tracker.Tracker(num_sticker=10, sticker_zero_id=10)
 
         self.parent.main_menu['camera']['port'].clear()
         self.device = capture_device.CapDev(port=self.parent.args.port,
@@ -136,7 +136,12 @@ class MainThread():
 
         self.parent.statusBar().showMessage(f'{np.rad2deg(angle):.1f}')
         if self.pli.measurment_done():
+            print("live view")
             self.state = self.State.LIVE
+            self.parent.main_menu['pli'].set_enabled(True)
+            self.parent.main_menu['pli'].add_action('process',
+                                                    triggered=functools.partial(
+                                                        self.pli.run_analysis))
 
     def next_tracking(self, frame: np.ndarray):
         self.show_image(frame)

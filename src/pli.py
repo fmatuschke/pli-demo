@@ -6,6 +6,7 @@ import typing
 import warnings
 
 import numpy as np
+from PyQt5 import QtCore
 
 from . import epa
 
@@ -106,8 +107,36 @@ class Incl:
             raise ValueError('inclination shape and fom shape differs')
 
 
-class PLI():
+class Runnable(QtCore.QRunnable):
 
+    def __init__(self, images):
+        super().__init__()
+        self.images = images
+
+    def run(self):
+        print('running analysis ...')
+        self.mod = self._run_epa()
+        # self.incl = self._run_calc_incl()
+        # self.tilts = self._run_tilting_simulation()
+        print('analysis finished')
+
+    def get_results(self):
+        return self.mod
+        # return self.mod, self.incl, self.tilts
+
+    def _run_epa(self):
+        t, d, r = epa.epa(self.images.images)
+        self._modalities = Modalities(t, d, r)
+        # self.apply_offset(self.images.offset)
+
+    def _run_calc_incl(self, images):
+        pass
+
+    def _run_tilting_simulation(self, images, tilting):
+        pass
+
+
+class PLI():
     __is_frozen = False
 
     def __setattr__(self, key, value):
@@ -121,6 +150,10 @@ class PLI():
     def __init__(self, threshold):
         self.reset()
         self._angle_threshold = threshold
+
+        # self.analysis_finished = QtCore.pyqtSignal()
+        # self.analysis_progress = QtCore.pyqtSignal(int)
+
         self.__freeze()
 
     def reset(self):
@@ -177,7 +210,7 @@ class PLI():
             if not self._images.valid[index]:
                 self._images.insert(image, index)
                 print(
-                    f'inserted {np.rad2deg(angle):.1f} -> {np.rad2deg(angle_):.0f}'
+                    f'inserted {np.rad2deg(angle):.1f} -> {np.rad2deg(angle_):.0f}: {np.sum(self._images.valid)}/{self._images.N}'
                 )
 
     def apply_offset(self, offset: float):
@@ -185,18 +218,7 @@ class PLI():
         self._modalities.direction[:] %= np.pi
         # TODO: apply to tilting and fom
 
-    def _run_analysis(self):
-        self._run_epa()
-        self._run_calc_incl()
-        self._run_tilting_simulation()
-
-    def _run_tilting_simulation(self):
-        pass
-
-    def _run_epa(self):
-        t, d, r = epa.epa(self._images.data)
-        self._modalities = Modalities(t, d, r)
-        self.apply_offset(self._images.offset)
-
-    def _run_calc_incl(self):
-        pass
+    def run_analysis(self):
+        pool = QtCore.QThreadPool.globalInstance()
+        runnable = Runnable(self._images)
+        pool.start(runnable)
