@@ -36,7 +36,7 @@ class MainThread():
     def reset(self, pli_threshold=np.deg2rad(4.2)):
         self.input_mode = None
         self.state = self.State.TRACKING
-        self._debug = True
+        self._debug = False
 
         self.parent.main_menu['pli'].set_enabled(False)
         self.pli = pli.PLI(pli_threshold)
@@ -124,6 +124,25 @@ class MainThread():
     def next_live(self, frame: np.ndarray):
         pass
 
+    def enable_pli_results(self):
+
+        def show_img_and_stop(image, cval):
+            image = image / cval * 255
+            image = image.astype(np.uint8)
+
+            self.show_image(image)
+            self.parent.worker.stop()
+
+        self.parent.main_menu['pli'].add_action(
+            'transmittance',
+            lambda: show_img_and_stop(self.pli.modalities.transmittance, 255))
+        self.parent.main_menu['pli'].add_action(
+            'direction',
+            lambda: show_img_and_stop(self.pli.modalities.direction, np.pi))
+        self.parent.main_menu['pli'].add_action(
+            'retardation',
+            lambda: show_img_and_stop(self.pli.modalities.retardation, 1))
+
     def next_measurement(self, frame: np.ndarray):
         if self.pli.measurment_done():
             raise ValueError('measurment already done')
@@ -139,9 +158,8 @@ class MainThread():
             print("live view")
             self.state = self.State.LIVE
             self.parent.main_menu['pli'].set_enabled(True)
-            self.parent.main_menu['pli'].add_action('process',
-                                                    triggered=functools.partial(
-                                                        self.pli.run_analysis))
+            self.pli.run_analysis(self.enable_pli_results)
+            # TODO: restliche ergebnisse
 
     def next_tracking(self, frame: np.ndarray):
         self.show_image(frame)

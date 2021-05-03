@@ -4,6 +4,8 @@ from __future__ import annotations
 import dataclasses as dc
 import typing
 import warnings
+import traceback
+import sys
 
 import numpy as np
 from PyQt5 import QtCore
@@ -107,18 +109,38 @@ class Incl:
             raise ValueError('inclination shape and fom shape differs')
 
 
-class Runnable(QtCore.QRunnable):
+class WorkerSignals(QtCore.QObject):
+    finished = QtCore.pyqtSignal()
+    error = QtCore.pyqtSignal(tuple)
+    result = QtCore.pyqtSignal(object)
+
+
+class PLIAnalyser(QtCore.QRunnable):
 
     def __init__(self, images):
-        super().__init__()
+        super(PLIAnalyser, self).__init__()
         self.images = images
+        self.signals = WorkerSignals()
+        self.modolities = None
 
+    @QtCore.pyqtSlot()
     def run(self):
-        print('running analysis ...')
-        self.mod = self._run_epa()
-        # self.incl = self._run_calc_incl()
-        # self.tilts = self._run_tilting_simulation()
-        print('analysis finished')
+
+        try:
+            print('thread: running analysis ...')
+            self._run_epa()
+            # self.incl = self._run_calc_incl()
+            # self.tilts = self._run_tilting_simulation()
+            print('thread: analysis finished')
+        except:
+            traceback.print_exc()
+            exctype, value = sys.exc_info()[:2]
+            self.signals.error.emit((exctype, value, traceback.format_exc()))
+        else:
+            self.signals.result.emit(
+                self.modalities)  # Return the result of the processing
+        finally:
+            self.signals.finished.emit()  # Done
 
     def get_results(self):
         return self.mod
@@ -126,7 +148,7 @@ class Runnable(QtCore.QRunnable):
 
     def _run_epa(self):
         t, d, r = epa.epa(self.images.images)
-        self._modalities = Modalities(t, d, r)
+        self.modalities = Modalities(t, d, r)
         # self.apply_offset(self.images.offset)
 
     def _run_calc_incl(self, images):
@@ -218,7 +240,14 @@ class PLI():
         self._modalities.direction[:] %= np.pi
         # TODO: apply to tilting and fom
 
-    def run_analysis(self):
+    def run_analysis(self, fun):
         pool = QtCore.QThreadPool.globalInstance()
-        runnable = Runnable(self._images)
+        runnable = PLIAnalyser(self._images)
+
+        def save(result):
+            self._modalities = result
+
+        runnable.signals.result.connect(save)
+        runnable.signals.finished.connect(fun)
+
         pool.start(runnable)
