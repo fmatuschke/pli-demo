@@ -189,7 +189,7 @@ class PLI():
     def images(self):
         if self._images is None:
             raise ValueError('no images measured yet')
-        return self._images.copy()
+        return self._images
 
     def measurment_done(self):
         if self._images is None:

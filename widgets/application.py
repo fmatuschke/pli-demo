@@ -2,10 +2,9 @@ import os
 import pathlib
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-
-from . import dummy
-from . import display
 from src import main_loop
+
+from . import display, dummy, plot
 
 PATH = os.path.join(pathlib.Path().absolute(), 'data')
 
@@ -20,9 +19,11 @@ class Application(QtWidgets.QMainWindow):
         super(Application, self).__init__(*qt_args, **qt_kwargs)
         self.__initUI__()
 
-        # run application loop
         self.args = args
         self.app = main_loop.MainThread(self)
+        self.connectSignals()
+
+        # run application loop
         for _ in range(10):
             self.app.next()  # first execution to look for python errors
 
@@ -61,7 +62,7 @@ class Application(QtWidgets.QMainWindow):
         self.main_display.setSizePolicy(QtWidgets.QSizePolicy.Minimum,
                                         QtWidgets.QSizePolicy.Minimum)
 
-        self.plotwidget = dummy.Label()
+        self.plotwidget = plot.Plot()
         self.plotwidget.setMinimumSize(QtCore.QSize(200, 200))
         self.plotwidget.setAlignment(QtCore.Qt.AlignCenter)
         self.plotwidget.setSizePolicy(QtWidgets.QSizePolicy.Expanding,
@@ -98,6 +99,10 @@ class Application(QtWidgets.QMainWindow):
 
         # adding label to status bar
         self.statusBar().showMessage('')
+
+    def connectSignals(self):
+        self.main_display.xy_signal.connect(self.app.update_plot)
+        # self.main_display.plot_update.connect(self.plot.update_plot)
 
     def createLayout(self):
         self.layout = QtWidgets.QGridLayout()

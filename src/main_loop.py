@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import enum
 import functools
 
@@ -52,12 +54,19 @@ class MainThread():
         self.input_mode = None
         self.state = self.State.TRACKING
         self._debug = False
+        self._plot = [None, None]
+        self._image_height = None
+        self._image_width = None
+        self._angle = None
 
+        # pli
         self.parent.main_menu['pli'].set_enabled(False)
         self.pli = pli.PLI(pli_threshold)
 
+        # tracker
         self.tracker = tracker.Tracker(num_sticker=10, sticker_zero_id=10)
 
+        # camera
         self.parent.main_menu['camera']['port'].clear()
         self.device = capture_device.CapDev(port=self.parent.args.port,
                                             file_name=self.parent.args.video)
@@ -140,8 +149,20 @@ class MainThread():
             frame = self.tracker.mask(frame)
         self.show_image(frame)
 
+        # TODO: update plot
+        self.parent.plotwidget.update(self._plot[0], self._plot[1], self._angle)
+
+    def update_plot(self, x, y):
+
+        # to frame coordinates
+        x = int(x * self._image_width + 0.5)
+        y = int(y * self._image_height + 0.5)
+
+        self._plot[0] = self.pli.images.rotations
+        self._plot[1] = [self.pli.images.images[y, x, :]]
+
     def next_live(self, frame: np.ndarray):
-        pass
+        self._angle = self.tracker.current_angle(frame)
 
     def enable_pli_results(self):
 
@@ -166,14 +187,14 @@ class MainThread():
         if self.pli.measurment_done():
             raise ValueError('measurment already done')
 
-        angle = self.tracker.current_angle(frame)
-        if angle is None:
+        self._angle = self.tracker.current_angle(frame)
+        if self._angle is None:
             raise ValueError('angel is None')
 
         frame = self.tracker.crop(frame)
-        self.pli.insert(frame, angle)
+        self.pli.insert(frame, self._angle)
 
-        self.parent.statusBar().showMessage(f'{np.rad2deg(angle):.1f}')
+        self.parent.statusBar().showMessage(f'{np.rad2deg(self._angle):.1f}')
         if self.pli.measurment_done():
             print("live view")
             self.state = self.State.LIVE
@@ -189,4 +210,6 @@ class MainThread():
     def show_image(self, image):
         qimage = self.convertArray2QImage(image)
         pixmap = QtGui.QPixmap.fromImage(qimage)
+        self._image_height = image.shape[0]
+        self._image_width = image.shape[1]
         self.display.setPixmap(pixmap)
