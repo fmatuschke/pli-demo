@@ -217,3 +217,9 @@ class Application(QtWidgets.QMainWindow):
         self.main_menu['camera'].add_menu('filter')
         self.main_menu['camera'].add_menu('color')
         self.main_menu['camera'].add_menu('demo')
+
+        # HELP
+        def switch_debug():
+            self.app._debug = not self.app._debug
+
+        self.main_menu['help'].add_action('debug', switch_debug)

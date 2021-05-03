@@ -135,8 +135,9 @@ class MainThread():
         if self._debug:
             frame = self.tracker.add_info_view(frame)
 
-        frame = self.tracker.crop(frame)
-        frame = self.tracker.mask(frame)
+        if not self._debug:
+            frame = self.tracker.crop(frame)
+            frame = self.tracker.mask(frame)
         self.show_image(frame)
 
     def next_live(self, frame: np.ndarray):

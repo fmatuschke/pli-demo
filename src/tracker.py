@@ -57,14 +57,18 @@ class Tracker:
             self._mask = X**2 + Y**2 < self._illumination_radius**2
             self._mask = self.crop(self._mask)
 
-        return np.multiply(self._mask, image)
+        if image.ndim == 2:
+            res = np.multiply(self._mask, image)
+        else:
+            res = np.multiply(self._mask[:, :, None], image)
+        return res
 
     def crop(self, image: np.ndarray) -> np.ndarray:
         if not self.calibrated():
             raise ValueError(' tracker not calibrated yet')
 
-        x = np.arange(0, self._input_shape[0], dtype=np.float64)
-        y = np.arange(0, self._input_shape[1], dtype=np.float64)
+        x = np.arange(0, self._input_shape[1], dtype=np.float64)
+        y = np.arange(0, self._input_shape[0], dtype=np.float64)
         x -= self._illumination_center[0]
         y -= self._illumination_center[1]
         x = np.abs(x)
