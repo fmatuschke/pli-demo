@@ -46,10 +46,16 @@ class MainThread():
         self.parent.main_menu['camera']['port'].clear()
         self.device = capture_device.CapDev(port=self.parent.args.port,
                                             file_name=self.parent.args.video)
+
+        def switch_port(port):
+            self.pli.reset()
+            self.tracker.reset()
+            self.device.activate_camera(port)
+
+        # TODO: reset if triggered
         for port in self.device.ports():
             self.parent.main_menu['camera']['port'].add_action(
-                f'{port}',
-                triggered=functools.partial(self.device.activate_camera, port))
+                f'{port}', triggered=functools.partial(switch_port, port))
 
         for video in self.device.videos():
             print(video)
