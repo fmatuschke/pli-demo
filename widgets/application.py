@@ -122,36 +122,66 @@ class Application(QtWidgets.QMainWindow):
     def createMenu(self):
         """ create buttons, connection is seperated """
 
+        class ActionWrapper(QtWidgets.QAction):
+
+            def isAction(self):
+                return True
+
+            def isMenu(self):
+                return False
+
         class Wrapper:
 
             def __init__(self, qt_menu):
                 self._qt_obj = qt_menu
                 self._menu_dict = {}
 
+            def isAction(self):
+                return False
+
+            def isMenu(self):
+                return True
+
             def add_menu(self, name):
                 if name in self._menu_dict:
                     raise ValueError(
                         f'entry "{name}" already exists in "{qt_menu}"')
-                self._menu_dict[name] = (True,
-                                         Wrapper(
-                                             self._qt_obj.addMenu(f'&{name}')))
+                self._menu_dict[name] = Wrapper(
+                    self._qt_obj.addMenu(f'&{name}'))
 
             def add_action(self, name):
                 if name in self._menu_dict:
                     raise ValueError(
                         f'entry "{name}" already exists in "{qt_menu}"')
-                self._menu_dict[name] = (False, QtWidgets.QAction(f'&{name}'))
+                self._menu_dict[name] = ActionWrapper(f'&{name}')
 
             def __getitem__(self, key):
-                # needed for dict behavior
-                return self._menu_dict[key][1]  # only return object
+                return self._menu_dict[key]
+
+            def entries(self):
+                return [elm for elm in self._menu_dict.values()]
 
             def set_enabled(self, value):
                 self._qt_obj.setEnabled(value)
 
-            def clear(self):
-                self._qt_obj.clear()
-                self._menu_dict = {}
+            # def clear(self):
+            #     self._qt_obj.clear()
+            #     self._menu_dict = {}
+
+            # def clear_actions(self):
+            #     print('clear_actions')
+            #     to_pop = []
+            #     for key, elm in self._menu_dict.items():
+            #         if elm.isAction():
+            #             self._qt_obj.removeAction(elm)
+            #             to_pop.append(key)
+            #     for elm in to_pop:
+            #         self._menu_dict.pop(elm, None)
+
+            # def clear_menus(self):
+            #     for elm in self.entries():
+            #         if elm.isMenu():
+            #             elm.clear()
 
         self.main_menu = Wrapper(self.menuBar())
 
@@ -180,3 +210,4 @@ class Application(QtWidgets.QMainWindow):
         self.main_menu['camera'].add_menu('filter')
         self.main_menu['camera'].add_menu('color')
         self.main_menu['camera'].add_menu('demo')
+        self.main_menu['camera'].add_action('asdasd')
