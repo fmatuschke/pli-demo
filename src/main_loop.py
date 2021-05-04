@@ -112,13 +112,13 @@ class MainThread():
         self._debug = not self._debug
 
     def to_live_mode(self):
-        self.worker.start(self._mspf)
-        if not self.app.tracker.calibrated():
-            self.app.state = self.app.State.TRACKING
-        elif not self.app.pli.measurment_done():
-            self.app.state = self.app.State.MEASUREMENT
+        self.parent.worker.start(self.parent._mspf)
+        if not self.tracker.calibrated():
+            self.state = self.State.TRACKING
+        elif not self.pli.measurment_done():
+            self.state = self.State.MEASUREMENT
         else:
-            self.app.state = self.app.State.LIVE
+            self.state = self.State.LIVE
 
     def switch_port(self, port):
         self.state = self.State.TRACKING
