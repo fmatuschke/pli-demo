@@ -24,6 +24,12 @@ from . import capture_device, pli, tracker
 #     return wrap
 
 
+def diff_angles(a, b, U):
+    d = b - a
+    d = (d + U / 2) % U - U / 2
+    return d
+
+
 class MainThread():
 
     @enum.unique
@@ -60,6 +66,8 @@ class MainThread():
         self._image_height = None
         self._image_width = None
         self._angle = None
+        self._last_angle = None
+        self._update_angle = np.deg2rad(2.5)
 
         # pli
         self.parent.main_menu['pli'].set_enabled(False)
@@ -151,9 +159,16 @@ class MainThread():
             frame = self.tracker.mask(frame)
         self.show_image(frame)
 
-        self.parent.plotwidget.update(self._plot[0], self._plot[1], self._angle)
-        self.parent.setupwidget.set_rotation(self._angle)
-        self.parent.setupwidget.update()
+        if self._last_angle is None:
+            self._last_angle = self._angle
+        else:
+            if abs(diff_angles(self._last_angle, self._angle,
+                               np.pi)) > self._update_angle:
+                self._last_angle = self._angle
+                self.parent.plotwidget.update(self._plot[0], self._plot[1],
+                                              self._angle)
+                self.parent.setupwidget.set_rotation(self._angle)
+                self.parent.setupwidget.update()
 
     def update_plot(self, x, y):
 
