@@ -77,6 +77,7 @@ class MainThread():
         self._angle = None
         self._last_angle = None
         self._update_angle = np.deg2rad(2.5)
+        self.parent.plotwidget.clear()
 
         # pli
         self.pli = pli.PLI(pli_threshold)
@@ -190,8 +191,9 @@ class MainThread():
                     # get only valid measurements
                     y_datas = [ys[self.pli.valid()] for ys in self._plot[1]]
 
-                    self.parent.plotwidget.update(
-                        self._plot[0][self.pli.valid()], y_datas, self._angle)
+                    self.parent.plotwidget.update_data(
+                        self._plot[0][self.pli.valid()], y_datas)
+                self.parent.plotwidget.update_rho(self._angle)
                 self.parent.setupwidget.set_rotation(self._angle)
                 self.parent.setupwidget.update()
 

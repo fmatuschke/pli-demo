@@ -20,17 +20,20 @@ class Plot(QtChart.QChartView):
         self.chart.setBackgroundRoundness(0)
         self.setChart(self.chart)
 
-        #variables for saving data
-        self.x_save = []
-        self.y_save = []
+        self._only_line = True
+
+        # #variables for saving data
+        # self.x_save = []
+        # self.y_save = []
 
     def resizeEvent(self, event):
         super(Plot, self).resizeEvent(event)
 
-    def update(self, x, y_data, rho):
-
+    def clear(self):
         self.chart.removeAllSeries()
 
+    def update_data(self, x, y_data):
+        self.clear()
         if y_data is not None:
             for y in y_data:
                 if 0.0 in x:
@@ -43,11 +46,16 @@ class Plot(QtChart.QChartView):
                 for x_val, y_val in zip(x, y):
                     series.append(np.rad2deg(x_val), y_val)
                 self.chart.addSeries(series)
-                self.chart.createDefaultAxes()
 
+            self._only_line = False
+            self.chart.createDefaultAxes()
+
+    def update_rho(self, rho):
         series = QtChart.QLineSeries()
         if rho is not None:
-            if x is None:
+            if self._only_line:
+                if len(self.chart.series()):
+                    self.chart.removeSeries(self.chart.series()[-1])
                 series.append(np.rad2deg(rho), 0)
                 series.append(np.rad2deg(rho), 1)
             else:
@@ -64,3 +72,5 @@ class Plot(QtChart.QChartView):
         self.chart.axes()[0].setMin(0)
         self.chart.axes()[0].setMax(180)
         self.chart.axes()[1].applyNiceNumbers()
+
+        self._only_line = True  # reset if data changes
