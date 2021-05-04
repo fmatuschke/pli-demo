@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import typing
-import warnings
 import traceback
 import sys
 
@@ -132,9 +130,9 @@ class PLI():
             index = int(np.argwhere(self._images.rotations == angle_))
             if not self._images.valid[index]:
                 self._images.insert(image, index)
-                print(
-                    f'inserted {np.rad2deg(angle):.1f} -> {np.rad2deg(angle_):.0f}: {np.sum(self._images.valid)}/{self._images.N}'
-                )
+                print(f'inserted {np.rad2deg(angle):.1f} -> ' +
+                      f'{np.rad2deg(angle_):.0f}: ' +
+                      f'{np.sum(self._images.valid)}/{self._images.N}')
 
     def apply_offset(self, offset: float):
         self._modalities.direction[:] += offset
