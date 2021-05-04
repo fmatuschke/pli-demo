@@ -1,9 +1,8 @@
 import argparse
-import subprocess
 import sys
 
-import pretty_errors  # type: ignore
-from PyQt5.QtWidgets import QApplication, QWidget
+import pretty_errors  # type: ignore # noqa: F401
+from PyQt5.QtWidgets import QApplication
 
 import widgets.application
 

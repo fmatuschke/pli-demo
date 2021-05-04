@@ -229,9 +229,6 @@ class MainThread():
 
         self.parent.main_menu['pli'].add_menu('tilting')
 
-        # self.parent.main_menu['pli']['tilting'].add_action(
-        #     'center', lambda: show_img_and_stop(self.pli.tilting., 1))
-
     def next_measurement(self, frame: np.ndarray):
         if self.pli.measurment_done():
             raise ValueError('measurment already done')
