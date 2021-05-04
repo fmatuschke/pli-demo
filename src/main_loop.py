@@ -66,7 +66,7 @@ class MainThread():
         # freeze class
         self.__freeze()
 
-    def reset(self, pli_threshold=np.deg2rad(4.2)):
+    def reset(self, pli_threshold=np.deg2rad(5)):
         self.input_mode = None
         self.state = self.State.TRACKING
         self._debug = False
