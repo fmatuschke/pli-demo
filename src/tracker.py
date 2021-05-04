@@ -41,6 +41,8 @@ class Tracker:
         self._sticker_zero_angle = None
 
     def calibrated(self):
+        if self._cal_corners is None:
+            return False
         return self._cal_corners.shape[0] == self._num_sticker
 
     def mask(self, image: np.ndarray) -> np.ndarray:

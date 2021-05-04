@@ -173,8 +173,9 @@ class MainThread():
             frame = self.tracker.add_info_view(frame)
 
         if not self._debug:
-            frame = self.tracker.crop(frame)
-            frame = self.tracker.mask(frame)
+            if self.tracker.calibrated():
+                frame = self.tracker.crop(frame)
+                frame = self.tracker.mask(frame)
         self.show_image(frame)
 
         if self._last_angle is None:
@@ -189,6 +190,9 @@ class MainThread():
                 self.parent.setupwidget.update()
 
     def update_plot(self, x, y):
+
+        if self.pli._images is None:
+            return
 
         # to frame coordinates
         x = int(x * self._image_width + 0.5)

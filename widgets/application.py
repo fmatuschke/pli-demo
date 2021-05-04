@@ -183,7 +183,6 @@ class Application(QtWidgets.QMainWindow):
                 self._menu_dict = {}
 
             def clear_actions(self):
-                print('clear_actions')
                 to_pop = []
                 for key, elm in self._menu_dict.items():
                     if elm.isAction():
