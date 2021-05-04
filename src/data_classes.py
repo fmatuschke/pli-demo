@@ -83,22 +83,22 @@ class Incl:
             )
 
 
-@dc.dataclass(frozen=True)
-class Tilting:
-    north: np.ndarray
-    south: np.ndarray
-    east: np.ndarray
-    west: np.ndarray
+# @dc.dataclass(frozen=True)
+# class Tilting:
+#     north: np.ndarray
+#     south: np.ndarray
+#     east: np.ndarray
+#     west: np.ndarray
 
-    def __post_init__(self):
-        shape = np.array(self.north.shape)
+#     def __post_init__(self):
+#         shape = np.array(self.north.shape)
 
-        for field in dc.fields(Modalities):
-            elm = getattr(self, field.name)
-            if not np.array_equal(shape, elm.shape[:2]):
-                raise ValueError(f'{field.name} shape differs from north')
+#         for field in dc.fields(Modalities):
+#             elm = getattr(self, field.name)
+#             if not np.array_equal(shape, elm.shape[:2]):
+#                 raise ValueError(f'{field.name} shape differs from north')
 
-        for field in dc.fields(Modalities):
-            elm = getattr(self, field.name)
-            if elm.ndim != 2:
-                raise ValueError(f'{field.name} ndim: {elm.ndim}')
+#         for field in dc.fields(Modalities):
+#             elm = getattr(self, field.name)
+#             if elm.ndim != 2:
+#                 raise ValueError(f'{field.name} ndim: {elm.ndim}')

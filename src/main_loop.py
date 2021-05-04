@@ -38,6 +38,14 @@ class MainThread():
         MEASUREMENT = enum.auto()
         LIVE = enum.auto()
 
+    @enum.unique
+    class Tilt(enum.Enum):
+        CENTER = enum.auto()
+        NORTH = enum.auto()
+        EAST = enum.auto()
+        SOUTCH = enum.auto()
+        WEST = enum.auto()
+
     # rho_signal = QtCore.pyqtSignal(float)
 
     __is_frozen = False
@@ -62,6 +70,7 @@ class MainThread():
         self.input_mode = None
         self.state = self.State.TRACKING
         self._debug = False
+        self._tilt = self.Tilt.CENTER
         self._plot = [None, None]
         self._image_height = None
         self._image_width = None
@@ -70,49 +79,58 @@ class MainThread():
         self._update_angle = np.deg2rad(2.5)
 
         # pli
-        self.parent.main_menu['pli'].set_enabled(False)
         self.pli = pli.PLI(pli_threshold)
+
+        self.parent.main_menu['help'].clear_elements()
+        self.parent.main_menu['help'].add_action('debug', self.switch_debug)
+        self.parent.main_menu['help'].add_action('reset', self.reset)
+
+        self.parent.main_menu['pli'].clear_elements()
+        self.parent.main_menu['pli'].add_action('live', self.to_live_mode)
 
         # tracker
         self.tracker = tracker.Tracker(num_sticker=10, sticker_zero_id=10)
 
         # camera
-        self.parent.main_menu['camera']['port'].clear()
+        self.parent.main_menu['camera'].clear()
+        self.parent.main_menu['camera'].add_menu('port')
+        self.parent.main_menu['camera'].add_menu('demo')
         self.device = capture_device.CapDev(port=self.parent.args.port,
                                             file_name=self.parent.args.video)
 
-        def switch_port(port):
-            # TODO: RFC reset
-            self.parent.main_menu['pli'].set_enabled(False)
-            self.state = self.State.TRACKING
-            self.pli.reset()
-            self.tracker.reset()
-            self.device.activate_camera(port)
-
-        # TODO: reset if triggered
         for port in self.device.ports():
             self.parent.main_menu['camera']['port'].add_action(
-                f'{port}', triggered=functools.partial(switch_port, port))
-
-        def switch_video(video):
-            # TODO: RFC reset
-            self.parent.main_menu['pli'].set_enabled(False)
-            self.state = self.State.TRACKING
-            self.pli.reset()
-            self.tracker.reset()
-            self.device.activate_video(video)
+                f'{port}', triggered=functools.partial(self.switch_port, port))
 
         for video in self.device.videos():
             print(video)
             self.parent.main_menu['camera']['demo'].add_action(
-                f'{video}', triggered=functools.partial(switch_video, video))
+                f'{video}',
+                triggered=functools.partial(self.switch_video, video))
 
-    def switch_camera_port(self):
-        pass
+    def switch_debug(self):
+        self._debug = not self._debug
 
-    def switch_input_mode(self):
-        """ switch between device and video """
-        pass
+    def to_live_mode(self):
+        self.worker.start(self._mspf)
+        if not self.app.tracker.calibrated():
+            self.app.state = self.app.State.TRACKING
+        elif not self.app.pli.measurment_done():
+            self.app.state = self.app.State.MEASUREMENT
+        else:
+            self.app.state = self.app.State.LIVE
+
+    def switch_port(self, port):
+        self.state = self.State.TRACKING
+        self.pli.reset()
+        self.tracker.reset()
+        self.device.activate_camera(port)
+
+    def switch_video(self, video):
+        self.state = self.State.TRACKING
+        self.pli.reset()
+        self.tracker.reset()
+        self.device.activate_video(video)
 
     def convertArray2QImage(self, frame):
         frame = np.ascontiguousarray(frame)
@@ -201,7 +219,14 @@ class MainThread():
             'retardation',
             lambda: show_img_and_stop(self.pli.modalities.retardation, 1))
         self.parent.main_menu['pli'].add_action(
+            'inclination', lambda: show_img_and_stop(self.pli.inclination, 1))
+        self.parent.main_menu['pli'].add_action(
             'fom', lambda: show_img_and_stop(self.pli.fom, 1))
+
+        self.parent.main_menu['pli'].add_menu('tilting')
+
+        # self.parent.main_menu['pli']['tilting'].add_action(
+        #     'center', lambda: show_img_and_stop(self.pli.tilting., 1))
 
     def next_measurement(self, frame: np.ndarray):
         if self.pli.measurment_done():
@@ -216,9 +241,9 @@ class MainThread():
 
         self.parent.statusBar().showMessage(f'{np.rad2deg(self._angle):.1f}')
         if self.pli.measurment_done():
-            print("live view")
+            # print("live view")
             self.state = self.State.LIVE
-            self.parent.main_menu['pli'].set_enabled(True)
+            # self.parent.main_menu['pli'].set_enabled(True)
             self.pli.run_analysis(self.enable_pli_results)
             # TODO: restliche ergebnisse
 

@@ -31,9 +31,10 @@ class Application(QtWidgets.QMainWindow):
             exit(0)
 
         self.worker = QtCore.QTimer(self)
+        # TODO: 1000//min(camera.fps, 25)
+        self._mspf = 1000 // 60  # miliseconds per frame
         self.worker.timeout.connect(self.app.next)
-        # self.worker.start(1000 // 25)  # TODO: min(camera.fps, 25)
-        self.worker.start(1000 // 60)  # TODO: min(camera.fps, 25)
+        self.worker.start(self._mspf)
 
     def __initUI__(self):
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
@@ -196,6 +197,10 @@ class Application(QtWidgets.QMainWindow):
                     if elm.isMenu():
                         elm.clear()
 
+            def clear_elements(self):
+                self.clear_actions()
+                self.clear_menus()
+
         self.main_menu = Wrapper(self.menuBar())
 
         # INFO:
@@ -213,19 +218,24 @@ class Application(QtWidgets.QMainWindow):
 
         # main structure
         self.main_menu.add_menu('pli')
-        self.main_menu['pli'].set_enabled(False)
         self.main_menu.add_menu('camera')
         self.main_menu.add_menu('help')
 
+        # self.main_menu['pli'].add_action('live', to_live_mode)
+
         # CAMERA
-        self.main_menu['camera'].add_menu('port')
-        self.main_menu['camera'].add_menu('resolution')
-        self.main_menu['camera'].add_menu('filter')
-        self.main_menu['camera'].add_menu('color')
-        self.main_menu['camera'].add_menu('demo')
+        # self.main_menu['camera'].add_menu('port')
+        # self.main_menu['camera'].add_menu('demo')
+        # self.main_menu['camera'].add_menu('resolution')
+        # self.main_menu['camera'].add_menu('filter')
+        # self.main_menu['camera'].add_menu('color')
 
         # HELP
-        def switch_debug():
-            self.app._debug = not self.app._debug
+        # def switch_debug():
+        #     self.app._debug = not self.app._debug
 
-        self.main_menu['help'].add_action('debug', switch_debug)
+        # def reset():
+        #     self.app.reset()
+
+        # self.main_menu['help'].add_action('debug', switch_debug)
+        # self.main_menu['help'].add_action('reset', reset)
