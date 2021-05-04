@@ -95,14 +95,19 @@ class Tracker:
         phi = []
         for j in range(ids.size):
             center_sticker = np.mean(corners[j, :, :], axis=0)
-            ref = np.array((1, 0))  # reference vector in x direction
-            cur = center_sticker - self._illumination_center  # vector of sticker
+
+            # calc ref vector and current sticker vector
+            i = np.argwhere(np.array(self._cal_ids) == ids[j])
+            ref = np.mean(np.squeeze(self._cal_corners[i, :, :]),
+                          axis=0) - self._illumination_center
+            cur = center_sticker - self._illumination_center
+
+            # calc angle
             z = cur[0] * ref[1] - cur[1] * ref[0]  # helper for 2d sign problem
             value = np.dot(ref,
                            cur) / (np.linalg.norm(ref) * np.linalg.norm(cur))
             value = max(-1.0, min(1.0, value))
             phi.append(np.arccos(value) * np.sign(z))
-
         return scipy.stats.circmean(
             np.array(phi) - self._sticker_zero_angle, np.pi, 0)
 
