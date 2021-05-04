@@ -90,6 +90,11 @@ class PLI():
         #     raise ValueError('no images measured yet')
         return self._images
 
+    def valid(self):
+        if self._images is None:
+            return None
+        return self._images.valid[:]
+
     def measurment_done(self):
         if self._images is None:
             return False

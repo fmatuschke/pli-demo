@@ -184,8 +184,14 @@ class MainThread():
             if abs(diff_angles(self._last_angle, self._angle,
                                np.pi)) > self._update_angle:
                 self._last_angle = self._angle
-                self.parent.plotwidget.update(self._plot[0], self._plot[1],
-                                              self._angle)
+
+                if self._plot[0] is not None:
+
+                    # get only valid measurements
+                    y_datas = [ys[self.pli.valid()] for ys in self._plot[1]]
+
+                    self.parent.plotwidget.update(
+                        self._plot[0][self.pli.valid()], y_datas, self._angle)
                 self.parent.setupwidget.set_rotation(self._angle)
                 self.parent.setupwidget.update()
 
