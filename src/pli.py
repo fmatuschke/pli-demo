@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-# import dataclasses
-import dataclasses as dc
 import typing
 import warnings
 import traceback
@@ -11,108 +9,13 @@ import numpy as np
 from PyQt5 import QtCore
 
 from . import epa
-
-
-@dc.dataclass(frozen=True)
-class Images:
-    # TODO: RFC, variables are instances and shared for all Images
-    shape: tuple
-    N: int = 18
-
-    images: np.ndarray = dc.field(init=False)
-    rotations: np.ndarray = dc.field(init=False)
-    valid: np.ndarray = dc.field(init=False)
-
-    def __post_init__(self):
-        # resetting np arrays with __setattr__ because of frozen
-        object.__setattr__(self, 'images',
-                           np.empty((self.shape[0], self.shape[1], self.N)))
-        object.__setattr__(self, 'rotations',
-                           np.linspace(0, np.pi, self.N, False))
-        object.__setattr__(self, 'valid', np.zeros_like(self.rotations,
-                                                        np.bool8))
-
-    def apply_offset(self, offset: float) -> None:
-        self.rotations[:] = np.linspace(0, np.pi, self.N, False) + offset
-
-    def insert(self, image: np.ndarray, idx: int) -> None:
-        if self.valid[idx]:
-            warnings.warn('Already image present')
-
-        self.images[:, :, idx] = image
-        self.valid[idx] = True
-
-    @property
-    def stack(self):
-        return self.rotations[self.valid], self.images[:, :, self.valid]
-
-    @property
-    def offset(self) -> float:
-        return self.rotations[0]
-
-
-@dc.dataclass(frozen=True)
-class Modalities:
-    transmittance: np.ndarray
-    direction: np.ndarray
-    retardation: np.ndarray
-
-    def __post_init__(self):
-        shape = np.array(self.transmittance.shape)
-
-        for field in dc.fields(Modalities):
-            elm = getattr(self, field.name)
-            if not np.array_equal(shape, elm.shape[:2]):
-                raise ValueError(
-                    f'{field.name} shape differs from transmittance')
-
-        for field in dc.fields(Modalities):
-            elm = getattr(self, field.name)
-            if elm.ndim != 2:
-                raise ValueError(f'{field.name} ndim: {elm.ndim}')
-
-
-@dc.dataclass(frozen=True)
-class Tilting:
-    north: np.ndarray
-    south: np.ndarray
-    east: np.ndarray
-    west: np.ndarray
-
-    def __post_init__(self):
-        shape = np.array(self.north.shape)
-
-        for field in dc.fields(Modalities):
-            elm = getattr(self, field.name)
-            if not np.array_equal(shape, elm.shape[:2]):
-                raise ValueError(f'{field.name} shape differs from north')
-
-        for field in dc.fields(Modalities):
-            elm = getattr(self, field.name)
-            if elm.ndim != 2:
-                raise ValueError(f'{field.name} ndim: {elm.ndim}')
-
-
-@dc.dataclass(frozen=True)
-class Incl:
-    inclination: np.ndarray
-    fom: np.ndarray
-
-    def __post_init__(self):
-        if inclination.ndim != 2:
-            raise ValueError(f'inclination ndim: {inclination.ndim}')
-        if fom.ndim != 3:
-            raise ValueError(f'fom ndim: {fom.ndim}')
-        if fom.shape[-1] != 3:
-            raise ValueError(f'fom.shape[-1]: {fom.shape[-1] }')
-        if np.array_equal(inclination.shape, fom.shape[:-1]):
-            raise ValueError('inclination shape and fom shape differs')
+from . import data_classes
 
 
 class WorkerSignals(QtCore.QObject):
     finished = QtCore.pyqtSignal()
     error = QtCore.pyqtSignal(tuple)
-    result = QtCore.pyqtSignal(object)
+    result = QtCore.pyqtSignal(tuple)
 
 
 class PLIAnalyser(QtCore.QRunnable):
@@ -121,41 +24,39 @@ class PLIAnalyser(QtCore.QRunnable):
         super(PLIAnalyser, self).__init__()
         self.images = images
         self.signals = WorkerSignals()
-        self.modolities = None
 
     @QtCore.pyqtSlot()
     def run(self):
-
         try:
             print('thread: running analysis ...')
             self._run_epa()
-            # self.incl = self._run_calc_incl()
-            # self.tilts = self._run_tilting_simulation()
+            self._run_calc_incl()
+            self._run_tilting_simulation()
             print('thread: analysis finished')
         except:
             traceback.print_exc()
             exctype, value = sys.exc_info()[:2]
             self.signals.error.emit((exctype, value, traceback.format_exc()))
         else:
-            self.signals.result.emit(
-                self.modalities)  # Return the result of the processing
+            self.signals.result.emit((self.modalities, self.incl))
         finally:
             self.signals.finished.emit()  # Done
 
-    def get_results(self):
-        return self.mod
-        # return self.mod, self.incl, self.tilts
-
     def _run_epa(self):
         t, d, r = epa.epa(self.images.images)
-        self.modalities = Modalities(t, d, r)
-        # self.apply_offset(self.images.offset)
+        self.modalities = data_classes.Modalities(t, d, r)
 
-    def _run_calc_incl(self, images):
-        pass
+    def _run_calc_incl(self):
+        inclination = epa.simple_incl(self.modalities.transmittance,
+                                      self.modalities.retardation)
+        fom = epa.fom(self.modalities.direction, inclination)
+        self.incl = data_classes.Incl(inclination, fom)
 
-    def _run_tilting_simulation(self, images, tilting):
-        pass
+    def _run_tilting_simulation(self):
+        self.tilts = epa.calc_tilts(self.modalities.transmittance,
+                                    self.modalities.direction,
+                                    self.modalities.retardation,
+                                    self.incl.inclination)
 
 
 class PLI():
@@ -222,7 +123,7 @@ class PLI():
 
     def insert(self, image: np.ndarray, angle: float):
         if self._images is None:
-            self._images = Images(image.shape)
+            self._images = data_classes.Images(image.shape)
 
         condition = np.abs(self._images.rotations -
                            angle) < self._angle_threshold
@@ -242,10 +143,11 @@ class PLI():
 
     def run_analysis(self, fun):
         pool = QtCore.QThreadPool.globalInstance()
-        runnable = PLIAnalyser(self._images)
+        runnable = PLIAnalyser(self._images,)
 
         def save(result):
-            self._modalities = result
+            self._modalities = result[0]
+            self._inclination = result[1]
 
         runnable.signals.result.connect(save)
         runnable.signals.finished.connect(fun)

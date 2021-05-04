@@ -200,6 +200,8 @@ class MainThread():
         self.parent.main_menu['pli'].add_action(
             'retardation',
             lambda: show_img_and_stop(self.pli.modalities.retardation, 1))
+        self.parent.main_menu['pli'].add_action(
+            'fom', lambda: show_img_and_stop(self.pli.fom, 1))
 
     def next_measurement(self, frame: np.ndarray):
         if self.pli.measurment_done():
