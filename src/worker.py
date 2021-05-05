@@ -87,13 +87,6 @@ class MainThread():
         # pli
         self.pli = pli.PLI(pli_threshold)
 
-        self.parent.main_menu['help'].clear_elements()
-        self.parent.main_menu['help'].add_action('debug', self.switch_debug)
-        self.parent.main_menu['help'].add_action('reset', self.reset)
-
-        self.parent.main_menu['pli'].clear_elements()
-        self.parent.main_menu['pli'].add_action('live', self.to_live_mode)
-
         # tracker
         self.tracker = tracker.Tracker(num_sticker=10, sticker_zero_id=10)
 
@@ -242,31 +235,7 @@ class MainThread():
         self._angle = self.tracker.current_angle(frame)
 
     def enable_pli_results(self):
-
-        def show_img_and_stop(image, cval, name):
-            image = image / cval * 255
-            image = image.astype(np.uint8)
-
-            self.show_image(image)
-            self._last_img_name = name  # TODO: enum with str as value
-            self.parent.worker.stop()
-
-        self.parent.main_menu['pli'].add_action(
-            'transmittance', lambda: show_img_and_stop(
-                self.pli.modalities.transmittance, 255, 'transmittance'))
-        self.parent.main_menu['pli'].add_action(
-            'direction', lambda: show_img_and_stop(
-                self.pli.modalities.direction, np.pi, 'direction'))
-        self.parent.main_menu['pli'].add_action(
-            'retardation', lambda: show_img_and_stop(
-                self.pli.modalities.retardation, 1, 'retardation'))
-        self.parent.main_menu['pli'].add_action(
-            'inclination',
-            lambda: show_img_and_stop(self.pli.inclination, 1, 'inclination'))
-        self.parent.main_menu['pli'].add_action(
-            'fom', lambda: show_img_and_stop(self.pli.fom, 1, 'fom'))
-
-        self.parent.main_menu['pli'].add_menu('tilting')
+        pass
 
     def next_measurement(self, frame: np.ndarray):
         if self.pli.measurment_done():

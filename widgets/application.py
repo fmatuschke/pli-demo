@@ -1,6 +1,7 @@
 import os
 import pathlib
 
+import numpy as np
 from PyQt5 import QtCore, QtGui, QtWidgets
 from src import worker
 
@@ -241,3 +242,32 @@ class Application(QtWidgets.QMainWindow):
                                            lambda: self.app.save_images())
         self.main_menu['tools'].add_action('apply offset',
                                            lambda: self.app.apply_offset())
+
+        self.main_menu['help'].add_action('debug',
+                                          lambda: self.app.switch_debug())
+        self.main_menu['help'].add_action('reset', lambda: self.app.reset())
+
+        def show_img_and_stop(image, cval, name):
+            image = image / cval * 255
+            image = image.astype(np.uint8)
+
+            self.app.show_image(image)
+            self.app._last_img_name = name  # TODO: enum with str as value
+            self.worker.stop()
+
+        self.main_menu['pli'].add_action('live',
+                                         lambda: self.app.to_live_mode())
+        self.main_menu['pli'].add_action(
+            'transmittance', lambda: show_img_and_stop(
+                self.app.pli.modalities.transmittance, 255, 'transmittance'))
+        self.main_menu['pli'].add_action(
+            'direction', lambda: show_img_and_stop(
+                self.app.pli.modalities.direction, np.pi, 'direction'))
+        self.main_menu['pli'].add_action(
+            'retardation', lambda: show_img_and_stop(
+                self.app.pli.modalities.retardation, 1, 'retardation'))
+        self.main_menu['pli'].add_action(
+            'inclination', lambda: show_img_and_stop(self.app.pli.inclination,
+                                                     1, 'inclination'))
+        self.main_menu['pli'].add_action(
+            'fom', lambda: show_img_and_stop(self.app.pli.fom, 1, 'fom'))
