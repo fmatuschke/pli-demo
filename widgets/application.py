@@ -225,3 +225,6 @@ class Application(QtWidgets.QMainWindow):
         self.main_menu.add_menu('pli')
         self.main_menu.add_menu('camera')
         self.main_menu.add_menu('help')
+
+        self.main_menu['camera'].add_menu('port')
+        self.main_menu['camera'].add_menu('demo')

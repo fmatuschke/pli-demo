@@ -91,9 +91,7 @@ class MainThread():
         self.tracker = tracker.Tracker(num_sticker=10, sticker_zero_id=10)
 
         # camera
-        self.parent.main_menu['camera'].clear()
-        self.parent.main_menu['camera'].add_menu('port')
-        self.parent.main_menu['camera'].add_menu('demo')
+        self.parent.main_menu['camera']['port'].clear()
         self.device = capture_device.CapDev(port=self.parent.args.port,
                                             file_name=self.parent.args.video)
 
@@ -101,8 +99,8 @@ class MainThread():
             self.parent.main_menu['camera']['port'].add_action(
                 f'{port}', triggered=functools.partial(self.switch_port, port))
 
+        self.parent.main_menu['camera']['demo'].clear()
         for video in self.device.videos():
-            print(video)
             self.parent.main_menu['camera']['demo'].add_action(
                 f'{video}',
                 triggered=functools.partial(self.switch_video, video))
