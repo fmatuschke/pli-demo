@@ -182,10 +182,8 @@ class CapDev:
             time.sleep(0.42)
 
     def empty_frame(self):
-        frame = np.zeros((128, 128), dtype=np.uint8)
-        np.fill_diagonal(frame, 255)
-        frame = np.flip(frame, 0)
-        np.fill_diagonal(frame, 255)
+        frame = cv2.imread(os.path.join(PATH, 'pli-logo.png'))[:]
+
         return frame
 
     def get_frame(self, quadratic=False):
