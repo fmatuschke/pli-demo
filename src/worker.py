@@ -168,12 +168,12 @@ class MainThread():
     def next(self):
         """ process next iteration """
 
-        if self.device._device is None:
+        valid, frame = self.device.get_frame()
+
+        if not valid:
             print('Error, device disconnected')
             print('---> resetting ...')
             self.reset()
-
-        frame = self.device.get_frame()
 
         if self.state == self.State.LIVE:
             self.next_live(frame)
@@ -234,15 +234,6 @@ class MainThread():
             y -= y_
 
         self._xy_buffer = [(x, y)]
-
-        # get valid values
-
-        # print(self.pli.images.rotations)
-        # print(self.pli.images.images[y, x, :])
-        # print(self.pli.valid())
-
-        # self._plot_buffer[0] = self.pli.images.rotations[self.pli.valid()]
-        # self._plot_buffer[1] = [self.pli.images.images[y, x, self.pli.valid()]]
 
     def next_live(self, frame: np.ndarray):
         self._angle = self.tracker.current_angle(frame)

@@ -1,10 +1,12 @@
+from __future__ import annotations
+
 import enum
 import os
 import pathlib
+import time
 
 import cv2
 import numpy as np
-import time
 
 PATH = os.path.join(pathlib.Path().absolute(), 'data')
 
@@ -181,10 +183,10 @@ class CapDev:
         frame = cv2.imread(os.path.join(PATH, 'pli-logo.png'))[:]
         return frame
 
-    def get_frame(self, quadratic=False):
+    def get_frame(self, quadratic=False) -> tuple[bool, np.ndarray]:
 
         if self._device is None:
-            return self.empty_frame()
+            return True, self.empty_frame()
 
         # if video frame count > 0
         video_frame_count = self._device.get(cv2.CAP_PROP_FRAME_COUNT)
@@ -202,7 +204,7 @@ class CapDev:
             # it is True, OK. Otherwise open it using cap.open().
 
             self.release_device()
-            return self.empty_frame()
+            return False, self.empty_frame()
 
         if self._color_mode in [Color.GRAY, Color.RGB]:
             frame = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
@@ -223,4 +225,4 @@ class CapDev:
             else:
                 frame = np.array(frame[delta:delta + l, :])
 
-        return frame
+        return True, frame
