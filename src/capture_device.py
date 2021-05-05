@@ -84,6 +84,7 @@ class CapDev:
         if self._device is not None:
             if self._device.isOpened():
                 self._device.release()
+            self._device = None
 
     def activate_camera(self, port):
         self.release_device()
@@ -98,7 +99,7 @@ class CapDev:
         self._device = cv2.VideoCapture(file_name)
         # TODO: catch input error
 
-    def _check_port(self, port, n_times=1):
+    def _check_port(self, port, n_times):
         camera = cv2.VideoCapture(port)
         port_works = False
         for n in range(n_times):
@@ -110,8 +111,7 @@ class CapDev:
                 camera.release()
                 break
 
-        print(f'Check Port: {n} steps needed')
-
+        print(f'Check Port {port}: {n} steps needed')
         self.release_device()
         return port_works
 
@@ -119,14 +119,6 @@ class CapDev:
         ports = [port for port in port_list if self._check_port(port, n_times)]
         print(f"INFO: working ports: {ports}")
         return ports
-
-    def set_port(self, port):
-        self.release_device()
-        self._device = cv2.VideoCapture(port)
-        if not self._device.isOpened():
-            print(f'camera port "{port}" not opening')
-        else:
-            self._port = port
 
     def _check_resolutions(self):
         # TODO this should be available from the OS
@@ -206,6 +198,8 @@ class CapDev:
             # In that case, this code shows error. You can check whether
             # it is initialized or not by the method cap.isOpened(). If
             # it is True, OK. Otherwise open it using cap.open().
+
+            self.release_device()
             return self.empty_frame()
 
         if self._color_mode in [Color.GRAY, Color.RGB]:
