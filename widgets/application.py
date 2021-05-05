@@ -4,7 +4,7 @@ import pathlib
 from PyQt5 import QtCore, QtGui, QtWidgets
 from src import worker
 
-from . import display, dummy, plot, animation
+from . import display, dummy, microscope, plot
 
 PATH = os.path.join(pathlib.Path().absolute(), 'data')
 
@@ -69,7 +69,7 @@ class Application(QtWidgets.QMainWindow):
         self.plotwidget.setSizePolicy(QtWidgets.QSizePolicy.Expanding,
                                       QtWidgets.QSizePolicy.Expanding)
 
-        self.setupwidget = animation.SetupWidget()
+        self.setupwidget = microscope.SetupWidget()
         self.setupwidget.setMinimumSize(QtCore.QSize(100, 200))
 
         self.logo_pli = QtWidgets.QLabel()
