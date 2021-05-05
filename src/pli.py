@@ -98,25 +98,50 @@ class PLI():
     @property
     def modalities(self):
         if self._modalities is None:
-            raise ValueError('modalities could not be calculated yet')
+            print('modalities could not be calculated yet')
+            return None
         return self._modalities
+
+    @property
+    def transmittance(self):
+        if self._modalities is None:
+            print('modalities could not be calculated yet')
+            return None
+        return self._modalities.transmittance.copy()
+
+    @property
+    def direction(self):
+        if self._modalities is None:
+            print('modalities could not be calculated yet')
+            return None
+        return self._modalities.direction.copy()
+
+    @property
+    def retardation(self):
+        if self._modalities is None:
+            print('modalities could not be calculated yet')
+            return None
+        return self._modalities.retardation.copy()
 
     @property
     def inclination(self):
         if self._inclination is None:
-            raise ValueError('inclination could not be calculated yet')
-        return self._inclination.inclination
+            print('inclination could not be calculated yet')
+            return None
+        return self._inclination.inclination.copy()
 
     @property
     def fom(self):
         if self._inclination is None:
-            raise ValueError('fom could not be calculated yet')
-        return self._inclination.fom
+            print('fom could not be calculated yet')
+            return None
+        return self._inclination.fom.copy()
 
     @property
     def tilting(self):
         if self._tilting is None:
-            raise ValueError('tilting could not be calculated yet')
+            print('tilting could not be calculated yet')
+            return None
         return self._tilting
 
     def insert(self, image: np.ndarray, angle: float):

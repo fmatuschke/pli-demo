@@ -2,9 +2,11 @@ from __future__ import annotations
 
 import enum
 import functools
+import os
 
 import numpy as np
-from PyQt5 import QtCore, QtGui
+import PIL.Image
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 from . import capture_device, pli, tracker
 
@@ -194,8 +196,8 @@ class MainThread():
 
         if not self._debug:
             if self.tracker.calibrated():
-                frame = self.tracker.crop(frame)
-                frame = self.tracker.mask(frame)
+                frame = self.tracker.crop_img(frame)
+                frame = self.tracker.mask_img(frame)
         self.show_image(frame)
 
         if self._last_angle is None:
@@ -271,7 +273,7 @@ class MainThread():
         if self._angle is None:
             raise ValueError('angel is None')
 
-        frame = self.tracker.crop(frame)
+        frame = self.tracker.crop_img(frame)
         self.pli.insert(frame, self._angle)
 
         if self.pli.measurment_done():
@@ -289,3 +291,79 @@ class MainThread():
         self._image_height = image.shape[0]
         self._image_width = image.shape[1]
         self.display.setPixmap(pixmap)
+
+    def save_plot(self):
+        if len(self._xy_buffer) == 0:
+            self.parent.statusbar.showMessage('Plot is empty', 4200)
+            return
+
+        options = QtWidgets.QFileDialog.Options()
+        # options |= QtWidgets.QFileDialog.DontUseNativeDialog
+        file_name, _ = QtWidgets.QFileDialog.getSaveFileName(
+            self.parent,
+            "Save Plot",
+            "",
+            "Text Files (*.txt);;All Files (*)",
+            options=options)
+
+        if file_name:
+            header = []
+            data = [self.pli.images.rotations[self.pli.valid()]]
+            for x, y in self._xy_buffer:
+                header.append(f'x{x}y{y}')
+                data.append(self.pli.images.images[y, x, self.pli.valid()])
+            data = np.vstack(data).T
+
+            delimiter = ' '
+            header = delimiter.join(header)
+            np.savetxt(os.path.join(file_name),
+                       data,
+                       delimiter=delimiter,
+                       header=header)
+        else:
+            self.parent.statusbar.showMessage('Invalid file name', 4200)
+
+    def save_images(self):
+        if self.pli._inclination is None:
+            self.parent.statusbar.showMessage('Images not ready yet', 4200)
+            return
+
+        options = QtWidgets.QFileDialog.Options()
+        options |= QtWidgets.QFileDialog.AcceptSave
+
+        dialog = QtWidgets.QFileDialog()
+        path = dialog.getExistingDirectory(self.parent,
+                                           'Save Images',
+                                           options=options)
+
+        for file in [
+                'transmittance.tif', 'direction.tif', 'retardation.tif',
+                'mask.tif', 'inclination.tif', 'fom.tif'
+        ]:
+            if os.path.isfile(os.path.join(path, file)):
+                qm = QtWidgets.QMessageBox
+                flag = qm.question(self.parent, '',
+                                   "Are you sure to overwrite existing files?",
+                                   qm.Yes | qm.No)
+                if flag == qm.No:
+                    self.save_images()
+                    return
+                break
+
+        if path:
+            img = PIL.Image.fromarray(self.pli.transmittance)
+            img.save(os.path.join(path, 'transmittance.tif'))
+            img = PIL.Image.fromarray(self.pli.direction)
+            img.save(os.path.join(path, 'direction.tif'))
+            img = PIL.Image.fromarray(self.pli.retardation)
+            img.save(os.path.join(path, 'retardation.tif'))
+            img = PIL.Image.fromarray(self.tracker.get_mask())
+            img.save(os.path.join(path, 'mask.tif'))
+            img = PIL.Image.fromarray(self.pli.inclination)
+            img.save(os.path.join(path, 'inclination.tif'))
+            fom = self.pli.fom * 255
+            img = PIL.Image.fromarray(fom.astype(np.uint8))
+            img.save(os.path.join(path, 'fom.tif'))
+
+        else:
+            self.parent.statusbar.showMessage('Invalid path', 4200)

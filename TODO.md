@@ -14,3 +14,4 @@
 - [x] refresh port -> help/reset
 - [ ] green ring
 - [ ] xy data circles
+- [ ] everythong to getter methods?

@@ -224,6 +224,7 @@ class Application(QtWidgets.QMainWindow):
         """ the sub structure will be handled by the tools """
         self.main_menu.add_menu('pli')
         self.main_menu.add_menu('camera')
+        self.main_menu.add_menu('tools')
         self.main_menu.add_menu('help')
 
         self.main_menu['camera'].add_menu('port')
@@ -232,3 +233,9 @@ class Application(QtWidgets.QMainWindow):
 
         self.main_menu['camera']['resolution'].add_action(
             'check resolution', lambda: self.app.check_device_properties())
+
+        # secondary, never changing structure
+        self.main_menu['tools'].add_action('save_plot',
+                                           lambda: self.app.save_plot())
+        self.main_menu['tools'].add_action('save_images',
+                                           lambda: self.app.save_images())

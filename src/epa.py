@@ -111,9 +111,10 @@ def simple_incl(transmittance: np.ndarray,
 def fom(direction: np.ndarray, inclination: np.ndarray) -> np.ndarray:
     # todo check with numba
     hsv_to_rgb_v = np.vectorize(colorsys.hsv_to_rgb)
-    return np.dstack(
+    fom = np.dstack(
         hsv_to_rgb_v(direction / np.pi, np.ones_like(direction),
                      1 - (inclination / np.pi * 2)))
+    return fom
 
 
 @numba.njit(cache=True)
