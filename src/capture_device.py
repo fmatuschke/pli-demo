@@ -87,7 +87,7 @@ class CapDev:
 
     def activate_camera(self, port):
         self.release_device()
-        if self._check_port(port):
+        if self._check_port(port, n_times=10):
             self._device = cv2.VideoCapture(port)
             # self._check_resolutions() # takes time
         else:
@@ -109,6 +109,8 @@ class CapDev:
                 name = camera.getBackendName()
                 camera.release()
                 break
+
+        print(f'Check Port: {n} steps needed')
 
         self.release_device()
         return port_works
@@ -183,7 +185,6 @@ class CapDev:
 
     def empty_frame(self):
         frame = cv2.imread(os.path.join(PATH, 'pli-logo.png'))[:]
-
         return frame
 
     def get_frame(self, quadratic=False):

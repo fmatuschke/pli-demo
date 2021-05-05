@@ -108,7 +108,8 @@ class Application(QtWidgets.QMainWindow):
         self.statusbar.addPermanentWidget(self.status_angle)
 
     def connectSignals(self):
-        self.main_display.xy_signal.connect(self.app.update_plot)
+        self.main_display.xy_signal.connect(
+            self.app.update_plot_coordinates_buffer)
 
     def createLayout(self):
         self.layout = QtWidgets.QGridLayout()

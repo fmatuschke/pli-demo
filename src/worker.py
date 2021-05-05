@@ -69,7 +69,7 @@ class MainThread():
         self.state = self.State.TRACKING
         self._debug = False
         self._tilt = self.Tilt.CENTER
-        self._plot = [None, None]
+        self._xy_buffer = []
         self._image_height = None
         self._image_width = None
         self._angle = None
@@ -187,25 +187,26 @@ class MainThread():
                                np.pi)) > self._update_angle:
                 self._last_angle = self._angle
 
-                if self._plot[0] is not None:
+                if len(self._xy_buffer) > 0:
+                    x_data = self.pli.images.rotations[self.pli.valid()]
+                    y_data = []
+                    for x, y in self._xy_buffer:
+                        y_data.append(self.pli.images.images[y, x,
+                                                             self.pli.valid()])
 
-                    # get only valid measurements
-                    y_datas = [ys[self.pli.valid()] for ys in self._plot[1]]
-
-                    self.parent.plotwidget.update_data(
-                        self._plot[0][self.pli.valid()], y_datas)
+                    self.parent.plotwidget.update_data(x_data, y_data)
                 self.parent.plotwidget.update_rho(self._angle)
                 self.parent.setupwidget.set_rotation(self._angle)
                 self.parent.setupwidget.update()
 
-    def update_plot(self, x, y):
+    def update_plot_coordinates_buffer(self, rel_x_frame_pos, rel_y_frame_pos):
 
         if self.pli._images is None:
             return
 
         # to frame coordinates
-        x = int(x * self._image_width + 0.5)
-        y = int(y * self._image_height + 0.5)
+        x = int(rel_x_frame_pos * self._image_width + 0.5)
+        y = int(rel_y_frame_pos * self._image_height + 0.5)
 
         self.parent.statusbar.showMessage(f'x: {x}, y: {y}', 3000)
 
@@ -214,8 +215,16 @@ class MainThread():
             x -= x_
             y -= y_
 
-        self._plot[0] = self.pli.images.rotations
-        self._plot[1] = [self.pli.images.images[y, x, :]]
+        self._xy_buffer = [(x, y)]
+
+        # get valid values
+
+        # print(self.pli.images.rotations)
+        # print(self.pli.images.images[y, x, :])
+        # print(self.pli.valid())
+
+        # self._plot_buffer[0] = self.pli.images.rotations[self.pli.valid()]
+        # self._plot_buffer[1] = [self.pli.images.images[y, x, self.pli.valid()]]
 
     def next_live(self, frame: np.ndarray):
         self._angle = self.tracker.current_angle(frame)

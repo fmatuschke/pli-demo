@@ -34,21 +34,23 @@ class Plot(QtChart.QChartView):
 
     def update_data(self, x, y_data):
         self.clear()
-        if y_data is not None:
-            for y in y_data:
-                if 0.0 in x:
-                    x = np.append(x, [np.pi])
-                    y = np.append(y, [y[0]])
-                    self.x_save = np.pi - x
-                    self.y_save = y
+        if len(y_data) == 0:
+            return
 
-                series = QtChart.QScatterSeries()
-                for x_val, y_val in zip(x, y):
-                    series.append(np.rad2deg(x_val), y_val)
-                self.chart.addSeries(series)
+        for y in y_data:
+            if 0.0 in x:
+                x = np.append(x, [np.pi])
+                y = np.append(y, [y[0]])
+                self.x_save = np.pi - x
+                self.y_save = y
 
-            self._only_line = False
-            self.chart.createDefaultAxes()
+            series = QtChart.QScatterSeries()
+            for x_val, y_val in zip(x, y):
+                series.append(np.rad2deg(x_val), y_val)
+            self.chart.addSeries(series)
+
+        self._only_line = False
+        self.chart.createDefaultAxes()
 
     def update_rho(self, rho):
         series = QtChart.QLineSeries()
