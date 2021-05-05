@@ -206,6 +206,8 @@ class MainThread():
         x = int(x * self._image_width + 0.5)
         y = int(y * self._image_height + 0.5)
 
+        self.parent.statusbar.showMessage(f'x: {x}, y: {y}', 3000)
+
         self._plot[0] = self.pli.images.rotations
         self._plot[1] = [self.pli.images.images[y, x, :]]
 
@@ -248,13 +250,10 @@ class MainThread():
         frame = self.tracker.crop(frame)
         self.pli.insert(frame, self._angle)
 
-        self.parent.statusBar().showMessage(f'{np.rad2deg(self._angle):.1f}')
+        self.parent.status_angle.setText(f'{np.rad2deg(self._angle):.1f}')
         if self.pli.measurment_done():
-            # print("live view")
             self.state = self.State.LIVE
-            # self.parent.main_menu['pli'].set_enabled(True)
             self.pli.run_analysis(self.enable_pli_results)
-            # TODO: restliche ergebnisse
 
     def next_tracking(self, frame: np.ndarray):
         self.show_image(frame)

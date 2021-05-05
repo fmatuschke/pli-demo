@@ -99,7 +99,13 @@ class Application(QtWidgets.QMainWindow):
                                     QtWidgets.QSizePolicy.Maximum)
 
         # adding label to status bar
-        self.statusBar().showMessage('')
+        # self.statusBar().showMessage('')
+        self.statusbar = self.statusBar()
+        self.statusbar.showMessage("Init", 3000)
+
+        # Add angleLabel
+        self.status_angle = QtWidgets.QLabel('')
+        self.statusbar.addPermanentWidget(self.status_angle)
 
     def connectSignals(self):
         self.main_display.xy_signal.connect(self.app.update_plot)
@@ -216,25 +222,7 @@ class Application(QtWidgets.QMainWindow):
         """
 
         # main structure
+        """ the sub structure will be handled by the tools """
         self.main_menu.add_menu('pli')
         self.main_menu.add_menu('camera')
         self.main_menu.add_menu('help')
-
-        # self.main_menu['pli'].add_action('live', to_live_mode)
-
-        # CAMERA
-        # self.main_menu['camera'].add_menu('port')
-        # self.main_menu['camera'].add_menu('demo')
-        # self.main_menu['camera'].add_menu('resolution')
-        # self.main_menu['camera'].add_menu('filter')
-        # self.main_menu['camera'].add_menu('color')
-
-        # HELP
-        # def switch_debug():
-        #     self.app._debug = not self.app._debug
-
-        # def reset():
-        #     self.app.reset()
-
-        # self.main_menu['help'].add_action('debug', switch_debug)
-        # self.main_menu['help'].add_action('reset', reset)
