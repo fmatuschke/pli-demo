@@ -155,6 +155,11 @@ class MainThread():
     def next(self):
         """ process next iteration """
 
+        if self.device._device is None:
+            print('Error, device disconnected')
+            print('---> resetting ...')
+            self.reset()
+
         frame = self.device.get_frame()
 
         if self.state == self.State.LIVE:
