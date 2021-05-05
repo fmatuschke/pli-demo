@@ -148,7 +148,7 @@ class Application(QtWidgets.QMainWindow):
             def isMenu(self):
                 return False
 
-        class Wrapper:
+        class MenuWrapper:
 
             def __init__(self, qt_menu):
                 self._qt_obj = qt_menu
@@ -164,7 +164,7 @@ class Application(QtWidgets.QMainWindow):
                 if name in self._menu_dict:
                     raise ValueError(
                         f'entry "{name}" already exists in "{qt_menu}"')
-                self._menu_dict[name] = Wrapper(
+                self._menu_dict[name] = MenuWrapper(
                     self._qt_obj.addMenu(f'&{name}'))
 
             def add_action(self, name, triggered):
@@ -206,7 +206,7 @@ class Application(QtWidgets.QMainWindow):
                 self.clear_actions()
                 self.clear_menus()
 
-        self.main_menu = Wrapper(self.menuBar())
+        self.main_menu = MenuWrapper(self.menuBar())
 
         # INFO:
         """
@@ -226,3 +226,10 @@ class Application(QtWidgets.QMainWindow):
         self.main_menu.add_menu('pli')
         self.main_menu.add_menu('camera')
         self.main_menu.add_menu('help')
+
+        # self.main_menu.add_menu('')
+
+        def save_data():
+            np.savetxt(self.app.pli.images)
+
+        self.main_menu.add_action('save', save_data)

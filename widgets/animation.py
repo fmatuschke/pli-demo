@@ -4,7 +4,7 @@ import pathlib
 import numpy as np
 from OpenGL.GL import *
 from OpenGL.GLU import *
-from PIL import Image as Image
+from PIL import Image
 from PyQt5 import QtCore, QtGui, QtOpenGL, QtWidgets
 
 PATH = os.path.join(pathlib.Path().absolute(), 'data')

@@ -43,7 +43,7 @@ class MainThread():
         CENTER = enum.auto()
         NORTH = enum.auto()
         EAST = enum.auto()
-        SOUTCH = enum.auto()
+        SOUTH = enum.auto()
         WEST = enum.auto()
 
     # rho_signal = QtCore.pyqtSignal(float)
@@ -170,6 +170,9 @@ class MainThread():
         else:
             raise ValueError('Undefined State')
 
+        if self._angle is not None:
+            self.parent.status_angle.setText(f'{np.rad2deg(self._angle):.1f}')
+
         if self._debug:
             frame = self.tracker.add_info_view(frame)
 
@@ -250,7 +253,6 @@ class MainThread():
         frame = self.tracker.crop(frame)
         self.pli.insert(frame, self._angle)
 
-        self.parent.status_angle.setText(f'{np.rad2deg(self._angle):.1f}')
         if self.pli.measurment_done():
             self.state = self.State.LIVE
             self.pli.run_analysis(self.enable_pli_results)

@@ -5,10 +5,6 @@
 git lfs for images and video files
 
 ```sh
-sudo apt install git-lfs
-```
-
-```sh
 git clone git@jugit.fz-juelich.de:inm-1/fa/3d-pli/general/pli-demo.git --single-branch
 git lfs pull origin data/
 ```
