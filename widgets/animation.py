@@ -33,14 +33,13 @@ class SetupWidget(QtOpenGL.QGLWidget):
                 self.get_pattern_test()
         }
 
-        self.initializeGL()
-
     def resizeEvent(self, event):
         super(SetupWidget, self).resizeEvent(event)
         w, h = max(1, self.size().width()), max(1, self.size().height())
         glViewport(0, 0, w, h)
 
     def initializeGL(self):
+        # will be called from qt
         glClearDepth(1.0)
         glClearColor(0.2, 0.2, 0.2, 0.0)
         glDepthFunc(GL_LESS)
