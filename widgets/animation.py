@@ -6,6 +6,8 @@ from OpenGL.GLU import *
 from PIL import Image as Image
 from PyQt5 import QtCore, QtGui, QtOpenGL, QtWidgets
 
+PATH = os.path.join(pathlib.Path().absolute(), 'data')
+
 
 class SetupWidget(QtOpenGL.QGLWidget):
     '''
@@ -25,7 +27,7 @@ class SetupWidget(QtOpenGL.QGLWidget):
                 self.get_pattern_polfilter(),
             "section":
                 self.greening_texture(
-                    self.read_texture(os.path.join("data", "section.png"))),
+                    self.read_texture(os.path.join(PATH, "section.png"))),
             "test":
                 self.get_pattern_test()
         }
