@@ -59,12 +59,16 @@ class MainThread():
     def __init__(self, parent):
         self.parent = parent
         self.display = self.parent.main_display
-        self.reset()
+        self.reset(msg=False)
 
         # freeze class
         self.__freeze()
 
-    def reset(self, pli_threshold=np.deg2rad(5)):
+    def reset(self, pli_threshold=np.deg2rad(5), msg=True):
+
+        if msg:
+            print('resetting worker ...')
+
         self.input_mode = None
         self.state = self.State.TRACKING
         self._debug = False
