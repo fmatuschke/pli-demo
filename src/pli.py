@@ -160,9 +160,19 @@ class PLI():
                       f'{np.sum(self._images.valid)}/{self._images.N}')
 
     def apply_offset(self, offset: float):
-        self._modalities.direction[:] += offset
+        current_data_offset = self._images.offset
+        self._images.apply_absolute_offset(offset)
+
+        self._modalities.direction[:] = self.direction - current_data_offset + offset
+
+        # to [-np.pi, np.pi]
         self._modalities.direction[:] %= np.pi
-        # TODO: apply to tilting and fom
+        # to [0, np.pi]
+        self._modalities.direction[:] += np.pi
+        self._modalities.direction[:] %= np.pi
+
+        self._inclination.fom[:] = epa.fom(self.direction, self.inclination)
+        # TODO: apply to tilting
 
     def run_analysis(self, fun):
         pool = QtCore.QThreadPool.globalInstance()

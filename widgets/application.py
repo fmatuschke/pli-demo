@@ -239,3 +239,5 @@ class Application(QtWidgets.QMainWindow):
                                            lambda: self.app.save_plot())
         self.main_menu['tools'].add_action('save_images',
                                            lambda: self.app.save_images())
+        self.main_menu['tools'].add_action('apply offset',
+                                           lambda: self.app.apply_offset())

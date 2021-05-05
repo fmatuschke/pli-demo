@@ -25,8 +25,11 @@ class Images:
         object.__setattr__(self, 'valid', np.zeros_like(self.rotations,
                                                         np.bool8))
 
-    def apply_offset(self, offset: float) -> None:
+    def apply_absolute_offset(self, offset: float) -> None:
         self.rotations[:] = np.linspace(0, np.pi, self.N, False) + offset
+        self.rotations[:] %= np.pi
+        self.rotations[:] += np.pi
+        self.rotations[:] %= np.pi
 
     def insert(self, image: np.ndarray, idx: int) -> None:
         if self.valid[idx]:

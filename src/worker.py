@@ -78,6 +78,7 @@ class MainThread():
         self._xy_buffer = []
         self._image_height = None
         self._image_width = None
+        self._last_img_name = 'live'  # same as menue pli actions
         self._angle = None
         self._last_angle = None
         self._update_angle = np.deg2rad(2.5)
@@ -242,26 +243,28 @@ class MainThread():
 
     def enable_pli_results(self):
 
-        def show_img_and_stop(image, cval):
+        def show_img_and_stop(image, cval, name):
             image = image / cval * 255
             image = image.astype(np.uint8)
 
             self.show_image(image)
+            self._last_img_name = name  # TODO: enum with str as value
             self.parent.worker.stop()
 
         self.parent.main_menu['pli'].add_action(
-            'transmittance',
-            lambda: show_img_and_stop(self.pli.modalities.transmittance, 255))
+            'transmittance', lambda: show_img_and_stop(
+                self.pli.modalities.transmittance, 255, 'transmittance'))
         self.parent.main_menu['pli'].add_action(
-            'direction',
-            lambda: show_img_and_stop(self.pli.modalities.direction, np.pi))
+            'direction', lambda: show_img_and_stop(
+                self.pli.modalities.direction, np.pi, 'direction'))
         self.parent.main_menu['pli'].add_action(
-            'retardation',
-            lambda: show_img_and_stop(self.pli.modalities.retardation, 1))
+            'retardation', lambda: show_img_and_stop(
+                self.pli.modalities.retardation, 1, 'retardation'))
         self.parent.main_menu['pli'].add_action(
-            'inclination', lambda: show_img_and_stop(self.pli.inclination, 1))
+            'inclination',
+            lambda: show_img_and_stop(self.pli.inclination, 1, 'inclination'))
         self.parent.main_menu['pli'].add_action(
-            'fom', lambda: show_img_and_stop(self.pli.fom, 1))
+            'fom', lambda: show_img_and_stop(self.pli.fom, 1, 'fom'))
 
         self.parent.main_menu['pli'].add_menu('tilting')
 
@@ -367,3 +370,12 @@ class MainThread():
 
         else:
             self.parent.statusbar.showMessage('Invalid path', 4200)
+
+    def apply_offset(self):
+        offset, ok = QtWidgets.QInputDialog.getDouble(self.parent,
+                                                      "Offset Value",
+                                                      "new offset value")
+        if ok:
+            offset = np.deg2rad(offset)
+            self.pli.apply_offset(offset)
+            self.parent.main_menu['pli'][self._last_img_name].trigger()
