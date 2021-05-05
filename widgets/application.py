@@ -2,7 +2,7 @@ import os
 import pathlib
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from src import main_loop
+from src import worker
 
 from . import display, dummy, plot, animation
 
@@ -20,7 +20,7 @@ class Application(QtWidgets.QMainWindow):
         self.__initUI__()
 
         self.args = args
-        self.app = main_loop.MainThread(self)
+        self.app = worker.MainThread(self)
         self.connectSignals()
 
         # run application loop
@@ -109,8 +109,6 @@ class Application(QtWidgets.QMainWindow):
 
     def connectSignals(self):
         self.main_display.xy_signal.connect(self.app.update_plot)
-        # self.main_display.rho_signal.connect(self.app.update_plot_rho)
-        # self.app.rho_signal.connect(self.setupwidget.set_rotation)
 
     def createLayout(self):
         self.layout = QtWidgets.QGridLayout()
@@ -226,10 +224,3 @@ class Application(QtWidgets.QMainWindow):
         self.main_menu.add_menu('pli')
         self.main_menu.add_menu('camera')
         self.main_menu.add_menu('help')
-
-        # self.main_menu.add_menu('')
-
-        def save_data():
-            np.savetxt(self.app.pli.images)
-
-        self.main_menu.add_action('save', save_data)

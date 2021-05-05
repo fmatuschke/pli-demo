@@ -72,9 +72,6 @@ class PLI():
         self.reset()
         self._angle_threshold = threshold
 
-        # self.analysis_finished = QtCore.pyqtSignal()
-        # self.analysis_progress = QtCore.pyqtSignal(int)
-
         self.__freeze()
 
     def reset(self):
@@ -86,8 +83,6 @@ class PLI():
 
     @property
     def images(self):
-        # if self._images is None:
-        #     raise ValueError('no images measured yet')
         return self._images
 
     def valid(self):

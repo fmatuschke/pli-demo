@@ -46,8 +46,6 @@ class MainThread():
         SOUTH = enum.auto()
         WEST = enum.auto()
 
-    # rho_signal = QtCore.pyqtSignal(float)
-
     __is_frozen = False
 
     def __setattr__(self, key, value):
@@ -250,7 +248,7 @@ class MainThread():
         if self._angle is None:
             raise ValueError('angel is None')
 
-        frame = self.tracker.crop(frame)
+        # frame = self.tracker.crop(frame)
         self.pli.insert(frame, self._angle)
 
         if self.pli.measurment_done():
