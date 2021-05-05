@@ -209,6 +209,11 @@ class MainThread():
 
         self.parent.statusbar.showMessage(f'x: {x}, y: {y}', 3000)
 
+        if self._debug:  # better: if cropping is not active
+            y_, x_ = self.tracker.crop_offset()
+            x -= x_
+            y -= y_
+
         self._plot[0] = self.pli.images.rotations
         self._plot[1] = [self.pli.images.images[y, x, :]]
 
@@ -248,7 +253,7 @@ class MainThread():
         if self._angle is None:
             raise ValueError('angel is None')
 
-        # frame = self.tracker.crop(frame)
+        frame = self.tracker.crop(frame)
         self.pli.insert(frame, self._angle)
 
         if self.pli.measurment_done():
