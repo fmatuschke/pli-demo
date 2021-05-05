@@ -227,4 +227,8 @@ class Application(QtWidgets.QMainWindow):
         self.main_menu.add_menu('help')
 
         self.main_menu['camera'].add_menu('port')
+        self.main_menu['camera'].add_menu('resolution')
         self.main_menu['camera'].add_menu('demo')
+
+        self.main_menu['camera']['resolution'].add_action(
+            'check resolution', lambda: self.app.check_device_properties())

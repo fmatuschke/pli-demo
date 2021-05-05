@@ -90,7 +90,6 @@ class CapDev:
         self.release_device()
         if self._check_port(port, n_times=10):
             self._device = cv2.VideoCapture(port)
-            # self._check_resolutions() # takes time
         else:
             print("Error: port is not working")
 
@@ -120,7 +119,7 @@ class CapDev:
         print(f"INFO: working ports: {ports}")
         return ports
 
-    def _check_resolutions(self):
+    def get_resolutions(self):
         # TODO this should be available from the OS
 
         org_width = int(self._device.get(cv2.CAP_PROP_FRAME_WIDTH))
@@ -149,16 +148,19 @@ class CapDev:
             height = int(self._device.get(cv2.CAP_PROP_FRAME_HEIGHT))
             fps = int(self._device.get(cv2.CAP_PROP_FPS))
             self._resolutions.append((width, height, fps))
+            print(f'INFO: found prop: {(width, height, fps)}')
 
         self._resolutions = list(set(self._resolutions))
         self._resolutions.sort(key=lambda x: x[1])
         self._resolutions.sort(key=lambda x: x[0])
-        print(f'INFO: found {self._resolutions}')
 
         # reset to original
         self.set_prop(org_width, org_height, org_fps)
 
         return self._resolutions
+
+    def get_fps(self):
+        return int(self._device.get(cv2.CAP_PROP_FPS))
 
     def set_prop(self, width, height, fps=25):
         # reset camera to set setting before image capture

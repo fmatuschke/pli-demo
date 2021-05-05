@@ -127,6 +127,17 @@ class MainThread():
         self.tracker.reset()
         self.device.activate_camera(port)
 
+    def check_device_properties(self):
+        res = self.device.get_resolutions()
+        self.parent.main_menu['camera']['resolution'].clear()
+        self.parent.main_menu['camera']['resolution'].add_action(
+            'scan', lambda: self.check_device_properties())
+        for r in res:
+            self.parent.main_menu['camera']['resolution'].add_action(
+                f'{r[0]}x{r[1]}, {r[2]} fps',
+                triggered=functools.partial(self.device.set_prop, r[0], r[1],
+                                            r[2]))
+
     def switch_video(self, video):
         self.state = self.State.TRACKING
         self.pli.reset()
