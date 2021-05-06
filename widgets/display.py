@@ -41,8 +41,12 @@ class Display(QtWidgets.QLabel):
         palette.setColor(QtGui.QPalette.Window, QtGui.QColor(0, 0, 0))
         self.setPalette(palette)
 
-    def widgetNoredCoordinates(self, click_x: int,
-                               click_y: int) -> tuple(float, float):
+    def resizeEvent(self, event):
+        super(Display, self).resizeEvent(event)
+        self.parent.app.show_image(self.parent.app._last_image)
+
+    def _widgetNormedCoordinates(self, click_x: int,
+                                 click_y: int) -> tuple(float, float):
         '''
         return pixmap coordinate. if data is cropped after masked, add mask offset if you want pli_stack.get()!
         '''
@@ -67,6 +71,6 @@ class Display(QtWidgets.QLabel):
         if self.pixmap() is None:
             return
 
-        x, y = self.widgetNoredCoordinates(event.x(), event.y())
+        x, y = self._widgetNormedCoordinates(event.x(), event.y())
         if x >= 0 and x < 1 and y >= 0 and y < 1:
             self.xy_signal.emit(x, y)

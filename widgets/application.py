@@ -60,7 +60,7 @@ class Application(QtWidgets.QMainWindow):
     def createWidgets(self):
         self.setCentralWidget(QtWidgets.QWidget(self))
 
-        self.main_display = display.Display()
+        self.main_display = display.Display(self)
         self.main_display.setMinimumSize(QtCore.QSize(545, 545))
         self.main_display.setAlignment(QtCore.Qt.AlignCenter)
         self.main_display.setSizePolicy(QtWidgets.QSizePolicy.Minimum,

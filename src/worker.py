@@ -76,6 +76,7 @@ class MainThread():
         self._debug = False
         self._tilt = self.Tilt.CENTER
         self._xy_buffer = []
+        self._last_image = None
         self._image_height = None
         self._image_width = None
         self._last_img_name = 'live'  # same as menue pli actions
@@ -154,10 +155,6 @@ class MainThread():
                                self.display.size().height(),
                                QtCore.Qt.KeepAspectRatio,
                                QtCore.Qt.SmoothTransformation)
-
-        #TODO: save parameter for coordinate transformation
-        # self.frame_height = frame.shape[0]
-        # self.frame_width = frame.shape[1]
 
         return qimage
 
@@ -258,6 +255,7 @@ class MainThread():
             self.state = self.State.MEASUREMENT
 
     def show_image(self, image):
+        self._last_image = image.copy()
         qimage = self.convertArray2QImage(image)
         pixmap = QtGui.QPixmap.fromImage(qimage)
         self._image_height = image.shape[0]
