@@ -5,6 +5,11 @@ venv*/
 output/
 old/
 
+*.txt
+*.csv
+*.dat
+*.tif
+
 # Created by https://www.toptal.com/developers/gitignore/api/python,vscode
 # Edit at https://www.toptal.com/developers/gitignore?templates=python,vscode
 
