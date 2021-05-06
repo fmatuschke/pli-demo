@@ -281,17 +281,19 @@ class MainThread():
             if not pathlib.Path(file_name).suffix:
                 file_name += '.txt'
 
-            header = []
+            header = ['rho']
             data = [self.pli.images.rotations[self.pli.valid()]]
             for x, y in self._xy_buffer:
                 header.append(f'x{x}y{y}')
                 data.append(self.pli.images.images[y, x, self.pli.valid()])
             data = np.vstack(data).T
 
-            delimiter = ' '
+            delimiter = ','
             header = delimiter.join(header)
             np.savetxt(os.path.join(file_name),
                        data,
+                       comments='',
+                       fmt='%.6f',
                        delimiter=delimiter,
                        header=header)
         else:
