@@ -435,9 +435,13 @@ class MainThread():
                 break
 
         if path:
-            np.savetxt('rotations.txt', self.pli.images.rotations)
-            img = PIL.Image.fromarray(self.pli.images.images)
-            img.save(os.path.join(path, 'stack.tif'))
+            np.savetxt(os.path.join(path, 'rotations.txt'),
+                       self.pli.images.rotations)
+            stack = []
+            for img in self.pli.images.images:
+                stack.append(PIL.Image.fromarray(img))
+            stack[0].save(os.path.join(path, 'stack.tif'),
+                          append_images=stack[1:])
             img = PIL.Image.fromarray(self.pli.transmittance)
             img.save(os.path.join(path, 'transmittance.tif'))
             img = PIL.Image.fromarray(self.pli.direction)
