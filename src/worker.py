@@ -3,6 +3,7 @@ from __future__ import annotations
 import enum
 import functools
 import os
+import pathlib
 
 import numpy as np
 import PIL.Image
@@ -277,6 +278,9 @@ class MainThread():
             options=options)
 
         if file_name:
+            if not pathlib.Path(file_name).suffix:
+                file_name += '.txt'
+
             header = []
             data = [self.pli.images.rotations[self.pli.valid()]]
             for x, y in self._xy_buffer:
