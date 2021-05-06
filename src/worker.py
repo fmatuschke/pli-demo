@@ -67,7 +67,7 @@ class MainThread():
         # freeze class
         self.__freeze()
 
-    def reset(self, pli_threshold=np.deg2rad(5), msg=True):
+    def reset(self, msg=True):
 
         if msg:
             print('resetting worker ...')
@@ -87,7 +87,7 @@ class MainThread():
         self.parent.plotwidget.clear()
 
         # pli
-        self.pli = pli.PLI(pli_threshold)
+        self.pli = pli.PLI(np.deg2rad(self.parent.args.insert_threshold))
 
         # tracker
         self.tracker = tracker.Tracker(num_sticker=10, sticker_zero_id=10)

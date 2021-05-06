@@ -14,6 +14,7 @@ def process_cl_args():
     parser.add_argument('--resolution', type=str)
     parser.add_argument('--fps', type=int)
     parser.add_argument('--first-n', action='store_true')
+    parser.add_argument('--insert-threshold', type=float, default=2.5)
 
     parsed_args, unparsed_args = parser.parse_known_args()
     return parsed_args, unparsed_args
