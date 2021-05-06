@@ -2,7 +2,8 @@
 
 # #Issue
 
-- [ ] save data gui gets blocked by something
+- [ ] qt dar lines very slow
+- [ ] qt chart very slow
 - [ ] new videos which are working for smaller insert-threshold
 - [ ] multiple xy clicks
 - [ ] plot data is not empty after changing values

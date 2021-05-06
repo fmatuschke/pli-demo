@@ -287,7 +287,7 @@ class MainThread():
         if self._angle is None:
             return
 
-        # draw green segments
+        # draw first line
         point_0 = QtCore.QPointF(
             (center[0] - offset[0] + np.cos(-self._angle) * radius * 0.98) *
             scale,
@@ -300,6 +300,7 @@ class MainThread():
             scale)
         painter.drawLine(point_0, point_1)
 
+        # draw second line
         point_0 = QtCore.QPointF(
             (center[0] - offset[0] +
              np.cos(-self._angle + np.pi) * radius * 0.98) * scale,
@@ -312,10 +313,16 @@ class MainThread():
              np.sin(-self._angle + np.pi) * radius * 1.02) * scale)
         painter.drawLine(point_0, point_1)
 
+        # draw green segments
+        """
+        TODO: draw line is very slow.
+        N_points_per_segment > 3 is very slow
+        """
+        N_points_per_segment = 2 + 1
         for rho in self.pli.rotations[self.pli.valid()]:
             for a, b in zip(
-                    np.linspace(-1, 1, 10)[:-1],
-                    np.linspace(-1, 1, 10)[1:]):
+                    np.linspace(-1, 1, N_points_per_segment)[:-1],
+                    np.linspace(-1, 1, N_points_per_segment)[1:]):
                 point_0 = QtCore.QPointF(
                     (center[0] - offset[0] +
                      np.cos(-rho + np.deg2rad(a * 5)) * radius) * scale,
@@ -350,6 +357,8 @@ class MainThread():
             pen.setColor(QtGui.QColor(c[0], c[1], c[2], c[3]))
             painter.setPen(pen)
             painter.drawEllipse(QtCore.QPointF(x * scale, y * scale), 5, 5)
+
+        del painter
 
     def show_image(self, image):
         self._last_image = image.copy()
