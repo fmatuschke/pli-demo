@@ -2,6 +2,7 @@
 
 # #Issue
 
+- [ ] save data gui gets blocked by something
 - [ ] new videos which are working for smaller insert-threshold
 - [ ] multiple xy clicks
 - [ ] plot data is not empty after changing values
@@ -11,7 +12,6 @@
 - [ ] tilting
   - [ ] as switchable 'pointer' `self.data = self.tilts[mode]`
 - [ ] show coordinate while hovering with mouse
-- [ ] save image stack with angle.txt
 
 ## RFC
 
