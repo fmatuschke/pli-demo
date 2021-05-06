@@ -255,12 +255,97 @@ class MainThread():
         if self.tracker.calibrate(frame):
             self.state = self.State.MEASUREMENT
 
+    def _overlay_display(self, pixmap):
+
+        if not self.tracker.calibrated():
+            radius = 10
+            center = (pixmap.width() / 2, pixmap.height() / 2)
+            offset = (0, 0)
+        else:
+            radius = self.tracker._illumination_radius * 0.99
+            center = self.tracker._illumination_center[::-1]
+            offset = self.tracker.crop_offset()
+
+        painter = QtGui.QPainter(pixmap)
+        pen = QtGui.QPen()
+        scale = pixmap.width() / self._image_width
+
+        pen.setColor(QtCore.Qt.red)
+        pen.setWidth(3)
+        painter.setPen(pen)
+        painter.drawEllipse(
+            QtCore.QPointF((center[0] - offset[0]) * scale,
+                           (center[1] - offset[1]) * scale), radius * scale,
+            radius * scale)
+
+        pen.setColor(QtCore.Qt.green)
+        pen.setWidth(4)
+        painter.setPen(pen)
+
+        if self._angle is None:
+            return
+
+        point_0 = QtCore.QPointF(
+            (center[0] - offset[0] + np.cos(-self._angle) * radius * 0.98) *
+            scale,
+            (center[1] - offset[1] + np.sin(-self._angle) * radius * 0.98) *
+            scale)
+        point_1 = QtCore.QPointF(
+            (center[0] - offset[0] + np.cos(-self._angle) * radius * 1.02) *
+            scale,
+            (center[1] - offset[1] + np.sin(-self._angle) * radius * 1.02) *
+            scale)
+        painter.drawLine(point_0, point_1)
+
+        point_0 = QtCore.QPointF(
+            (center[0] - offset[0] +
+             np.cos(-self._angle + np.pi) * radius * 0.98) * scale,
+            (center[1] - offset[1] +
+             np.sin(-self._angle + np.pi) * radius * 0.98) * scale)
+        point_1 = QtCore.QPointF(
+            (center[0] - offset[0] +
+             np.cos(-self._angle + np.pi) * radius * 1.02) * scale,
+            (center[1] - offset[1] +
+             np.sin(-self._angle + np.pi) * radius * 1.02) * scale)
+        painter.drawLine(point_0, point_1)
+
+        for rho in self.pli.rotations[self.pli.valid()]:
+            for a, b in zip(
+                    np.linspace(-1, 1, 10)[:-1],
+                    np.linspace(-1, 1, 10)[1:]):
+                point_0 = QtCore.QPointF(
+                    (center[0] - offset[0] +
+                     np.cos(-rho + np.deg2rad(a * 5)) * radius) * scale,
+                    (center[1] - offset[1] +
+                     np.sin(-rho + np.deg2rad(a * 5)) * radius) * scale)
+                point_1 = QtCore.QPointF(
+                    (center[0] - offset[0] +
+                     np.cos(-rho + np.deg2rad(b * 5)) * radius) * scale,
+                    (center[1] - offset[1] +
+                     np.sin(-rho + np.deg2rad(b * 5)) * radius) * scale)
+                painter.drawLine(point_0, point_1)
+
+                rho = rho + np.pi
+                point_0 = QtCore.QPointF(
+                    (center[0] - offset[0] +
+                     np.cos(-rho + np.deg2rad(a * 5)) * radius) * scale,
+                    (center[1] - offset[1] +
+                     np.sin(-rho + np.deg2rad(a * 5)) * radius) * scale)
+                point_1 = QtCore.QPointF(
+                    (center[0] - offset[0] +
+                     np.cos(-rho + np.deg2rad(b * 5)) * radius) * scale,
+                    (center[1] - offset[1] +
+                     np.sin(-rho + np.deg2rad(b * 5)) * radius) * scale)
+                painter.drawLine(point_0, point_1)
+
     def show_image(self, image):
         self._last_image = image.copy()
         qimage = self.convertArray2QImage(image)
         pixmap = QtGui.QPixmap.fromImage(qimage)
         self._image_height = image.shape[0]
         self._image_width = image.shape[1]
+
+        self._overlay_display(pixmap)
         self.display.setPixmap(pixmap)
 
     def save_plot(self):

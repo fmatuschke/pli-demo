@@ -85,6 +85,10 @@ class PLI():
     def images(self):
         return self._images
 
+    @property
+    def rotations(self):
+        return self._images.rotations[:]
+
     def valid(self):
         if self._images is None:
             return None
