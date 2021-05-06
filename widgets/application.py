@@ -2,12 +2,14 @@ import os
 import pathlib
 
 import numpy as np
+from PIL import Image
 from PyQt5 import QtCore, QtGui, QtWidgets
 from src import worker
 
 from . import display, dummy, microscope, plot
 
 PATH = os.path.join(pathlib.Path().absolute(), 'data')
+COLORSPHERE = Image.open(os.path.join(PATH, 'color_sphere.png'))
 
 
 class Application(QtWidgets.QMainWindow):
@@ -250,6 +252,12 @@ class Application(QtWidgets.QMainWindow):
         def show_img_and_stop(image, cval, name):
             image = image / cval * 255
             image = image.astype(np.uint8)
+
+            if name == 'fom':
+                shape = np.array(image.shape[:-1]) // 6
+                cs = COLORSPHERE.resize(shape, Image.NEAREST)
+                cs = np.asarray(cs)[:, :, :-1]  # PIL returns RGBA
+                image[0:shape[0], image.shape[1] - shape[1]:, :] = cs
 
             self.app.show_image(image)
             self.app._last_img_name = name  # TODO: enum with str as value
