@@ -2,7 +2,8 @@
 
 # #Issue
 
-- [ ] slow save menu
+- [x] slow save menu
+  - sloved by pausing worker
   - for big videos also if plot and segment overlay is disabled
   - if number of points in line > 3 for small video
   - gets better if qtimer is less frequent
