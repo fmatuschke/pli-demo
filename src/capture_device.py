@@ -108,7 +108,7 @@ class CapDev:
                 is_reading, _ = camera.read()
                 if is_reading:
                     port_works = True
-                name = camera.getBackendName()
+                # name = camera.getBackendName()
                 camera.release()
                 break
 
@@ -143,7 +143,7 @@ class CapDev:
         # reset
         # self.set_port(self._port)
 
-        print(f'INFO: start testing vor properties')
+        print('INFO: start testing vor properties')
         for width, height in test_resolution:
             self.set_prop(width, height, 60)
             width = int(self._device.get(cv2.CAP_PROP_FRAME_WIDTH))
@@ -217,12 +217,12 @@ class CapDev:
 
         if quadratic:
             height, width = frame.shape[0], frame.shape[1]
-            l = min(height, width)
+            min_wh = min(height, width)
             delta = np.abs((width - height) // 2)
 
             if width > height:
-                frame = np.array(frame[:, delta:delta + l])
+                frame = np.array(frame[:, delta:delta + min_wh])
             else:
-                frame = np.array(frame[delta:delta + l, :])
+                frame = np.array(frame[delta:delta + min_wh, :])
 
         return True, frame

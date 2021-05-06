@@ -101,9 +101,9 @@ def simple_incl(transmittance: np.ndarray,
     hist[hist <= 1] = 0  # erfahrungswert
 
     threshold = edges[np.argwhere(hist > 0)[-1] + 1]
-    mask = np.logical_and(retardation > 0.080, retardation <= threshold)
+    # TODO: why not using mask?
+    # mask = np.logical_and(retardation > 0.080, retardation <= threshold)
 
-    # print(np.amax(retardation[mask]))
     inclination = np.pi / 2 * (1 - retardation / threshold)
     return inclination
 

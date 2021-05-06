@@ -1,9 +1,5 @@
 from __future__ import annotations
 
-import typing
-from typing import Optional
-
-import numpy as np
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 
@@ -47,9 +43,10 @@ class Display(QtWidgets.QLabel):
 
     def _widgetNormedCoordinates(self, click_x: int,
                                  click_y: int) -> tuple(float, float):
-        '''
-        return pixmap coordinate. if data is cropped after masked, add mask offset if you want pli_stack.get()!
-        '''
+        """
+        return pixmap coordinate. if data is cropped after masked,
+        add mask offset if you want pli_stack.get()!
+        """
         pixmap_width = self.pixmap().size().width()
         pixmap_height = self.pixmap().size().height()
 
@@ -65,9 +62,9 @@ class Display(QtWidgets.QLabel):
         return x, y
 
     def mousePressEvent(self, event):
-        '''
-            Sets Tracking coordinate to the clicked coordinate
-            '''
+        """
+        Sets Tracking coordinate to the clicked coordinate
+        """
         if self.pixmap() is None:
             return
 
