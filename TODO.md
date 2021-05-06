@@ -2,8 +2,11 @@
 
 # #Issue
 
-- [ ] qt dar lines very slow, also for large videos
-- [ ] qt chart very slow
+- [ ] slow save menu
+  - for big videos also if plot and segment overlay is disabled
+  - if number of points in line > 3 for small video
+  - gets better if qtimer is less frequent
+  - @timing for worker.next() < 0.03 for 1080p
 - [ ] new videos which are working for smaller insert-threshold
 - [ ] multiple xy clicks
 - [ ] plot data is not empty after changing values

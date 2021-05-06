@@ -370,6 +370,7 @@ class MainThread():
         self._overlay_display(pixmap)
         self.display.setPixmap(pixmap)
 
+    # TODO has nothing to do with worker
     def save_plot(self):
         if len(self._xy_buffer) == 0:
             self.parent.statusbar.showMessage('Plot is empty', 4200)
@@ -406,6 +407,7 @@ class MainThread():
         else:
             self.parent.statusbar.showMessage('Invalid file name', 4200)
 
+    # TODO has nothing to do with worker
     def save_images(self):
         if self.pli._inclination is None:
             self.parent.statusbar.showMessage('Images not ready yet', 4200)
@@ -461,6 +463,7 @@ class MainThread():
         else:
             self.parent.statusbar.showMessage('Invalid path', 4200)
 
+    # TODO has nothing to do with worker
     def apply_offset(self):
         offset, ok = QtWidgets.QInputDialog.getDouble(self.parent,
                                                       "Offset Value",
