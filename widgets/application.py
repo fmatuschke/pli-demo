@@ -6,7 +6,7 @@ from PIL import Image
 from PyQt5 import QtCore, QtGui, QtWidgets
 from src import worker
 
-from . import display, dummy, microscope, plot
+from . import display, microscope, plot
 
 PATH = os.path.join(pathlib.Path().absolute(), 'data')
 COLORSPHERE = Image.open(os.path.join(PATH, 'color_sphere.png'))
@@ -14,7 +14,8 @@ COLORSPHERE = Image.open(os.path.join(PATH, 'color_sphere.png'))
 
 class Application(QtWidgets.QMainWindow):
     """ 
-    MainWindow of the application, which contains all widgets and sort them in a layout
+    MainWindow of the application, which contains all widgets and
+    sort them in a layout
     """
 
     def __init__(self, args, *qt_args, **qt_kwargs):
@@ -165,14 +166,14 @@ class Application(QtWidgets.QMainWindow):
             def add_menu(self, name):
                 if name in self._menu_dict:
                     raise ValueError(
-                        f'entry "{name}" already exists in "{qt_menu}"')
+                        f'entry "{name}" already exists in "{self._qt_obj}"')
                 self._menu_dict[name] = MenuWrapper(
                     self._qt_obj.addMenu(f'&{name}'))
 
             def add_action(self, name, triggered):
                 if name in self._menu_dict:
                     raise ValueError(
-                        f'entry "{name}" already exists in "{qt_menu}"')
+                        f'entry "{name}" already exists in "{self._qt_obj}"')
                 self._menu_dict[name] = ActionWrapper(f'{name}',
                                                       triggered=triggered)
                 self._qt_obj.addAction(self._menu_dict[name])
