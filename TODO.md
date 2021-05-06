@@ -2,7 +2,7 @@
 
 # #Issue
 
-- [ ] qt dar lines very slow
+- [ ] qt dar lines very slow, also for large videos
 - [ ] qt chart very slow
 - [ ] new videos which are working for smaller insert-threshold
 - [ ] multiple xy clicks
