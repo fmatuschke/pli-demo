@@ -438,9 +438,11 @@ class MainThread():
             np.savetxt(os.path.join(path, 'rotations.txt'),
                        self.pli.images.rotations)
             stack = []
-            for img in self.pli.images.images:
+            data = np.moveaxis(self.pli.images.images, -1, 0)
+            for img in data:
                 stack.append(PIL.Image.fromarray(img))
             stack[0].save(os.path.join(path, 'stack.tif'),
+                          save_all=True,
                           append_images=stack[1:])
             img = PIL.Image.fromarray(self.pli.transmittance)
             img.save(os.path.join(path, 'transmittance.tif'))
