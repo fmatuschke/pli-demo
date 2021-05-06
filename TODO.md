@@ -10,7 +10,6 @@
 
 - [ ] tilting
   - [ ] as switchable 'pointer' `self.data = self.tilts[mode]`
-- [ ] xy data circles
 - [ ] show coordinate while hovering with mouse
 - [ ] save image stack with angle.txt
 

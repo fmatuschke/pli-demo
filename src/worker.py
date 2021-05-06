@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import enum
 import functools
+import itertools
 import os
 import pathlib
 
@@ -266,6 +267,7 @@ class MainThread():
             center = self.tracker._illumination_center[::-1]
             offset = self.tracker.crop_offset()
 
+        # draw red circle
         painter = QtGui.QPainter(pixmap)
         pen = QtGui.QPen()
         scale = pixmap.width() / self._image_width
@@ -285,6 +287,7 @@ class MainThread():
         if self._angle is None:
             return
 
+        # draw green segments
         point_0 = QtCore.QPointF(
             (center[0] - offset[0] + np.cos(-self._angle) * radius * 0.98) *
             scale,
@@ -337,6 +340,16 @@ class MainThread():
                     (center[1] - offset[1] +
                      np.sin(-rho + np.deg2rad(b * 5)) * radius) * scale)
                 painter.drawLine(point_0, point_1)
+
+        # draw click circles
+        # ChartThemeDark Colors (same as plot)
+        colors = np.array([(56, 173, 107, 255), (60, 132, 167, 255),
+                           (235, 136, 23, 255), (123, 127, 140, 255),
+                           (191, 89, 62, 255)], np.uint8)
+        for (x, y), c in zip(self._xy_buffer, itertools.cycle(colors)):
+            pen.setColor(QtGui.QColor(c[0], c[1], c[2], c[3]))
+            painter.setPen(pen)
+            painter.drawEllipse(QtCore.QPointF(x * scale, y * scale), 5, 5)
 
     def show_image(self, image):
         self._last_image = image.copy()
