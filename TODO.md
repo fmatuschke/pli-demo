@@ -17,6 +17,7 @@
 - [ ] tilting
   - [ ] as switchable 'pointer' `self.data = self.tilts[mode]`
 - [ ] show coordinate while hovering with mouse
+- masking modalities
 
 ## RFC
 
