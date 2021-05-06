@@ -411,6 +411,7 @@ class MainThread():
                                            options=options)
 
         for file in [
+                'rotations.txt', 'stack.tif'
                 'transmittance.tif', 'direction.tif', 'retardation.tif',
                 'mask.tif', 'inclination.tif', 'fom.tif'
         ]:
@@ -425,6 +426,9 @@ class MainThread():
                 break
 
         if path:
+            np.savetxt('rotations.txt', self.pli.images.rotations)
+            img = PIL.Image.fromarray(self.pli.images.images)
+            img.save(os.path.join(path, 'stack.tif'))
             img = PIL.Image.fromarray(self.pli.transmittance)
             img.save(os.path.join(path, 'transmittance.tif'))
             img = PIL.Image.fromarray(self.pli.direction)
