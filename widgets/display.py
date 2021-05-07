@@ -70,4 +70,4 @@ class Display(QtWidgets.QLabel):
 
         x, y = self._widgetNormedCoordinates(event.x(), event.y())
         if x >= 0 and x < 1 and y >= 0 and y < 1:
-            self.xy_signal.emit(x, y)
+            self.parent.app.update_plot_coordinates_buffer(x, y)
