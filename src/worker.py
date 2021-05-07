@@ -259,13 +259,11 @@ class MainThread():
     def _overlay_display(self, pixmap):
 
         if not self.tracker.calibrated():
-            radius = 10
-            center = (pixmap.width() / 2, pixmap.height() / 2)
-            offset = (0, 0)
-        else:
-            radius = self.tracker._illumination_radius * 0.99
-            center = self.tracker._illumination_center[::-1]
-            offset = self.tracker.crop_offset()
+            return
+
+        radius = self.tracker._illumination_radius * 0.99
+        center = self.tracker._illumination_center[::-1]
+        offset = self.tracker.crop_offset()
 
         # draw red circle
         painter = QtGui.QPainter(pixmap)
