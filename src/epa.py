@@ -147,7 +147,7 @@ def calc_tilts(transmittance: np.ndarray, direction: np.ndarray,
     y = np.cos(inclination) * np.sin(direction)
     z = np.sin(inclination)
 
-    theta = np.deg2rad(20)
+    theta = np.deg2rad(10)
 
     tilt_frames = np.empty(
         (4, transmittance.shape[0], transmittance.shape[1], N))

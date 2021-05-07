@@ -1,3 +1,4 @@
+import functools
 import os
 import pathlib
 
@@ -291,10 +292,13 @@ class Application(QtWidgets.QMainWindow):
 
         self.main_menu['pli'].add_menu('tilts')
 
-        def set_and_show_tilt():
-            self.app.set_tilt(tilt_name.value)
+        def set_and_show_tilt(abc):
+            self.app.set_tilt(abc)
             self.main_menu['pli'][self.app._last_img_name].trigger()
+            self.app.update_plot()
 
+        # TODO: why here partial and above lambda?
         for tilt_name in worker.MainThread.Tilt:
             self.main_menu['pli']['tilts'].add_action(
-                tilt_name.value, lambda: self.app.set_tilt(tilt_name.value))
+                tilt_name.value,
+                functools.partial(set_and_show_tilt, tilt_name.value))
