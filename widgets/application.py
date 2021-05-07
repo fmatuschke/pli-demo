@@ -255,6 +255,10 @@ class Application(QtWidgets.QMainWindow):
                                           lambda: self.app.switch_debug())
         self.main_menu['help'].add_action('reset', lambda: self.app.reset())
 
+        def show_live():
+            self.app.to_live_mode()
+            self.app._last_img_name = 'live'
+
         def show_img_and_stop(image, cval, name):
             image = image / cval * 255
             image = image.astype(np.uint8)
@@ -269,8 +273,7 @@ class Application(QtWidgets.QMainWindow):
             self.app._last_img_name = name  # TODO: enum with str as value
             self.worker.stop()
 
-        self.main_menu['pli'].add_action('live',
-                                         lambda: self.app.to_live_mode())
+        self.main_menu['pli'].add_action('live', lambda: show_live())
         self.main_menu['pli'].add_action(
             'transmittance', lambda: show_img_and_stop(
                 self.app.pli.transmittance(self.app._tilt.value), 255,

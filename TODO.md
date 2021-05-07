@@ -13,8 +13,7 @@
 
 ## Features
 
-- [ ] tilting
-  - [ ] as switchable 'pointer' `self.data = self.tilts[mode]`
+- [ ] add visual indicator, which menu is active in PLI
 - [ ] show coordinate while hovering with mouse
 - masking modalities
 - [ ] qt drawings as overlayed transparant label?
