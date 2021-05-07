@@ -121,6 +121,7 @@ def fom(direction: np.ndarray, inclination: np.ndarray) -> np.ndarray:
 def _calc_tilt(x: np.ndarray, y: np.ndarray, z: np.ndarray, rho: float,
                rot: np.ndarray) -> np.ndarray:
     data = np.zeros((x.shape[0], x.shape[1], rho.size))
+    incl = np.zeros((x.shape[0], x.shape[1]))
     for i in range(x.shape[0]):
         for j in range(x.shape[1]):
             # if not mask[i, j]:
@@ -131,11 +132,15 @@ def _calc_tilt(x: np.ndarray, y: np.ndarray, z: np.ndarray, rho: float,
 
             delta = 0.2 * np.cos(a)**2
             data[i, j, :] = (1 + np.sin(2 * (rho - p)) * np.sin(delta))
-    return data
+
+            incl[i, j] = a
+    return data, incl
 
 
 def calc_tilts(transmittance: np.ndarray, direction: np.ndarray,
-               retardation: np.ndarray, inclination: np.ndarray) -> np.ndarray:
+               retardation: np.ndarray, inclination: np.ndarray,
+               N: int) -> np.ndarray:
+
     # TODO: speedup
     tilt_frames = []
     x = np.cos(inclination) * np.cos(direction)
@@ -145,23 +150,25 @@ def calc_tilts(transmittance: np.ndarray, direction: np.ndarray,
     theta = np.deg2rad(20)
 
     tilt_frames = np.empty(
-        (4, transmittance.shape[0], transmittance.shape[1], 18))
-
-    rho = np.linspace(0, np.pi, 18, endpoint=False, dtype=x.dtype)
-    for r, phi in enumerate([0, 90, 180, 270]):
-        rot = np.dot(rot_z(-phi), np.dot(rot_x(theta),
-                                         rot_z(phi))).astype(x.dtype)
-
-        tilt_frames[r] = (_calc_tilt(x, y, z, rho, rot) *
-                          transmittance[:, :, None]).astype(np.uint8)
-
+        (4, transmittance.shape[0], transmittance.shape[1], N))
     tilt_transmittance = np.empty(
         (4, transmittance.shape[0], transmittance.shape[1]))
     tilt_direction = np.empty(
         (4, transmittance.shape[0], transmittance.shape[1]))
     tilt_retardation = np.empty(
         (4, transmittance.shape[0], transmittance.shape[1]))
+    tilt_inclination = np.empty(
+        (4, transmittance.shape[0], transmittance.shape[1]))
+
+    rho = np.linspace(0, np.pi, N, endpoint=False, dtype=x.dtype)
+    for r, phi in enumerate([0, 90, 180, 270]):
+        rot = np.dot(rot_z(-phi), np.dot(rot_x(theta),
+                                         rot_z(phi))).astype(x.dtype)
+
+        frames, tilt_inclination[r] = _calc_tilt(x, y, z, rho, rot)
+        tilt_frames[r] = (frames * transmittance[:, :, None]).astype(np.uint8)
 
     for i, data in enumerate(tilt_frames):
         tilt_transmittance[i], tilt_direction[i], tilt_retardation[i] = epa(
             data)
+    return tilt_frames, tilt_transmittance, tilt_direction, tilt_retardation, tilt_inclination

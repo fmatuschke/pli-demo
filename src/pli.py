@@ -36,7 +36,7 @@ class PLIAnalyser(QtCore.QRunnable):
             exctype, value = sys.exc_info()[:2]
             self.signals.error.emit((exctype, value, traceback.format_exc()))
         else:
-            self.signals.result.emit((self.modalities, self.incl))
+            self.signals.result.emit((self.modalities, self.incl, self.tilts))
         finally:
             self.signals.finished.emit()  # Done
 
@@ -54,7 +54,8 @@ class PLIAnalyser(QtCore.QRunnable):
         self.tilts = epa.calc_tilts(self.modalities.transmittance,
                                     self.modalities.direction,
                                     self.modalities.retardation,
-                                    self.incl.inclination)
+                                    self.incl.inclination,
+                                    self.images.shape[-1])
 
 
 class PLI():
@@ -71,6 +72,7 @@ class PLI():
     def __init__(self, threshold):
         self.reset()
         self._angle_threshold = threshold
+        self._num_rot = 18
 
         self.__freeze()
 
@@ -81,13 +83,23 @@ class PLI():
         self._inclination = None
         self._tilting = None
 
-    @property
-    def images(self):
-        return self._images
+    def images(self, tilt):
+        if tilt == 'center':
+            return self._images.images.copy()
+        elif tilt == 'north':
+            return self._tilting[0][0].copy()
+        elif tilt == 'east':
+            return self._tilting[0][1].copy()
+        elif tilt == 'south':
+            return self._tilting[0][2].copy()
+        elif tilt == 'west':
+            return self._tilting[0][3].copy()
+        else:
+            raise ValueError(f'wrong tilt: {tilt}')
 
     @property
     def rotations(self):
-        return self._images.rotations[:]
+        return self._images.rotations.copy()
 
     def valid(self):
         if self._images is None:
@@ -99,40 +111,77 @@ class PLI():
             return False
         return np.all(self._images.valid)
 
-    @property
-    def modalities(self):
+    def transmittance(self, tilt):
         if self._modalities is None:
             print('modalities could not be calculated yet')
             return None
-        return self._modalities
 
-    @property
-    def transmittance(self):
+        if tilt == 'center':
+            return self._modalities.transmittance.copy()
+        elif tilt == 'north':
+            return self._tilting[1][0].copy()
+        elif tilt == 'east':
+            return self._tilting[1][1].copy()
+        elif tilt == 'south':
+            return self._tilting[1][2].copy()
+        elif tilt == 'west':
+            return self._tilting[1][3].copy()
+        else:
+            raise ValueError(f'wrong tilt: {tilt}')
+
+    def direction(self, tilt):
         if self._modalities is None:
             print('modalities could not be calculated yet')
             return None
-        return self._modalities.transmittance.copy()
 
-    @property
-    def direction(self):
+        if tilt == 'center':
+            return self._modalities.direction.copy()
+        elif tilt == 'north':
+            return self._tilting[2][0].copy()
+        elif tilt == 'east':
+            return self._tilting[2][1].copy()
+        elif tilt == 'south':
+            return self._tilting[2][2].copy()
+        elif tilt == 'west':
+            return self._tilting[2][3].copy()
+        else:
+            raise ValueError(f'wrong tilt: {tilt}')
+
+    def retardation(self, tilt):
         if self._modalities is None:
             print('modalities could not be calculated yet')
             return None
-        return self._modalities.direction.copy()
 
-    @property
-    def retardation(self):
-        if self._modalities is None:
-            print('modalities could not be calculated yet')
-            return None
-        return self._modalities.retardation.copy()
+        if tilt == 'center':
+            return self._modalities.retardation.copy()
+        elif tilt == 'north':
+            return self._tilting[3][0].copy()
+        elif tilt == 'east':
+            return self._tilting[3][1].copy()
+        elif tilt == 'south':
+            return self._tilting[3][2].copy()
+        elif tilt == 'west':
+            return self._tilting[3][3].copy()
+        else:
+            raise ValueError(f'wrong tilt: {tilt}')
 
-    @property
-    def inclination(self):
+    def inclination(self, tilt):
         if self._inclination is None:
             print('inclination could not be calculated yet')
             return None
-        return self._inclination.inclination.copy()
+
+        if tilt == 'center':
+            return self._modalities.inclination.copy()
+        elif tilt == 'north':
+            return self._tilting[4][0].copy()
+        elif tilt == 'east':
+            return self._tilting[4][1].copy()
+        elif tilt == 'south':
+            return self._tilting[4][2].copy()
+        elif tilt == 'west':
+            return self._tilting[4][3].copy()
+        else:
+            raise ValueError(f'wrong tilt: {tilt}')
 
     @property
     def fom(self):
@@ -141,16 +190,10 @@ class PLI():
             return None
         return self._inclination.fom.copy()
 
-    @property
-    def tilting(self):
-        if self._tilting is None:
-            print('tilting could not be calculated yet')
-            return None
-        return self._tilting
-
     def insert(self, image: np.ndarray, angle: float):
         if self._images is None:
-            self._images = data_classes.Images(image.shape)
+            self._images = data_classes.Images(
+                list(image.shape) + [self._num_rot])
 
         condition = np.abs(self._images.rotations -
                            angle) < self._angle_threshold
@@ -161,7 +204,7 @@ class PLI():
                 self._images.insert(image, index)
                 print(f'inserted {np.rad2deg(angle):.1f} -> ' +
                       f'{np.rad2deg(angle_):.0f}: ' +
-                      f'{np.sum(self._images.valid)}/{self._images.N}')
+                      f'{np.sum(self._images.valid)}/{self._images.shape[-1]}')
 
     def apply_offset(self, offset: float):
         current_data_offset = self._images.offset
@@ -180,11 +223,12 @@ class PLI():
 
     def run_analysis(self, fun):
         pool = QtCore.QThreadPool.globalInstance()
-        runnable = PLIAnalyser(self._images,)
+        runnable = PLIAnalyser(self._images)
 
         def save(result):
             self._modalities = result[0]
             self._inclination = result[1]
+            self._tilting = result[2]
 
         runnable.signals.result.connect(save)
         runnable.signals.finished.connect(fun)

@@ -10,7 +10,6 @@ import warnings
 class Images:
     # TODO: RFC, variables are instances and shared for all Images
     shape: tuple
-    N: int = 18
 
     images: np.ndarray = dc.field(init=False)
     rotations: np.ndarray = dc.field(init=False)
@@ -18,15 +17,15 @@ class Images:
 
     def __post_init__(self):
         # resetting np arrays with __setattr__ because of frozen
-        object.__setattr__(self, 'images',
-                           np.empty((self.shape[0], self.shape[1], self.N)))
+        object.__setattr__(self, 'images', np.empty(self.shape))
         object.__setattr__(self, 'rotations',
-                           np.linspace(0, np.pi, self.N, False))
+                           np.linspace(0, np.pi, self.shape[-1], False))
         object.__setattr__(self, 'valid', np.zeros_like(self.rotations,
                                                         np.bool8))
 
     def apply_absolute_offset(self, offset: float) -> None:
-        self.rotations[:] = np.linspace(0, np.pi, self.N, False) + offset
+        self.rotations[:] = np.linspace(0, np.pi, self.self.shape[-1],
+                                        False) + offset
         self.rotations[:] %= np.pi
         self.rotations[:] += np.pi
         self.rotations[:] %= np.pi

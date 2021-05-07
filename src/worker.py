@@ -44,11 +44,11 @@ class MainThread():
 
     @enum.unique
     class Tilt(enum.Enum):
-        CENTER = enum.auto()
-        NORTH = enum.auto()
-        EAST = enum.auto()
-        SOUTH = enum.auto()
-        WEST = enum.auto()
+        CENTER = 'center'
+        NORTH = 'north'
+        EAST = 'east'
+        SOUTH = 'south'
+        WEST = 'west'
 
     __is_frozen = False
 
@@ -89,6 +89,7 @@ class MainThread():
 
         # pli
         self.pli = pli.PLI(np.deg2rad(self.parent.args.insert_threshold))
+        self.parent.main_menu['pli'].set_enabled(False)
 
         # tracker
         self.tracker = tracker.Tracker(num_sticker=10, sticker_zero_id=10)
@@ -160,6 +161,9 @@ class MainThread():
 
         return qimage
 
+    def set_tilt(self, tilt):
+        self._tilt = self.Tilt(tilt)
+
     def next(self):
         """ process next iteration """
 
@@ -205,10 +209,12 @@ class MainThread():
 
     def update_plot(self):
         if len(self._xy_buffer) > 0:
-            x_data = self.pli.images.rotations[self.pli.valid()]
+            x_data = self.pli.rotations[self.pli.valid()]
             y_data = []
             for x, y in self._xy_buffer:
-                y_data.append(self.pli.images.images[y, x, self.pli.valid()])
+                y_data.append(
+                    self.pli.images(self._tilt.value)[y, x,
+                                                      self.pli.valid()])
             self.parent.plotwidget.update_data(x_data, y_data)
             self.parent.plotwidget.update_rho(self._angle)
 
@@ -249,7 +255,7 @@ class MainThread():
         self._angle = self.tracker.current_angle(frame)
 
     def enable_pli_results(self):
-        pass
+        self.parent.main_menu['pli'].set_enabled(True)
 
     def next_measurement(self, frame: np.ndarray):
         if self.pli.measurment_done():
@@ -405,10 +411,12 @@ class MainThread():
                 file_name += '.txt'
 
             header = ['rho']
-            data = [self.pli.images.rotations[self.pli.valid()]]
+            data = [self.pli.rotations[self.pli.valid()]]
             for x, y in self._xy_buffer:
                 header.append(f'x{x}y{y}')
-                data.append(self.pli.images.images[y, x, self.pli.valid()])
+                data.append(
+                    self.pli.images(self._tilt.value)[y, x,
+                                                      self.pli.valid()])
             data = np.vstack(data).T
 
             delimiter = ','
@@ -456,10 +464,9 @@ class MainThread():
                 break
 
         if path:
-            np.savetxt(os.path.join(path, 'rotations.txt'),
-                       self.pli.images.rotations)
+            np.savetxt(os.path.join(path, 'rotations.txt'), self.pli.rotations)
             stack = []
-            data = np.moveaxis(self.pli.images.images, -1, 0)
+            data = np.moveaxis(self.pli.images(self._tilt.value), -1, 0)
             for img in data:
                 stack.append(PIL.Image.fromarray(img))
             stack[0].save(os.path.join(path, 'stack.tif'),

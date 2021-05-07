@@ -150,6 +150,9 @@ class Application(QtWidgets.QMainWindow):
             def isMenu(self):
                 return False
 
+            def set_enabled(self, value):
+                self.setEnabled(value)
+
         class MenuWrapper:
 
             def __init__(self, qt_menu):
@@ -162,20 +165,22 @@ class Application(QtWidgets.QMainWindow):
             def isMenu(self):
                 return True
 
-            def add_menu(self, name):
+            def add_menu(self, name, active=True):
                 if name in self._menu_dict:
                     raise ValueError(
                         f'entry "{name}" already exists in "{self._qt_obj}"')
                 self._menu_dict[name] = MenuWrapper(
                     self._qt_obj.addMenu(f'&{name}'))
+                self._menu_dict[name].set_enabled(active)
 
-            def add_action(self, name, triggered):
+            def add_action(self, name, triggered, active=True):
                 if name in self._menu_dict:
                     raise ValueError(
                         f'entry "{name}" already exists in "{self._qt_obj}"')
                 self._menu_dict[name] = ActionWrapper(f'{name}',
                                                       triggered=triggered)
                 self._qt_obj.addAction(self._menu_dict[name])
+                self._menu_dict[name].set_enabled(active)
 
             def __getitem__(self, key):
                 return self._menu_dict[key]
@@ -267,15 +272,29 @@ class Application(QtWidgets.QMainWindow):
                                          lambda: self.app.to_live_mode())
         self.main_menu['pli'].add_action(
             'transmittance', lambda: show_img_and_stop(
-                self.app.pli.modalities.transmittance, 255, 'transmittance'))
+                self.app.pli.transmittance(self.app._tilt.value), 255,
+                'transmittance'))
         self.main_menu['pli'].add_action(
             'direction', lambda: show_img_and_stop(
-                self.app.pli.modalities.direction, np.pi, 'direction'))
+                self.app.pli.direction(self.app._tilt.value), np.pi, 'direction'
+            ))
         self.main_menu['pli'].add_action(
             'retardation', lambda: show_img_and_stop(
-                self.app.pli.modalities.retardation, 1, 'retardation'))
+                self.app.pli.retardation(self.app._tilt.value), 1, 'retardation'
+            ))
         self.main_menu['pli'].add_action(
-            'inclination', lambda: show_img_and_stop(self.app.pli.inclination,
-                                                     1, 'inclination'))
+            'inclination', lambda: show_img_and_stop(
+                self.app.pli.inclination(self.app._tilt.value), 1, 'inclination'
+            ))
         self.main_menu['pli'].add_action(
             'fom', lambda: show_img_and_stop(self.app.pli.fom, 1, 'fom'))
+
+        self.main_menu['pli'].add_menu('tilts')
+
+        def set_and_show_tilt():
+            self.app.set_tilt(tilt_name.value)
+            self.main_menu['pli'][self.app._last_img_name].trigger()
+
+        for tilt_name in worker.MainThread.Tilt:
+            self.main_menu['pli']['tilts'].add_action(
+                tilt_name.value, lambda: self.app.set_tilt(tilt_name.value))
