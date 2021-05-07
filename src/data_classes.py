@@ -24,7 +24,7 @@ class Images:
                                                         np.bool8))
 
     def apply_absolute_offset(self, offset: float) -> None:
-        self.rotations[:] = np.linspace(0, np.pi, self.self.shape[-1],
+        self.rotations[:] = np.linspace(0, np.pi, self.shape[-1],
                                         False) + offset
         self.rotations[:] %= np.pi
         self.rotations[:] += np.pi

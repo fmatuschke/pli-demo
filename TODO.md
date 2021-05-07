@@ -1,6 +1,10 @@
 # TODO
 
-# #Issue
+# check
+
+- [ ] tilting simulation seems strong, transmittance seems wrong
+
+## Issue
 
 - [x] slow save menu
   - sloved by pausing worker

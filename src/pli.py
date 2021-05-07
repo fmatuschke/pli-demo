@@ -111,7 +111,7 @@ class PLI():
             return False
         return np.all(self._images.valid)
 
-    def transmittance(self, tilt):
+    def transmittance(self, tilt='center'):
         if self._modalities is None:
             print('modalities could not be calculated yet')
             return None
@@ -129,7 +129,7 @@ class PLI():
         else:
             raise ValueError(f'wrong tilt: {tilt}')
 
-    def direction(self, tilt):
+    def direction(self, tilt='center'):
         if self._modalities is None:
             print('modalities could not be calculated yet')
             return None
@@ -147,7 +147,7 @@ class PLI():
         else:
             raise ValueError(f'wrong tilt: {tilt}')
 
-    def retardation(self, tilt):
+    def retardation(self, tilt='center'):
         if self._modalities is None:
             print('modalities could not be calculated yet')
             return None
@@ -165,13 +165,13 @@ class PLI():
         else:
             raise ValueError(f'wrong tilt: {tilt}')
 
-    def inclination(self, tilt):
+    def inclination(self, tilt='center'):
         if self._inclination is None:
             print('inclination could not be calculated yet')
             return None
 
         if tilt == 'center':
-            return self._modalities.inclination.copy()
+            return self._inclination.inclination.copy()
         elif tilt == 'north':
             return self._tilting[4][0].copy()
         elif tilt == 'east':
@@ -210,16 +210,27 @@ class PLI():
         current_data_offset = self._images.offset
         self._images.apply_absolute_offset(offset)
 
-        self._modalities.direction[:] = self.direction - current_data_offset + offset
+        if self._modalities is not None:
 
-        # to [-np.pi, np.pi]
-        self._modalities.direction[:] %= np.pi
-        # to [0, np.pi]
-        self._modalities.direction[:] += np.pi
-        self._modalities.direction[:] %= np.pi
+            self._modalities.direction[:] = self._modalities.direction - current_data_offset + offset
 
-        self._inclination.fom[:] = epa.fom(self.direction, self.inclination)
-        # TODO: apply to tilting
+            # to [-np.pi, np.pi]
+            self._modalities.direction[:] %= np.pi
+            # to [0, np.pi]
+            self._modalities.direction[:] += np.pi
+            self._modalities.direction[:] %= np.pi
+
+            self._inclination.fom[:] = epa.fom(self.direction(),
+                                               self.inclination())
+
+            for direction in self._tilting[2]:
+
+                direction[:] = direction[:] - current_data_offset + offset
+                # to [-np.pi, np.pi]
+                direction[:] %= np.pi
+                # to [0, np.pi]
+                direction[:] += np.pi
+                direction[:] %= np.pi
 
     def run_analysis(self, fun):
         pool = QtCore.QThreadPool.globalInstance()
