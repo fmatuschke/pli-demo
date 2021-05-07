@@ -9,7 +9,6 @@
   - gets better if qtimer is less frequent
   - @timing for worker.next() < 0.03 for 1080p
 - [ ] new videos which are working for smaller insert-threshold
-- [ ] multiple xy clicks
 - [ ] plot data is not empty after changing values
 
 ## Features
@@ -18,6 +17,7 @@
   - [ ] as switchable 'pointer' `self.data = self.tilts[mode]`
 - [ ] show coordinate while hovering with mouse
 - masking modalities
+- [ ] qt drawings as overlayed transparant label?
 
 ## RFC
 
