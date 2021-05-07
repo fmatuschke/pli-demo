@@ -193,26 +193,33 @@ class MainThread():
                 frame = self.tracker.mask_img(frame)
         self.show_image(frame)
 
+        # update plot and gui if rotation is significant
         if self._last_angle is None:
             self._last_angle = self._angle
         else:
             if abs(diff_angles(self._last_angle, self._angle,
                                np.pi)) > self._update_angle:
                 self._last_angle = self._angle
+                self.update_plot()
+                self.update_gui()
 
-                if len(self._xy_buffer) > 0:
-                    x_data = self.pli.images.rotations[self.pli.valid()]
-                    y_data = []
-                    for x, y in self._xy_buffer:
-                        y_data.append(self.pli.images.images[y, x,
-                                                             self.pli.valid()])
+    def update_plot(self):
+        if len(self._xy_buffer) > 0:
+            x_data = self.pli.images.rotations[self.pli.valid()]
+            y_data = []
+            for x, y in self._xy_buffer:
+                y_data.append(self.pli.images.images[y, x, self.pli.valid()])
+            self.parent.plotwidget.update_data(x_data, y_data)
+            self.parent.plotwidget.update_rho(self._angle)
 
-                    self.parent.plotwidget.update_data(x_data, y_data)
-                self.parent.plotwidget.update_rho(self._angle)
-                self.parent.setupwidget.set_rotation(self._angle)
-                self.parent.setupwidget.update()
+    def update_gui(self):
+        self.parent.setupwidget.set_rotation(self._angle)
+        self.parent.setupwidget.update()
 
-    def update_plot_coordinates_buffer(self, rel_x_frame_pos, rel_y_frame_pos):
+    def update_plot_coordinates_buffer(self,
+                                       rel_x_frame_pos,
+                                       rel_y_frame_pos,
+                                       append=False):
 
         if self.pli._images is None:
             return
@@ -222,13 +229,21 @@ class MainThread():
         y = int(rel_y_frame_pos * self._image_height + 0.5)
 
         self.parent.statusbar.showMessage(f'x: {x}, y: {y}', 3000)
-
         if self._debug:  # better: if cropping is not active
             y_, x_ = self.tracker.crop_offset()
             x -= x_
             y -= y_
 
-        self._xy_buffer = [(x, y)]
+        if append:
+            self._xy_buffer.append((x, y))
+        else:
+            self._xy_buffer = [(x, y)]
+
+        print(self._xy_buffer)
+
+        # update plot and draw click indicator
+        self.update_plot()
+        self.show_image(self._last_image)
 
     def next_live(self, frame: np.ndarray):
         self._angle = self.tracker.current_angle(frame)
