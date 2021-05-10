@@ -253,6 +253,11 @@ class Application(QtWidgets.QMainWindow):
 
         self.main_menu['help'].add_action('debug',
                                           lambda: self.app.switch_debug())
+
+        def reset():
+            self.app.reset()
+            self.worker.start()
+
         self.main_menu['help'].add_action('reset', lambda: self.app.reset())
 
         def show_live():
