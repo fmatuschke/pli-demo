@@ -70,6 +70,7 @@ class Modalities:
 @dc.dataclass(frozen=True)
 class Incl:
     inclination: np.ndarray
+    wm_mask: np.ndarray
     fom: np.ndarray
 
     def __post_init__(self):

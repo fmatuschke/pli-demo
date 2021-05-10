@@ -270,6 +270,7 @@ class MainThread():
             raise ValueError('angel is None')
 
         frame = self.tracker.crop_img(frame)
+        frame = self.tracker.mask_img(frame)
         self.pli.insert(frame, self._angle)
 
         if self.pli.measurment_done():
@@ -482,11 +483,11 @@ class MainThread():
             img.save(os.path.join(path, 'direction.tif'))
             img = PIL.Image.fromarray(self.pli.retardation())
             img.save(os.path.join(path, 'retardation.tif'))
-            img = PIL.Image.fromarray(self.tracker.get_mask())
-            img.save(os.path.join(path, 'mask.tif'))
+            img = PIL.Image.fromarray(self.pli.wm_mask())
+            img.save(os.path.join(path, 'wm_mask.tif'))
             img = PIL.Image.fromarray(self.pli.inclination())
             img.save(os.path.join(path, 'inclination.tif'))
-            fom = self.pli.fom * 255
+            fom = self.pli.fom() * 255
             img = PIL.Image.fromarray(fom.astype(np.uint8))
             img.save(os.path.join(path, 'fom.tif'))
 

@@ -268,6 +268,13 @@ class Application(QtWidgets.QMainWindow):
             image = image / cval * 255
             image = image.astype(np.uint8)
 
+            # if not self.app._debug:
+            #     if image.ndim == 2:
+            #         image = np.multiply(image, self.app.pli.wm_mask())
+            #     else:
+            #         image = np.multiply(image,
+            #                             self.app.pli.wm_mask()[:, :, None])
+
             if name == 'fom':
                 shape = np.array(image.shape[:-1]) // 6
                 cs = COLORSPHERE.resize(shape, Image.NEAREST)
@@ -296,7 +303,7 @@ class Application(QtWidgets.QMainWindow):
                 self.app.pli.inclination(self.app._tilt.value), 1, 'inclination'
             ))
         self.main_menu['pli'].add_action(
-            'fom', lambda: show_img_and_stop(self.app.pli.fom, 1, 'fom'))
+            'fom', lambda: show_img_and_stop(self.app.pli.fom(), 1, 'fom'))
 
         self.main_menu['pli'].add_menu('tilts')
 

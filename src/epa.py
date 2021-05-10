@@ -102,10 +102,10 @@ def simple_incl(transmittance: np.ndarray,
 
     threshold = edges[np.argwhere(hist > 0)[-1] + 1]
     # TODO: why not using mask?
-    # mask = np.logical_and(retardation > 0.080, retardation <= threshold)
+    wm_mask = np.logical_and(retardation > 0.080, retardation <= threshold)
 
     inclination = np.pi / 2 * (1 - retardation / threshold)
-    return inclination
+    return inclination, wm_mask
 
 
 def fom(direction: np.ndarray, inclination: np.ndarray) -> np.ndarray:

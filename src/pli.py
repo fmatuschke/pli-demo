@@ -45,10 +45,10 @@ class PLIAnalyser(QtCore.QRunnable):
         self.modalities = data_classes.Modalities(t, d, r)
 
     def _run_calc_incl(self):
-        inclination = epa.simple_incl(self.modalities.transmittance,
-                                      self.modalities.retardation)
+        inclination, wm_mask = epa.simple_incl(self.modalities.transmittance,
+                                               self.modalities.retardation)
         fom = epa.fom(self.modalities.direction, inclination)
-        self.incl = data_classes.Incl(inclination, fom)
+        self.incl = data_classes.Incl(inclination, wm_mask, fom)
 
     def _run_tilting_simulation(self):
         self.tilts = epa.calc_tilts(self.modalities.transmittance,
@@ -183,7 +183,12 @@ class PLI():
         else:
             raise ValueError(f'wrong tilt: {tilt}')
 
-    @property
+    def wm_mask(self):
+        if self._inclination is None:
+            print('wm mask could not be calculated yet')
+            return None
+        return self._inclination.wm_mask.copy()
+
     def fom(self):
         if self._inclination is None:
             print('fom could not be calculated yet')
