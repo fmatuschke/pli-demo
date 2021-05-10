@@ -258,7 +258,7 @@ class Application(QtWidgets.QMainWindow):
             self.app.reset()
             self.worker.start()
 
-        self.main_menu['help'].add_action('reset', lambda: self.app.reset())
+        self.main_menu['help'].add_action('reset', lambda: reset())
 
         def show_live():
             self.app.to_live_mode()
