@@ -19,6 +19,9 @@ class Display(QtWidgets.QLabel):
 
     def __init__(self, parent=None, *args, **kwargs):
         super(Display, self).__init__(parent, *args, **kwargs)
+        self.setMouseTracking(True)
+        self.installEventFilter(self)
+
         self.parent = parent
 
         # freeze class
@@ -75,3 +78,13 @@ class Display(QtWidgets.QLabel):
                 self.parent.app.update_plot_coordinates_buffer(x, y, False)
             elif event.button() == QtCore.Qt.RightButton:
                 self.parent.app.update_plot_coordinates_buffer(x, y, True)
+
+    def eventFilter(self, o, e):
+        # mouseMoveEvent without click
+        if o is self and e.type() == QtCore.QEvent.MouseMove:
+            x, y = self._widgetNormedCoordinates(e.x(), e.y())
+            # to frame coordinates
+            x = int(x * self.parent.app._image_width + 0.5)
+            y = int(y * self.parent.app._image_height + 0.5)
+            self.parent.statusbar.showMessage(f'x: {x}, y: {y}')
+        return super().eventFilter(o, e)
