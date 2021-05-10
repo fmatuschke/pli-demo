@@ -472,15 +472,15 @@ class MainThread():
             stack[0].save(os.path.join(path, 'stack.tif'),
                           save_all=True,
                           append_images=stack[1:])
-            img = PIL.Image.fromarray(self.pli.transmittance)
+            img = PIL.Image.fromarray(self.pli.transmittance())
             img.save(os.path.join(path, 'transmittance.tif'))
-            img = PIL.Image.fromarray(self.pli.direction)
+            img = PIL.Image.fromarray(self.pli.direction())
             img.save(os.path.join(path, 'direction.tif'))
-            img = PIL.Image.fromarray(self.pli.retardation)
+            img = PIL.Image.fromarray(self.pli.retardation())
             img.save(os.path.join(path, 'retardation.tif'))
             img = PIL.Image.fromarray(self.tracker.get_mask())
             img.save(os.path.join(path, 'mask.tif'))
-            img = PIL.Image.fromarray(self.pli.inclination)
+            img = PIL.Image.fromarray(self.pli.inclination())
             img.save(os.path.join(path, 'inclination.tif'))
             fom = self.pli.fom * 255
             img = PIL.Image.fromarray(fom.astype(np.uint8))
