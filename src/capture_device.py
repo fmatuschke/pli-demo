@@ -122,7 +122,9 @@ class CapDev:
         return ports
 
     def get_resolutions(self):
-        # TODO this should be available from the OS
+
+        if self._device is None:
+            return None
 
         org_width = int(self._device.get(cv2.CAP_PROP_FRAME_WIDTH))
         org_height = int(self._device.get(cv2.CAP_PROP_FRAME_HEIGHT))

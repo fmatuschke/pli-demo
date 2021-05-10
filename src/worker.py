@@ -129,6 +129,10 @@ class MainThread():
 
     def check_device_properties(self):
         res = self.device.get_resolutions()
+        if res is None:
+            print('No device set yet')
+            return
+
         self.parent.main_menu['camera']['resolution'].clear()
         self.parent.main_menu['camera']['resolution'].add_action(
             'scan', lambda: self.check_device_properties())
