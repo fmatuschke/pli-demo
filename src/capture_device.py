@@ -145,7 +145,16 @@ class CapDev:
 
         print('INFO: start testing vor properties')
         for width, height in test_resolution:
-            self.set_prop(width, height, 60)
+
+            # TODO: why is this a problem?
+            # self.set_prop(width, height, 60)
+
+            # set values
+            self._device.set(cv2.CAP_PROP_FRAME_WIDTH, width)
+            self._device.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
+            self._device.set(cv2.CAP_PROP_FPS, 60)
+
+            # read return values
             width = int(self._device.get(cv2.CAP_PROP_FRAME_WIDTH))
             height = int(self._device.get(cv2.CAP_PROP_FRAME_HEIGHT))
             fps = int(self._device.get(cv2.CAP_PROP_FPS))
