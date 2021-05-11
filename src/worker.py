@@ -95,8 +95,10 @@ class MainThread():
         self.tracker = tracker.Tracker(num_sticker=10, sticker_zero_id=10)
 
         # camera
+        prop = [int(a) for a in self.parent.args.resolution.split('x')]
         self.parent.main_menu['camera']['port'].clear()
         self.device = capture_device.CapDev(port=self.parent.args.port,
+                                            properties=prop,
                                             file_name=self.parent.args.video)
 
         for port in self.device.ports():

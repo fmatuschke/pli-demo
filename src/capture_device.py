@@ -41,6 +41,7 @@ class CapDev:
             self,
             port=0,
             port_list=range(5),
+            properties=None,
             file_name=None,  # 'data/half_720p.mp4'
             color_mode=Color.GREEN):
 
@@ -62,6 +63,8 @@ class CapDev:
             self.activate_video(file_name)
         elif self._port in self._ports:
             self.activate_camera(self._port)
+            if properties is not None:
+                self.set_prop(properties[0], properties[1], properties[2])
         else:
             self._device = None
             self._port = None
