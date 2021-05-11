@@ -276,7 +276,7 @@ class Application(QtWidgets.QMainWindow):
             #                             self.app.pli.wm_mask()[:, :, None])
 
             if name == 'fom':
-                shape = np.array(image.shape[:-1]) // 6
+                shape = np.array(image.shape[:-1]) // 7
                 cs = COLORSPHERE.resize(shape, Image.NEAREST)
                 cs = np.asarray(cs)[:, :, :-1]  # PIL returns RGBA
                 image[0:shape[0], image.shape[1] - shape[1]:, :] = cs
