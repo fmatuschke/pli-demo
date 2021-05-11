@@ -186,8 +186,17 @@ class Application(QtWidgets.QMainWindow):
             def __getitem__(self, key):
                 return self._menu_dict[key]
 
+            # def __next__(self):
+            #     return next(self._menu_dict.values())
+
+            # def __iter__(self):
+            #     return iter(self._menu_dict.values())
+
             def entries(self):
                 return [elm for elm in self._menu_dict.values()]
+
+            def names(self):
+                return [elm for elm in self._menu_dict.keys()]
 
             def set_enabled(self, value):
                 self._qt_obj.setEnabled(value)
@@ -283,6 +292,10 @@ class Application(QtWidgets.QMainWindow):
                 cs = np.asarray(cs)[:, :, :-1]  # PIL returns RGBA
                 image[0:shape[0], image.shape[1] - shape[1]:, :] = cs
 
+            for elm in self.main_menu['pli'].names():
+                self.main_menu['pli'][elm].set_enabled(True)
+            self.main_menu['pli'][name].set_enabled(False)
+
             self.app.show_image(image)
             self.app._last_img_name = name  # TODO: enum with str as value
             self.app.update_plot()
@@ -310,10 +323,14 @@ class Application(QtWidgets.QMainWindow):
 
         self.main_menu['pli'].add_menu('tilts')
 
-        def set_and_show_tilt(abc):
-            self.app.set_tilt(abc)
+        def set_and_show_tilt(value):
+            self.app.set_tilt(value)
             self.main_menu['pli'][self.app._last_img_name].trigger()
             self.app.update_plot()
+
+            for elm in self.main_menu['pli']['tilts'].names():
+                self.main_menu['pli']['tilts'][elm].set_enabled(True)
+            self.main_menu['pli']['tilts'][value].set_enabled(False)
 
         # TODO: why here partial and above lambda?
         for tilt_name in worker.MainThread.Tilt:

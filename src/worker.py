@@ -286,6 +286,8 @@ class MainThread():
 
     def enable_pli_results(self):
         self.parent.main_menu['pli'].set_enabled(True)
+        self.parent.main_menu['pli']['live'].set_enabled(False)
+        self.parent.main_menu['pli']['tilts']['center'].set_enabled(False)
 
     def next_measurement(self, frame: np.ndarray):
         if self.pli.measurment_done():
