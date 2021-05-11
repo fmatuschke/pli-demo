@@ -461,6 +461,28 @@ class MainThread():
         else:
             self.parent.statusbar.showMessage('Invalid file name', 4200)
 
+        # save clicked modalitie values
+        if self.pli.fom() is not None:
+            header = [
+                'x', 'y', 'transmittance', 'direction', 'retardation',
+                'inclination'
+            ]
+
+            file_name = os.path.splitext(
+                file_name)[0] + '_modalities' + os.path.splitext(file_name)[1]
+            with open(os.path.join(file_name), 'w') as file:
+                for h in header[:-1]:
+                    file.write(f'{h},')
+                file.write(f'{header[-1]}\n')
+
+                for x, y in self._xy_buffer:
+                    file.write(f'{x}, ')
+                    file.write(f'{y}, ')
+                    file.write(f'{self.pli.transmittance()[y,x]},')
+                    file.write(f'{self.pli.direction()[y,x]},')
+                    file.write(f'{self.pli.retardation()[y,x]},')
+                    file.write(f'{self.pli.inclination()[y,x]}\n')
+
         self.parent.worker.start(self.parent._mspf)
 
     # TODO has nothing to do with worker
