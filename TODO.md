@@ -6,6 +6,12 @@
 
 ## Issue
 
+- [ ] infinit loop lost signal
+- [ ] resolution which worked breaks now the init process, also infinit loop
+- [ ] plot (FOM) does not change when offset changes
+- [ ] rho line does not change if offset is changed
+- [ ] resolution
+
 - [x] slow save menu
   - sloved by pausing worker
   - for big videos also if plot and segment overlay is disabled
@@ -17,6 +23,8 @@
 
 ## Features
 
+- [ ] tesafilm raus croppen!
+- [ ] speichere daten der angeklickten punkte
 - [ ] add visual indicator, which menu is active in PLI
 - [ ] show coordinate while hovering with mouse
 - masking modalities
@@ -24,6 +32,7 @@
 
 ## RFC
 
+- [ ] tracker uses also only green channel
 - [ ] check datatype -> float32 and uint8
 - [ ] everything to getter methods?
 - [ ] rfc data_classes
