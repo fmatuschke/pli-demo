@@ -417,7 +417,8 @@ class MainThread():
         self._image_height = image.shape[0]
         self._image_width = image.shape[1]
 
-        self._overlay_display(pixmap)
+        if not self._debug:
+            self._overlay_display(pixmap)
         self.display.setPixmap(pixmap)
 
     # TODO has nothing to do with worker
