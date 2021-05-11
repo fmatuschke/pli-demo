@@ -161,7 +161,7 @@ class MainThread():
         qimage = qimage.scaled(self.display.size().width(),
                                self.display.size().height(),
                                QtCore.Qt.KeepAspectRatio,
-                               QtCore.Qt.SmoothTransformation)
+                               QtCore.Qt.FastTransformation)
 
         return qimage
 
