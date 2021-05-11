@@ -130,7 +130,9 @@ def _calc_tilt(x: np.ndarray, y: np.ndarray, z: np.ndarray, rho: float,
             a = np.pi / 2 - np.arccos(v[2])
             p = np.arctan2(v[1], v[0])
 
-            delta = 0.2 * np.cos(a)**2
+            # 0.6 experience value for wupperthaler section
+            # and yes THIS IS WRONG
+            delta = 0.6 * np.cos(a)**2
             data[i, j, :] = (1 + np.sin(2 * (rho - p)) * np.sin(delta))
 
             incl[i, j] = a
@@ -166,7 +168,8 @@ def calc_tilts(transmittance: np.ndarray, direction: np.ndarray,
                                          rot_z(phi))).astype(x.dtype)
 
         frames, tilt_inclination[r] = _calc_tilt(x, y, z, rho, rot)
-        tilt_frames[r] = (frames * transmittance[:, :, None]).astype(np.uint8)
+        tilt_frames[r] = (frames * transmittance[:, :, None] / 2).astype(
+            np.uint8)
 
     for i, data in enumerate(tilt_frames):
         tilt_transmittance[i], tilt_direction[i], tilt_retardation[i] = epa(
