@@ -187,7 +187,7 @@ class CapDev:
         self._device.set(cv2.CAP_PROP_FPS, fps)
 
         # Read some images to ensure the cam is ready
-        for _ in range(42):
+        for _ in range(5):
             if self._device.read()[0]:
                 break
             print('INFO: trying to get image after setting options')
