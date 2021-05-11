@@ -268,12 +268,14 @@ class Application(QtWidgets.QMainWindow):
             image = image / cval * 255
             image = image.astype(np.uint8)
 
-            # if not self.app._debug:
-            #     if image.ndim == 2:
-            #         image = np.multiply(image, self.app.pli.wm_mask())
-            #     else:
-            #         image = np.multiply(image,
-            #                             self.app.pli.wm_mask()[:, :, None])
+            if not self.app._debug:
+                image = self.app.tracker.mask_img(image)
+                # # wm mask
+                # if image.ndim == 2:
+                #     image = np.multiply(image, self.app.pli.wm_mask())
+                # else:
+                #     image = np.multiply(image,
+                #                         self.app.pli.wm_mask()[:, :, None])
 
             if name == 'fom':
                 shape = np.array(image.shape[:-1]) // 7
