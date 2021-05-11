@@ -62,6 +62,11 @@ class Tracker:
             self._mask = X**2 + Y**2 < self._illumination_radius**2
             self._mask = self.crop_img(self._mask)
 
+            # experience values for Wupperthal section
+            dh = int(self._illumination_radius * 0.275)
+            self._mask[:dh, :] = 0
+            self._mask[-int(dh * 1.4):, :] = 0
+
         if image.ndim == 2:
             res = np.multiply(self._mask, image)
         else:
