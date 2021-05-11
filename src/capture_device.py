@@ -63,7 +63,7 @@ class CapDev:
             self.activate_video(file_name)
         elif self._port in self._ports:
             self.activate_camera(self._port)
-            if properties is not None:
+            if self._device is not None and properties is not None:
                 self.set_prop(properties[0], properties[1], properties[2])
         else:
             self._device = None
