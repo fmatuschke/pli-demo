@@ -427,7 +427,8 @@ class MainThread():
             self.parent.statusbar.showMessage('Plot is empty', 4200)
             return
 
-        self.parent.worker.stop()
+        if (was_active := self.parent.worker.isActive()):
+            self.parent.worker.stop()
 
         options = QtWidgets.QFileDialog.Options()
         # options |= QtWidgets.QFileDialog.DontUseNativeDialog
@@ -484,7 +485,8 @@ class MainThread():
                     file.write(f'{self.pli.retardation()[y,x]},')
                     file.write(f'{self.pli.inclination()[y,x]}\n')
 
-        self.parent.worker.start(self.parent._mspf)
+        if was_active:
+            self.parent.worker.start(self.parent._mspf)
 
     # TODO has nothing to do with worker
     def save_images(self):
@@ -492,7 +494,8 @@ class MainThread():
             self.parent.statusbar.showMessage('Images not ready yet', 4200)
             return
 
-        self.parent.worker.stop()
+        if (was_active := self.parent.worker.isActive()):
+            self.parent.worker.stop()
 
         options = QtWidgets.QFileDialog.Options()
         options |= QtWidgets.QFileDialog.AcceptSave
@@ -543,7 +546,8 @@ class MainThread():
         else:
             self.parent.statusbar.showMessage('Invalid path', 4200)
 
-        self.parent.worker.start(self.parent._mspf)
+        if was_active:
+            self.parent.worker.start(self.parent._mspf)
 
     # TODO has nothing to do with worker
     def apply_offset(self):
