@@ -64,6 +64,7 @@ class CapDev:
         elif self._port in self._ports:
             self.activate_camera(self._port)
             if self._device is not None and properties is not None:
+                prop = [int(a) for a in self.parent.args.resolution.split('x')]
                 self.set_prop(properties[0], properties[1], properties[2])
         else:
             self._device = None
