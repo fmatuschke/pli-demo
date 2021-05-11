@@ -245,7 +245,8 @@ class MainThread():
                     self.pli.images(self._tilt.value)[y, x,
                                                       self.pli.valid()])
             self.parent.plotwidget.update_data(x_data, y_data)
-            self.parent.plotwidget.update_rho(self._angle)
+            self.parent.plotwidget.update_rho(self._angle +
+                                              self.pli.rotations[0])
 
     def update_gui(self):
         self.parent.setupwidget.set_rotation(self._angle)

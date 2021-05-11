@@ -283,6 +283,7 @@ class Application(QtWidgets.QMainWindow):
 
             self.app.show_image(image)
             self.app._last_img_name = name  # TODO: enum with str as value
+            self.app.update_plot()
             self.worker.stop()
 
         self.main_menu['pli'].add_action('live', lambda: show_live())
