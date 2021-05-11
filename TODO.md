@@ -1,9 +1,5 @@
 # TODO
 
-# check
-
-- [ ] tilting retardation
-
 ## Issue
 
 - [ ] infinit loop lost signal
@@ -20,7 +16,6 @@
 
 ## Features
 
-- [ ] speichere daten der angeklickten punkte
 - [ ] add visual indicator, which menu is active in PLI
 - [ ] qt drawings as overlayed transparant label?
 
