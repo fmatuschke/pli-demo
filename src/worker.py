@@ -5,6 +5,7 @@ import functools
 import itertools
 import os
 import pathlib
+import cv2
 
 import numpy as np
 import PIL.Image
@@ -50,6 +51,12 @@ class MainThread():
         SOUTH = 'south'
         WEST = 'west'
 
+    @enum.unique
+    class Denoise(enum.Enum):
+        NONE = enum.auto()
+        GAUS = enum.auto()
+        NLMD = enum.auto()
+
     __is_frozen = False
 
     def __setattr__(self, key, value):
@@ -76,6 +83,7 @@ class MainThread():
         self.input_mode = None
         self.state = self.State.TRACKING
         self._debug = False
+        self._denoise_method = self.Denoise.NONE
         self._tilt = self.Tilt.CENTER
         self._xy_buffer = []
         self._last_image = None
@@ -179,6 +187,21 @@ class MainThread():
             print('Error, device disconnected')
             print('---> resetting ...')
             self.reset()
+
+        # denoise
+        if self._denoise_method == self.Denoise.NONE:
+            denoise = lambda x: x
+        elif self._denoise_method == self.Denoise.NLMD:
+            if frame.ndim == 2:
+                denoise = lambda x: cv2.fastNlMeansDenoising(frame, x, 5, 5, 9)
+            if frame.ndim == 3:
+                denoise = lambda x: cv2.fastNlMeansDenoisingColored(
+                    frame, x, 5, 5, 9)
+        elif self._denoise_method == self.Denoise.GAUS:
+            denoise = lambda x: cv2.GaussianBlur(x, (5, 5), 1)
+        else:
+            raise ValueError("wrong input")
+        frame = denoise(frame)
 
         if self.state == self.State.LIVE:
             self.next_live(frame)
