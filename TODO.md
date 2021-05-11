@@ -3,6 +3,7 @@
 # check
 
 - [ ] tilting simulation seems strong, transmittance seems wrong
+- [ ] tesafilm raus croppen!
 
 ## Issue
 
@@ -23,7 +24,6 @@
 
 ## Features
 
-- [ ] tesafilm raus croppen!
 - [ ] speichere daten der angeklickten punkte
 - [ ] add visual indicator, which menu is active in PLI
 - [ ] show coordinate while hovering with mouse
