@@ -215,7 +215,11 @@ class MainThread():
             raise ValueError('Undefined State')
 
         if self._angle is not None:
-            self.parent.status_angle.setText(f'{np.rad2deg(self._angle):.1f}')
+            val = self._angle + self.pli.rotations[0]
+            val %= np.pi
+            val += np.pi
+            val %= np.pi
+            self.parent.status_angle.setText(f'{np.rad2deg(val):.1f}')
 
         if self._debug:
             frame = self.tracker.add_info_view(frame)
