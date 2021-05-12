@@ -38,11 +38,11 @@ class Plot(QtChart.QChartView):
             return
 
         for y in y_data:
+
             if 0.0 in x:
+                idx = np.argwhere(x == 0.0)
                 x = np.append(x, [np.pi])
-                y = np.append(y, [y[0]])
-                self.x_save = np.pi - x
-                self.y_save = y
+                y = np.append(y, [y[idx]])
 
             series = QtChart.QScatterSeries()
             for x_val, y_val in zip(x, y):

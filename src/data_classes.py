@@ -23,13 +23,6 @@ class Images:
         object.__setattr__(self, 'valid', np.zeros_like(self.rotations,
                                                         np.bool8))
 
-    def apply_absolute_offset(self, offset: float) -> None:
-        self.rotations[:] = np.linspace(0, np.pi, self.shape[-1],
-                                        False) + offset
-        self.rotations[:] %= np.pi
-        self.rotations[:] += np.pi
-        self.rotations[:] %= np.pi
-
     def insert(self, image: np.ndarray, idx: int) -> None:
         if self.valid[idx]:
             warnings.warn('Already image present')
@@ -37,13 +30,8 @@ class Images:
         self.images[:, :, idx] = image
         self.valid[idx] = True
 
-    @property
     def stack(self):
         return self.rotations[self.valid], self.images[:, :, self.valid]
-
-    @property
-    def offset(self) -> float:
-        return self.rotations[0]
 
 
 @dc.dataclass(frozen=True)
@@ -71,19 +59,6 @@ class Modalities:
 class Incl:
     inclination: np.ndarray
     wm_mask: np.ndarray
-    fom: np.ndarray
-
-    def __post_init__(self):
-        if self.inclination.ndim != 2:
-            raise ValueError(f'inclination ndim: {self.inclination.ndim}')
-        if self.fom.ndim != 3:
-            raise ValueError(f'fom ndim: {self.fom.ndim}')
-        if self.fom.shape[-1] != 3:
-            raise ValueError(f'fom.shape[-1]: {self.fom.shape[-1] }')
-        if not np.array_equal(self.inclination.shape, self.fom.shape[:-1]):
-            raise ValueError(
-                f'inclination shape and fom shape differs: {self.inclination.shape}, {self.fom.shape[:-1]}'
-            )
 
 
 # @dc.dataclass(frozen=True)

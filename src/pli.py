@@ -47,8 +47,7 @@ class PLIAnalyser(QtCore.QRunnable):
     def _run_calc_incl(self):
         inclination, wm_mask = epa.simple_incl(self.modalities.transmittance,
                                                self.modalities.retardation)
-        fom = epa.fom(self.modalities.direction, inclination)
-        self.incl = data_classes.Incl(inclination, wm_mask, fom)
+        self.incl = data_classes.Incl(inclination, wm_mask)
 
     def _run_tilting_simulation(self):
         self.tilts = epa.calc_tilts(self.modalities.transmittance,
@@ -82,6 +81,8 @@ class PLI():
         self._modalities = None
         self._inclination = None
         self._tilting = None
+        self._fom = None
+        self._offset = 0
 
     def images(self, tilt):
         if tilt == 'center':
@@ -97,9 +98,12 @@ class PLI():
         else:
             raise ValueError(f'wrong tilt: {tilt}')
 
-    @property
     def rotations(self):
-        return self._images.rotations.copy()
+        rotations = self._images.rotations.copy() + self._offset
+        rotations %= np.pi
+        rotations += np.pi
+        rotations %= np.pi
+        return rotations
 
     def valid(self):
         if self._images is None:
@@ -135,17 +139,23 @@ class PLI():
             return None
 
         if tilt == 'center':
-            return self._modalities.direction.copy()
+            direction = self._modalities.direction.copy()
         elif tilt == 'north':
-            return self._tilting[2][0].copy()
+            direction = self._tilting[2][0].copy()
         elif tilt == 'east':
-            return self._tilting[2][1].copy()
+            direction = self._tilting[2][1].copy()
         elif tilt == 'south':
-            return self._tilting[2][2].copy()
+            direction = self._tilting[2][2].copy()
         elif tilt == 'west':
-            return self._tilting[2][3].copy()
+            direction = self._tilting[2][3].copy()
         else:
             raise ValueError(f'wrong tilt: {tilt}')
+
+        direction[:] += self._offset
+        direction[:] %= np.pi
+        direction[:] += np.pi
+        direction[:] %= np.pi
+        return direction
 
     def retardation(self, tilt='center'):
         if self._modalities is None:
@@ -190,10 +200,14 @@ class PLI():
         return self._inclination.wm_mask.copy()
 
     def fom(self):
-        if self._inclination is None:
-            print('fom could not be calculated yet')
-            return None
-        return self._inclination.fom.copy()
+        if self._fom is None:
+
+            if self._inclination is None:
+                print('fom could not be calculated yet')
+                return None
+            self._fom = epa.fom(self.direction(), self.inclination())
+
+        return self._fom.copy()
 
     def insert(self, image: np.ndarray, angle: float):
         if self._images is None:
@@ -212,30 +226,13 @@ class PLI():
                       f'{np.sum(self._images.valid)}/{self._images.shape[-1]}')
 
     def apply_offset(self, offset: float):
-        current_data_offset = self._images.offset
-        self._images.apply_absolute_offset(offset)
+        self._offset = offset
 
-        if self._modalities is not None:
+        if self._fom is not None:
+            self._fom[:] = epa.fom(self.direction(), self.inclination())
 
-            self._modalities.direction[:] = self._modalities.direction - current_data_offset + offset
-
-            # to [-np.pi, np.pi]
-            self._modalities.direction[:] %= np.pi
-            # to [0, np.pi]
-            self._modalities.direction[:] += np.pi
-            self._modalities.direction[:] %= np.pi
-
-            self._inclination.fom[:] = epa.fom(self.direction(),
-                                               self.inclination())
-
-            for direction in self._tilting[2]:
-
-                direction[:] = direction[:] - current_data_offset + offset
-                # to [-np.pi, np.pi]
-                direction[:] %= np.pi
-                # to [0, np.pi]
-                direction[:] += np.pi
-                direction[:] %= np.pi
+    def offset(self):
+        return self._offset
 
     def run_analysis(self, fun):
         pool = QtCore.QThreadPool.globalInstance()

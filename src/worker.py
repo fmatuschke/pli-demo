@@ -215,7 +215,7 @@ class MainThread():
             raise ValueError('Undefined State')
 
         if self._angle is not None:
-            val = self._angle + self.pli.rotations[0]
+            val = self._angle + self.pli.offset()
             val %= np.pi
             val += np.pi
             val %= np.pi
@@ -242,7 +242,7 @@ class MainThread():
 
     def update_plot(self):
         if len(self._xy_buffer) > 0:
-            x_data = self.pli.rotations[self.pli.valid()]
+            x_data = self.pli.rotations()[self.pli.valid()]
             y_data = []
             for x, y in self._xy_buffer:
                 y_data.append(
@@ -250,7 +250,7 @@ class MainThread():
                                                       self.pli.valid()])
             self.parent.plotwidget.update_data(x_data, y_data)
 
-        val = self._angle + self.pli.rotations[0]
+        val = self._angle + self.pli.offset()
         val %= np.pi
         val += np.pi
         val %= np.pi
@@ -379,7 +379,7 @@ class MainThread():
         N_points_per_segment > 3 is very slow
         """
         N_points_per_segment = 2 + 1
-        for rho in self.pli.rotations[self.pli.valid()]:
+        for rho in self.pli.rotations()[self.pli.valid()]:
             for a, b in zip(
                     np.linspace(-1, 1, N_points_per_segment)[:-1],
                     np.linspace(-1, 1, N_points_per_segment)[1:]):
@@ -454,7 +454,7 @@ class MainThread():
                 file_name += '.txt'
 
             header = ['rho']
-            data = [self.pli.rotations[self.pli.valid()]]
+            data = [self.pli.rotations()[self.pli.valid()]]
             for x, y in self._xy_buffer:
                 header.append(f'x{x}y{y}')
                 data.append(
@@ -531,7 +531,8 @@ class MainThread():
                 break
 
         if path:
-            np.savetxt(os.path.join(path, 'rotations.txt'), self.pli.rotations)
+            np.savetxt(os.path.join(path, 'rotations.txt'),
+                       self.pli.rotations())
             stack = []
             data = np.moveaxis(self.pli.images(self._tilt.value), -1, 0)
             for img in data:
