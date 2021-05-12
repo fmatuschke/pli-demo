@@ -201,12 +201,10 @@ class PLI():
 
     def fom(self):
         if self._fom is None:
-
             if self._inclination is None:
                 print('fom could not be calculated yet')
                 return None
             self._fom = epa.fom(self.direction(), self.inclination())
-
         return self._fom.copy()
 
     def insert(self, image: np.ndarray, angle: float):
@@ -227,7 +225,6 @@ class PLI():
 
     def apply_offset(self, offset: float):
         self._offset = offset
-
         if self._fom is not None:
             self._fom[:] = epa.fom(self.direction(), self.inclination())
 
