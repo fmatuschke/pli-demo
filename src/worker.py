@@ -456,7 +456,10 @@ class MainThread():
             header = ['rho']
             data = [self.pli.rotations()[self.pli.valid()]]
             for x, y in self._xy_buffer:
-                header.append(f'x{x}y{y}')
+                x_ = self.tracker.crop_offset()[1] + x
+                y_ = self.tracker.crop_offset()[0] + y
+
+                header.append(f'x:{x_},y:{y_};xc:{x},yc:{y}')
                 data.append(
                     self.pli.images(self._tilt.value)[y, x,
                                                       self.pli.valid()])
@@ -476,8 +479,8 @@ class MainThread():
         # save clicked modalitie values
         if self.pli.fom() is not None:
             header = [
-                'x', 'y', 'transmittance', 'direction', 'retardation',
-                'inclination'
+                'x', 'y', 'xc', 'yc', 'transmittance', 'direction',
+                'retardation', 'inclination'
             ]
 
             file_name = os.path.splitext(
@@ -488,6 +491,11 @@ class MainThread():
                 file.write(f'{header[-1]}\n')
 
                 for x, y in self._xy_buffer:
+                    x_ = self.tracker.crop_offset()[1] + x
+                    y_ = self.tracker.crop_offset()[0] + y
+
+                    file.write(f'{x_}, ')
+                    file.write(f'{y_}, ')
                     file.write(f'{x}, ')
                     file.write(f'{y}, ')
                     file.write(f'{self.pli.transmittance()[y,x]},')
@@ -536,22 +544,29 @@ class MainThread():
             stack = []
             data = np.moveaxis(self.pli.images(self._tilt.value), -1, 0)
             for img in data:
-                stack.append(PIL.Image.fromarray(img))
+                stack.append(PIL.Image.fromarray(
+                    self.tracker.rev_crop_img(img)))
             stack[0].save(os.path.join(path, 'stack.tif'),
                           save_all=True,
                           append_images=stack[1:])
-            img = PIL.Image.fromarray(self.pli.transmittance())
+            img = PIL.Image.fromarray(
+                self.tracker.rev_crop_img(self.pli.transmittance()))
             img.save(os.path.join(path, 'transmittance.tif'))
-            img = PIL.Image.fromarray(self.pli.direction())
+            img = PIL.Image.fromarray(
+                self.tracker.rev_crop_img(self.pli.direction()))
             img.save(os.path.join(path, 'direction.tif'))
-            img = PIL.Image.fromarray(self.pli.retardation())
+            img = PIL.Image.fromarray(
+                self.tracker.rev_crop_img(self.pli.retardation()))
             img.save(os.path.join(path, 'retardation.tif'))
-            img = PIL.Image.fromarray(self.pli.wm_mask())
+            img = PIL.Image.fromarray(
+                self.tracker.rev_crop_img(self.pli.wm_mask()))
             img.save(os.path.join(path, 'wm_mask.tif'))
-            img = PIL.Image.fromarray(self.pli.inclination())
+            img = PIL.Image.fromarray(
+                self.tracker.rev_crop_img(self.pli.inclination()))
             img.save(os.path.join(path, 'inclination.tif'))
             fom = self.pli.fom() * 255
-            img = PIL.Image.fromarray(fom.astype(np.uint8))
+            img = PIL.Image.fromarray(
+                self.tracker.rev_crop_img(fom.astype(np.uint8)))
             img.save(os.path.join(path, 'fom.tif'))
 
         else:

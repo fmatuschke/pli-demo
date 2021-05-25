@@ -50,7 +50,7 @@ class Tracker:
 
     def mask_img(self, image: np.ndarray) -> np.ndarray:
         if not self.calibrated():
-            raise ValueError(' tracker not calibrated yet')
+            raise ValueError('tracker not calibrated yet')
 
         if self._mask is None:
             x = np.arange(0, self._input_shape[0], dtype=np.float64)
@@ -75,7 +75,7 @@ class Tracker:
 
     def _crop_init(self):
         if not self.calibrated():
-            raise ValueError(' tracker not calibrated yet')
+            raise ValueError('tracker not calibrated yet')
         x = np.arange(0, self._input_shape[1], dtype=np.float64)
         y = np.arange(0, self._input_shape[0], dtype=np.float64)
         x -= self._illumination_center[0]
@@ -98,8 +98,23 @@ class Tracker:
         x_end = x.size - int(np.argmax(x[::-1] < self._illumination_radius)) - 1
         y_start = int(np.argmax(y < self._illumination_radius))
         y_end = y.size - int(np.argmax(y[::-1] < self._illumination_radius)) - 1
-
         return np.ascontiguousarray(image[y_start:y_end, x_start:x_end])
+
+    def rev_crop_img(self, image: np.ndarray) -> np.ndarray:
+        x, y = self._crop_init()
+        x_start = int(np.argmax(x < self._illumination_radius))
+        x_end = x.size - int(np.argmax(x[::-1] < self._illumination_radius)) - 1
+        y_start = int(np.argmax(y < self._illumination_radius))
+        y_end = y.size - int(np.argmax(y[::-1] < self._illumination_radius)) - 1
+
+        if image.ndim == 2:
+            re_shape = self._input_shape
+        else:
+            re_shape = (self._input_shape[0], self._input_shape[1], 3)
+
+        re_image = np.zeros(re_shape, dtype=image.dtype)
+        re_image[y_start:y_end, x_start:x_end, ...] = image
+        return re_image
 
     def current_angle(self, image: np.ndarray) -> typing.Optional[float]:
         cv_corners, cv_ids = self._process_image(image)
