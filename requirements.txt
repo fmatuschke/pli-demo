@@ -3,7 +3,7 @@ PyQt5==5.15.4 #5.14.0 # 5.15 buggy with plugin libraries
 PyQtChart==5.15.4 #5.14.0
 
 ### camera and video
-opencv-python==4.5.1.48
+opencv-python==4.8.1.78
 opencv-contrib-python==4.5.1.48
 
 ### math
